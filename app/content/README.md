@@ -1,67 +1,92 @@
-# Conteudo da Home (NatalCode)
+# Guia de Conteúdo (Seed)
 
-Este diretório centraliza os textos e listas da página inicial.
+Este diretório contém o arquivo de seed inicial do itapiru.
+
+## Sumário
+
+1. [Arquivo principal](#arquivo-principal)
+2. [Papel deste arquivo hoje](#papel-deste-arquivo-hoje)
+3. [Estrutura esperada do seed](#estrutura-esperada-do-seed)
+4. [Regras importantes](#regras-importantes)
+5. [Observações de operação](#observações-de-operação)
+6. [Onde o conteúdo é renderizado](#onde-o-conteúdo-é-renderizado)
 
 ## Arquivo principal
 
-- `app/content/home.php`
+- `app/content/dashboard.php`
 
-## Como editar
+## Papel deste arquivo hoje
 
-Edite apenas os valores de texto e links dentro dos arrays. Evite mudar os nomes das chaves.
+`dashboard.php` é usado para **inicialização do banco novo** (primeiro bootstrap).
 
-### Blocos de seção (titulo/subtitulo)
+- Se o SQLite ainda não existe, os dados iniciais são carregados a partir deste arquivo.
+- Se o SQLite já existe, o conteúdo operacional passa a ser gerenciado pelo admin/frontend.
 
-Em `sections`:
+Em produção normal, grupos, subgrupos e cards devem ser mantidos via:
 
-- `hero`
-- `features`
-- `socialProof`
-- `roadmap`
-- `faq`
-- `cta`
+- `/itapiru/admin?entity=groups`
+- `/itapiru/admin?entity=subgroups`
+- `/itapiru/admin?entity=cards`
 
-Cada bloco usa chaves como:
+## Estrutura esperada do seed
 
-- `kicker`
-- `title`
-- `lead`
+O arquivo retorna um array com blocos como:
 
-## Listas de itens
+- `title`: título do painel
+- `subtitle`: subtítulo
+- `sections`: subgrupos iniciais (com grupo)
+- `cardsBySection`: cards iniciais por subgrupo
 
-No mesmo arquivo `home.php`:
+Exemplo simplificado:
 
-- `heroActions`: botoes do Hero
-- `heroMetrics`: indicadores do Hero
-- `featuresItems`: cards de Solucoes
-- `socialProofTrustCards`: cards de confianca
-- `socialProofTestimonials`: depoimentos
-- `roadmapItems`: passos do Roadmap
-- `faqItems`: perguntas e respostas
-- `ctaActions`: botoes da chamada final
+```php
+return [
+    'title' => 'Painel Público',
+    'subtitle' => 'Painel público com cards dinâmicos por seção',
+    'sections' => [
+        'secao-1' => [
+            'label' => '1ª Seção',
+            'description' => 'Descrição da seção',
+            'group' => 'Seções da OM',
+            'order' => 1,
+        ],
+    ],
+    'cardsBySection' => [
+        'secao-1' => [
+            [
+                'title' => 'Sistema Interno',
+                'href' => 'http://intranet.local',
+                'status' => 'Interno',
+                'description' => 'Acesso rápido',
+                'order' => 1,
+            ],
+        ],
+    ],
+];
+```
 
-## Ordem de exibicao
+## Regras importantes
 
-A ordem na tela segue a ordem dos itens no array.
+1. O slug de cada item em `sections` deve ser único.
+2. As chaves de `cardsBySection` devem apontar para slugs existentes em `sections`.
+3. O campo `group` em `sections` define o grupo inicial do subgrupo no menu em 2 níveis.
+4. O status de card deve seguir os valores usados na UI (`Interno`, `Externo`, `Sistema`).
 
-## Delays de animacao
+## Observações de operação
 
-Campos `delay` controlam o tempo do AOS. Mantenha valores progressivos para um efeito fluido.
+- Alterar este arquivo **não atualiza automaticamente** uma base já em uso.
+- Para base existente, use o painel admin.
+- Para ambiente novo, o seed é aplicado no primeiro bootstrap do repositório.
 
-## Boas praticas
+## Fluxo recomendado
 
-- Mantenha textos curtos e objetivos.
-- Preserve a consistencia da linha editorial.
-- Ao trocar links, valide se o destino existe.
-- Nao remova chaves usadas pelos templates.
+1. Banco novo: inicializar aplicação (seed aplicado via `dashboard.php`).
+2. Operação diária: administrar conteúdo no frontend (`/itapiru/admin`).
+3. Ajustes estruturais: versionar mudanças no código e documentação.
 
-## Onde isso e renderizado
+## Onde o conteúdo é renderizado
 
-Templates que consomem esses dados:
-
-- `templates/home/hero.twig`
-- `templates/home/features.twig`
-- `templates/home/social-proof.twig`
-- `templates/home/roadmap.twig`
-- `templates/home/faq.twig`
-- `templates/home/final-cta.twig`
+- Home pública: `templates/dashboard-home.twig`
+- Página de subgrupo/cards: `templates/dashboard.twig`
+- Regras de roteamento e render: `app/routes.php`
+- Persistência e bootstrap: `src/Infrastructure/Persistence/Dashboard/DashboardRepository.php`

@@ -16,10 +16,15 @@ class SessionMiddleware implements Middleware
      */
     public function process(Request $request, RequestHandler $handler): Response
     {
-        if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
-            session_start();
-            $request = $request->withAttribute('session', $_SESSION);
+        if (session_status() !== PHP_SESSION_ACTIVE && !headers_sent()) {
+            @session_start();
         }
+
+        if (!isset($_SESSION) || !is_array($_SESSION)) {
+            $_SESSION = [];
+        }
+
+        $request = $request->withAttribute('session', $_SESSION);
 
         return $handler->handle($request);
     }

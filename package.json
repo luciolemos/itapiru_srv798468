@@ -1,11 +1,18 @@
 {
-  "name": "natalcode-visual-tests",
+  "name": "itapiru-visual-tests",
   "private": true,
   "version": "1.0.0",
-  "description": "Visual regression tests for NatalCode landing",
+  "description": "Visual regression tests for Itapiru",
   "scripts": {
-    "test:visual": "playwright test",
-    "test:visual:update": "playwright test --update-snapshots"
+    "test:itapiru:visual": "node node_modules/playwright/cli.js test",
+    "test:itapiru:visual:update": "node node_modules/playwright/cli.js test --update-snapshots",
+    "test:itapiru:visual:smoke": "node node_modules/playwright/cli.js test tests/visual/admin-nav.spec.js tests/visual/sidebar-groups-mobile.spec.js tests/visual/sidebar-active-state.spec.js",
+    "test:dashboard:visual": "npm run test:itapiru:visual",
+    "test:dashboard:visual:update": "npm run test:itapiru:visual:update",
+    "test:dashboard:visual:smoke": "npm run test:itapiru:visual:smoke",
+    "test:visual": "npm run test:itapiru:visual",
+    "test:visual:smoke": "npm run test:itapiru:visual:smoke",
+    "test:visual:update": "npm run test:itapiru:visual:update"
   },
   "devDependencies": {
     "@playwright/test": "^1.52.0"

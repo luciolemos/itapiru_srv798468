@@ -1,222 +1,150 @@
-# NatalCode
+# Itapiru
 
-[![Visual Regression](https://github.com/luciolemos/natalcode_srv798468/actions/workflows/visual-regression.yml/badge.svg)](https://github.com/luciolemos/natalcode_srv798468/actions/workflows/visual-regression.yml)
-[![PHPUnit](https://github.com/luciolemos/natalcode_srv798468/actions/workflows/phpunit.yml/badge.svg)](https://github.com/luciolemos/natalcode_srv798468/actions/workflows/phpunit.yml)
-[![PHPStan](https://github.com/luciolemos/natalcode_srv798468/actions/workflows/phpstan.yml/badge.svg)](https://github.com/luciolemos/natalcode_srv798468/actions/workflows/phpstan.yml)
-[![PHPCS](https://github.com/luciolemos/natalcode_srv798468/actions/workflows/phpcs.yml/badge.svg)](https://github.com/luciolemos/natalcode_srv798468/actions/workflows/phpcs.yml)
+O itapiru é um painel com sidebar dinâmico, no qual os menus e submenus são gerados e mantidos pelo próprio usuário admin diretamente no frontend. O objetivo do projeto é centralizar, em uma única experiência de navegação, cards com links para páginas web e sistemas de interesse operacional de cada seção da OM, com gestão simples e segura de conteúdo. A proposta é reduzir dispersão de acessos, padronizar a organização por contexto (grupo/subgrupo) e permitir evolução contínua do painel sem necessidade de edição manual de arquivos em produção. O sidebar de itapiru suporta menus em dois níveis apenas (menus/submenus). 
 
-Landing page institucional em **Slim 4 + Twig**, com foco em base reutilizavel para evolucao de produto (site, area administrativa e conteudo), com sistema de tema visual dinamico.
+- Nível 1 do menu: Grupo (Menu)
+- Nível 2 do menu: Subgrupo (Submenu)
+- Conteúdo final: cards vinculados ao subgrupo
 
-## Estado atual
+Depois que grupos e subgrupos são criados no admin, o próprio admin cria e mantém a visão de cards de cada subgrupo, sem edição manual de arquivo. Os slugs de grupos e subgrupos são únicos e podem ser renomeados. Os cards são identificados por ID único e podem ser editados/movidos entre subgrupos com validação de consistência.
 
-O projeto esta rodando em servidor Linux com Apache, publicado no dominio:
+## Sumário
 
-- `https://srv798468.hstgr.cloud/`
+1. [O que a aplicação faz](#o-que-a-aplicação-faz)
+2. [Endpoints principais](#endpoints-principais)
+3. [Menu em 2 níveis](#menu-em-2-níveis)
+4. [Stack e persistência](#stack-e-persistência)
+5. [Modelo de dados](#modelo-de-dados-resumo)
+6. [Comportamento dos CRUDs](#comportamento-dos-cruds)
+7. [Segurança do admin](#segurança-do-admin)
+8. [Seed e bootstrap](#seed-e-bootstrap)
+9. [Execução local](#rodar-localmente)
+10. [Operação do banco](#operação-do-banco)
+11. [Troubleshooting rápido](#troubleshooting-rápido)
 
-Atualmente, a aplicacao entrega:
+## O que a aplicação faz
 
-- landing page em Twig com secoes modulares;
-- paleta de cores dinamica (blue/red/green/violet/amber);
-- modo `light` / `dark`;
-- intensidade do dark (`neutral` / `vivid`);
-- animacoes de entrada com AOS e delays progressivos;
-- tokenizacao de design em CSS (`app.css`).
+- Exibe um painel público em `/itapiru`.
+- Monta o menu lateral com hierarquia de 2 níveis (grupos e subgrupos).
+- Exibe cards da seção ativa (`/itapiru/{subgroup_slug}`).
+- Permite CRUD completo no admin para grupos, subgrupos e cards.
+- Mantém integridade dos vínculos no banco para evitar inconsistências.
+- Permite renomear slugs de grupos e subgrupos sem perder o vínculo estrutural.
 
-## Stack
+## Endpoints principais
 
-- PHP 8.x
+### Público
+
+- `/itapiru`
+- `/itapiru/{subgroup_slug}`
+- `/itapiru/readme`
+- `/itapiru/contato`
+
+### Administração
+
+- `/itapiru/login`
+- `/itapiru/admin?entity=groups`
+- `/itapiru/admin?entity=subgroups`
+- `/itapiru/admin?entity=cards`
+
+## Menu em 2 níveis
+
+O sidebar é montado a partir de `groups` + `sections`.
+
+- Criou um grupo: ele aparece no nível 1.
+- Criou um subgrupo nesse grupo: ele aparece no nível 2 dentro do grupo.
+- Renomeou slug de grupo: os subgrupos continuam vinculados e aparecem no grupo renomeado.
+- A ordenação segue `sort_order`, com fallback por nome/slug.
+
+## Stack e persistência
+
+- PHP 8+
 - Slim Framework 4
-- PHP-DI
-- Twig (`slim/twig-view`)
-- Dotenv (`vlucas/phpdotenv`)
-- Monolog
-- AOS (Animate On Scroll)
-- CSS custom com design tokens
-- JS vanilla para interacoes de tema
+- Twig
+- SQLite (`var/data/itapiru.sqlite`)
 
-## Estrutura do projeto
+## Modelo de dados (resumo)
 
-```txt
-/var/www/natalcode
-├── app/
-│   ├── dependencies.php        # Container + Twig globals
-│   ├── middleware.php
-│   ├── repositories.php
-│   ├── routes.php
-│   └── settings.php
-├── public/
-│   ├── assets/
-│   │   ├── css/app.css         # Tokens + componentes + temas
-│   │   └── js/
-│   │       ├── aos-init.js
-│   │       └── theme-palette.js
-│   └── index.php               # Bootstrap Slim + dotenv
-├── templates/
-│   ├── components/
-│   │   ├── footer.twig
-│   │   ├── header.twig
-│   │   └── theme-palette.twig
-│   ├── home/
-│   │   ├── hero.twig
-│   │   ├── features.twig
-│   │   ├── social-proof.twig
-│   │   ├── roadmap.twig
-│   │   └── final-cta.twig
-│   ├── layouts/base.twig
-│   └── home.twig               # Composicao da home via includes
-├── .env
-├── .env.example
-└── README.md
-```
+- `groups`: grupos do nível 1 (`slug`, `label`, `sort_order`)
+- `sections`: subgrupos do nível 2 (`slug`, `label`, `description`, `group_id`, `sort_order`)
+- `cards`: cards vinculados ao subgrupo (`section_slug`, metadados visuais e link)
+- `admins`: autenticação do painel
 
-## Estrutura da landing
+Regras de integridade:
 
-A home eh composta por partials Twig:
+- `groups.slug` único
+- `groups.label` único case-insensitive (`uq_groups_label_nocase`)
+- subgrupo só é criado/atualizado com grupo existente
+- não exclui grupo com subgrupos
+- não exclui subgrupo com cards
 
-1. `hero`
-2. `features` (Solucoes)
-3. `social-proof`
-4. `roadmap`
-5. `final-cta`
+## Comportamento dos CRUDs
 
-Cada secao tem animacao AOS e delays progressivos nos elementos internos.
+### Grupos
 
-## Edicao de conteudo da home
+- Create: `POST /itapiru/admin/groups/create`
+- Update: `POST /itapiru/admin/groups/update`
+- Delete: `POST /itapiru/admin/groups/delete`
 
-Os textos e listas da home estao centralizados em:
+Regras importantes:
 
-- `app/content/home.php`
+- Renomear slug de grupo povoado é suportado.
+- Se o slug destino já existir, o backend faz merge seguro de vínculos.
 
-Guia rapido de edicao:
+### Subgrupos
 
-- `app/content/README.md`
+- Create: `POST /itapiru/admin/sections/create`
+- Update: `POST /itapiru/admin/sections/update`
+- Delete: `POST /itapiru/admin/sections/delete`
 
-## Tema, modo e intensidade
+Regras importantes:
 
-A interface suporta:
+- Subgrupo sempre pertence a um grupo válido.
+- Renomear slug de subgrupo atualiza os cards vinculados automaticamente.
 
-- paleta: `blue | red | green | violet | amber`
-- modo: `light | dark`
-- dark intensity: `neutral | vivid`
+### Cards
 
-### Prioridade de configuracao
+- Create: `POST /itapiru/admin/cards/create`
+- Update: `POST /itapiru/admin/cards/update`
+- Delete: `POST /itapiru/admin/cards/delete`
 
-1. Preferencia salva no navegador (`localStorage`)
-2. Defaults vindos do servidor via `.env`
+Regras importantes:
 
-## Configuracao via .env
+- No formulário, o select de subgrupo depende do grupo selecionado.
+- A UI exibe apenas subgrupos do grupo escolhido.
+- O backend valida a combinação grupo + subgrupo.
+- Se houver combinação cruzada, o salvamento é bloqueado.
 
-Arquivo: `.env`
+## Segurança do admin
 
-Chaves disponiveis:
+- CSRF obrigatório em todos os `POST`.
+- Guardas por origem de formulário (`_form`) para evitar envio em rota errada.
+- Throttle de login com bloqueio temporário após tentativas inválidas.
 
-```env
-APP_DEFAULT_THEME=amber
-APP_DEFAULT_MODE=light
-APP_DEFAULT_DARK_INTENSITY=neutral
-```
+## Seed e bootstrap
 
-Valores validos:
+- Seed inicial: `app/content/dashboard.php`
+- Seed executa apenas em banco novo.
+- Bootstrap aplica migrações e consolidação para manter unicidade de grupos.
 
-- `APP_DEFAULT_THEME`: `blue | red | green | violet | amber`
-- `APP_DEFAULT_MODE`: `light | dark`
-- `APP_DEFAULT_DARK_INTENSITY`: `neutral | vivid`
-
-## Como executar localmente
+## Rodar localmente
 
 ```bash
-cd /var/www/natalcode
+cd /var/www/itapiru
 composer install
-composer start
+php -S 0.0.0.0:8081 -t public
 ```
 
-Aplicacao local:
+Acesso local: `http://127.0.0.1:8081/itapiru`
 
-- `http://localhost:8080`
+## Operação do banco
 
-## Regressao visual (Playwright)
+- Banco: `var/data/itapiru.sqlite`
+- Guia operacional: [docs/sqlite-operacao.md](/itapiru/readme-sqlite)
 
-Setup inicial:
+## Troubleshooting rápido
 
-```bash
-cd /var/www/natalcode
-npm install
-npx playwright install --with-deps chromium
-```
-
-Gerar baseline inicial (snapshots):
-
-```bash
-npm run test:visual:update
-```
-
-Executar regressao visual:
-
-```bash
-npm run test:visual
-```
-
-Cobertura atual:
-
-- Home (top fold e full page)
-- Breakpoints: mobile, tablet e desktop
-
-### CI automatico
-
-Workflow configurado em:
-
-- `.github/workflows/visual-regression.yml`
-
-Executa em `push` e `pull_request`:
-
-- instala dependencias PHP/Node;
-- instala Chromium do Playwright;
-- executa `npm run test:visual`.
-
-Em caso de falha, publica artefatos com relatorio e resultados dos testes.
-
-### Quando a mudanca visual for intencional
-
-Atualize snapshots localmente e versione os arquivos gerados:
-
-```bash
-npm run test:visual:update
-```
-
-## Publicacao (Apache)
-
-A aplicacao deve ser servida com `DocumentRoot` apontando para:
-
-- `.../natalcode/public`
-
-## Observacao operacional
-
-No momento, alteracoes estao sendo feitas diretamente no servidor. Para fluxo profissional, recomenda-se:
-
-1. ambiente local de desenvolvimento;
-2. ambiente de staging;
-3. deploy para producao apos validacao.
-
-## Branch protection (recomendado)
-
-No GitHub, configure protecao da branch principal (`main`/`master`) com:
-
-- Require a pull request before merging
-- Require approvals: `1` ou mais
-- Dismiss stale pull request approvals when new commits are pushed
-- Require status checks to pass before merging
-- Require conversation resolution before merging
-- Restrict who can push to matching branches (opcional)
-
-### Status checks sugeridos
-
-- `Visual Regression / visual-tests`
-- `PHPUnit / phpunit`
-- `PHPStan / phpstan`
-- `PHPCS / phpcs`
-
-### Politica de merge
-
-- Preferir `Squash and merge`
-- Bloquear merge direto na branch principal
-- Exigir PR mesmo para manutencao de conteudo
+- **Rename de slug criou grupo novo**: conferir rota de update e recarregar admin com `Ctrl+F5`.
+- **Não exclui subgrupo**: verificar cards vinculados.
+- **Sidebar não refletiu criação**: validar persistência em `groups`/`sections` e recarregar página.
+- **Formulário inválido**: abrir a tela correta (novo/editar) e reenviar.

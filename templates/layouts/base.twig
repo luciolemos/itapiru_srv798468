@@ -1,27 +1,39 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
+  {% set assetVersion = '20260224-1' %}
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}NatalCode{% endblock %}</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css">
-  <link rel="stylesheet" href="/assets/css/app.css">
+  <title>{% block title %}Dashboard{% endblock %}</title>
+  <script>
+    (function () {
+      try {
+        if (localStorage.getItem('dashboard_sidebar_collapsed_desktop') === '1') {
+          document.documentElement.classList.add('db-sidebar-collapsed-initial');
+        }
+      } catch (error) {
+      }
+    })();
+  </script>
+  <link rel="stylesheet" href="{{ asset_base_path }}/assets/css/dashboard.css?v={{ assetVersion }}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="icon" type="image/png" href="{{ asset_base_path }}/assets/img/brand/nc6.png">
+  <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
   {% block head %}{% endblock %}
 </head>
-<body data-default-theme="{{ default_theme|default('amber') }}" data-default-mode="{{ default_mode|default('light') }}" data-default-dark-intensity="{{ default_dark_intensity|default('neutral') }}">
-  <div class="nc-shell">
-    {% include 'components/header.twig' %}
+<body>
+  <div id="db-loading" class="db-loading" aria-hidden="true"></div>
+  <div
+    id="db-app"
+    hx-boost="true"
+    hx-target="#db-content"
+    hx-select="#db-content"
+    hx-swap="outerHTML show:none"
+    hx-push-url="true"
+    hx-indicator="#db-loading"
+  >
     {% block content %}{% endblock %}
-    {% include 'components/theme-palette.twig' %}
-    {% include 'components/footer.twig' %}
   </div>
-  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-  <script src="/assets/js/header-menu.js" defer></script>
-  <script src="/assets/js/button-states.js" defer></script>
-  <script src="/assets/js/theme-palette.js" defer></script>
-  <script src="/assets/js/aos-init.js" defer></script>
+  <script src="{{ asset_base_path }}/assets/js/sidebar-toggle.js?v={{ assetVersion }}" defer></script>
 </body>
 </html>

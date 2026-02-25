@@ -1,0 +1,790 @@
+{% extends 'layouts/base.twig' %}
+
+{% block title %}Admin | Dashboard{% endblock %}
+
+{% block content %}
+<div class="db-shell">
+  <aside id="db-sidebar" class="db-sidebar" data-sidebar aria-label="Menu de seções">
+    <div class="db-sidebar-header">
+      <img
+        class="db-om-logo"
+        src="{{ asset_base_path }}/assets/img/om.png"
+        alt="Imagem institucional"
+      >
+      <h1 class="db-brand">{{ dashboardTitle }}</h1>
+      <p class="db-caption">{{ dashboardSubtitle }}</p>
+    </div>
+
+    <nav class="db-menu" aria-label="Navegação de seções">
+      <a href="/itapiru" hx-boost="false" class="db-menu-item{{ activeSection == 'home' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'home' ? 'page' : 'false' }}">
+        Início
+      </a>
+      <span class="db-menu-divider" aria-hidden="true"></span>
+      {% set sidebarGroups = groupedSections|default([]) %}
+      {% for group in sidebarGroups %}
+        {% set groupSlugs = group.items|keys %}
+        {% set isGroupOpen = loop.first or (activeSection is defined and activeSection in groupSlugs) %}
+        <section class="db-menu-group-block" data-menu-group>
+          <button
+            type="button"
+            class="db-menu-group-toggle"
+            data-menu-group-toggle
+            data-group-key="group-{{ loop.index0 }}-{{ group.label|lower|trim|replace({' ': '-'}) }}"
+            aria-expanded="{{ isGroupOpen ? 'true' : 'false' }}"
+          >
+            <span class="db-menu-group">{{ group.label|label_case }}</span>
+            <i class="bi bi-chevron-down" aria-hidden="true"></i>
+          </button>
+          <div class="db-menu-group-items" data-menu-group-items {{ isGroupOpen ? '' : 'hidden' }}>
+            {% for slug, section in group.items %}
+              <a href="/itapiru/{{ slug }}" hx-boost="false" class="db-menu-item" aria-current="false">
+                {{ section.label|label_case }}
+              </a>
+              {% if not loop.last %}
+                <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </section>
+        {% if not loop.last %}
+          <span class="db-menu-divider" aria-hidden="true"></span>
+        {% endif %}
+      {% endfor %}
+      <span class="db-menu-divider" aria-hidden="true"></span>
+      {% set isDocsMenuOpen = activeSection in ['readme', 'readme-seed', 'readme-sqlite'] %}
+      <section class="db-menu-group-block" data-menu-group>
+        <button
+          type="button"
+          class="db-menu-group-toggle"
+          data-menu-group-toggle
+          data-group-key="docs-menu"
+          aria-expanded="{{ isDocsMenuOpen ? 'true' : 'false' }}"
+        >
+          <span class="db-menu-group">Documentação</span>
+          <i class="bi bi-chevron-down" aria-hidden="true"></i>
+        </button>
+        <div class="db-menu-group-items" data-menu-group-items {{ isDocsMenuOpen ? '' : 'hidden' }}>
+          <a href="/itapiru/readme" hx-boost="false" class="db-menu-item{{ activeSection == 'readme' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'readme' ? 'page' : 'false' }}">
+            Guia do usuário
+          </a>
+          <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
+          <a href="/itapiru/readme-seed" hx-boost="false" class="db-menu-item{{ activeSection == 'readme-seed' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'readme-seed' ? 'page' : 'false' }}">
+            Guia de Seed
+          </a>
+          <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
+          <a href="/itapiru/readme-sqlite" hx-boost="false" class="db-menu-item{{ activeSection == 'readme-sqlite' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'readme-sqlite' ? 'page' : 'false' }}">
+            Guia do banco
+          </a>
+        </div>
+      </section>
+      <span class="db-menu-divider" aria-hidden="true"></span>
+      <a href="/itapiru/contato" hx-boost="false" class="db-menu-item{{ activeSection == 'contato' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'contato' ? 'page' : 'false' }}">
+        Contato
+      </a>
+      <span class="db-menu-divider" aria-hidden="true"></span>
+      {% set isAdminMenuOpen = activeSection == 'admin' %}
+      <section class="db-menu-group-block" data-menu-group>
+        <button
+          type="button"
+          class="db-menu-group-toggle"
+          data-menu-group-toggle
+          data-group-key="admin-menu"
+          aria-expanded="{{ isAdminMenuOpen ? 'true' : 'false' }}"
+        >
+          <span class="db-menu-group">Admin</span>
+          <i class="bi bi-chevron-down" aria-hidden="true"></i>
+        </button>
+        <div class="db-menu-group-items" data-menu-group-items {{ isAdminMenuOpen ? '' : 'hidden' }}>
+          <a href="/itapiru/admin?entity=groups" hx-boost="false" class="db-menu-item{{ activeSection == 'admin' and adminEntity == 'groups' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'admin' and adminEntity == 'groups' ? 'page' : 'false' }}">
+            Grupos
+          </a>
+          <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
+          <a href="/itapiru/admin?entity=subgroups" hx-boost="false" class="db-menu-item{{ activeSection == 'admin' and adminEntity == 'subgroups' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'admin' and adminEntity == 'subgroups' ? 'page' : 'false' }}">
+            Subgrupos
+          </a>
+          <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
+          <a href="/itapiru/admin?entity=cards" hx-boost="false" class="db-menu-item{{ activeSection == 'admin' and adminEntity == 'cards' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'admin' and adminEntity == 'cards' ? 'page' : 'false' }}">
+            Cards
+          </a>
+        </div>
+      </section>
+      <form method="post" action="/itapiru/logout" hx-boost="false" class="db-menu-form">
+        <input type="hidden" name="csrf_token" value="{{ csrfToken|default('') }}">
+        <button class="db-menu-item" type="submit">Sair</button>
+      </form>
+    </nav>
+  </aside>
+  <div class="db-sidebar-backdrop" data-sidebar-backdrop aria-hidden="true"></div>
+
+  <main class="db-main" aria-label="Painel administrativo">
+    {% set adminLabel = adminEntity == 'groups' ? 'Grupos' : (adminEntity == 'subgroups' ? 'Subgrupos' : 'Cards') %}
+    {% include 'components/dashboard-topbar.twig' with {
+      lastUpdated: lastUpdated,
+      breadcrumbs: [
+        { label: 'Dashboard', url: '/itapiru' },
+        { label: 'Admin' },
+        { label: adminLabel }
+      ]
+    } %}
+
+    <div id="db-content" class="db-main-body">
+      {% include 'components/dashboard-content-header.twig' with {
+        title: 'Administração do dashboard',
+        subtitle: adminEntity == 'groups'
+          ? 'Gerencie os grupos de primeiro nível do sidebar'
+          : (adminEntity == 'subgroups'
+            ? 'Gerencie os subgrupos de cada grupo do sidebar'
+            : 'Gerencie cards vinculando grupo e subgrupo')
+      } %}
+
+      {% if flashMessage %}
+        {% set flashIsError = flashMessage starts with 'Falha' or flashMessage starts with 'Já existe' or flashMessage starts with 'Informe' %}
+        <div class="db-form-alert {{ flashIsError ? 'is-error' : 'is-success' }}" role="status">{{ flashMessage }}</div>
+      {% endif %}
+
+      {% if adminEntity == 'groups' %}
+        <article class="db-card db-card--standard db-readme-card db-admin-entity-card">
+          <div class="db-admin-entity-head">
+            <h3 class="db-admin-entity-title">Grupos</h3>
+            {% if adminMode == 'new' %}
+              <a class="db-card-link db-card-link-secondary" href="/itapiru/admin?entity=groups">Voltar para lista</a>
+            {% else %}
+              <a class="db-card-link" href="/itapiru/admin?entity=groups&mode=new">Novo grupo</a>
+            {% endif %}
+          </div>
+
+          {% if adminMode == 'new' %}
+            <form class="db-contact-form" method="post" action="/itapiru/admin/groups/create">
+              <input type="hidden" name="csrf_token" value="{{ csrfToken }}">
+              <input type="hidden" name="_form" value="group_create">
+              <div class="db-form-grid">
+                <label class="db-form-field">
+                  <span class="db-form-label">Slug</span>
+                  <input class="db-form-input" name="slug" placeholder="ex: secoes-administrativas-om" required>
+                </label>
+                <label class="db-form-field">
+                  <span class="db-form-label">Ordem</span>
+                  <input class="db-form-input" type="number" name="order" value="99" min="1" required>
+                </label>
+              </div>
+              <label class="db-form-field">
+                <span class="db-form-label">Nome do grupo</span>
+                <input class="db-form-input" name="label" required>
+              </label>
+              <div class="db-form-actions">
+                <button class="db-card-link" type="submit">Criar grupo</button>
+              </div>
+            </form>
+          {% elseif adminMode == 'edit' and editingGroup %}
+            <form class="db-contact-form" method="post" action="/itapiru/admin/groups/update" hx-boost="false">
+              <input type="hidden" name="csrf_token" value="{{ csrfToken }}">
+              <input type="hidden" name="_form" value="group_update">
+              <input type="hidden" name="original_slug" value="{{ editingGroup.slug }}">
+              <div class="db-form-grid">
+                <label class="db-form-field">
+                  <span class="db-form-label">Slug</span>
+                  <input class="db-form-input" name="slug" value="{{ editingGroup.slug }}" required>
+                </label>
+                <label class="db-form-field">
+                  <span class="db-form-label">Ordem</span>
+                  <input class="db-form-input" type="number" name="order" value="{{ editingGroup.order }}" min="1" required>
+                </label>
+              </div>
+              <label class="db-form-field">
+                <span class="db-form-label">Nome do grupo</span>
+                <input class="db-form-input" name="label" value="{{ editingGroup.label }}" required>
+              </label>
+              <div class="db-admin-form-actions-inline">
+                <a class="db-card-link db-card-link-secondary" href="/itapiru/admin?entity=groups">Voltar para lista</a>
+                <button class="db-card-link" type="submit">Salvar grupo</button>
+                {% set editingGroupSubgroups = editingGroup.subgroups_count|default(0) %}
+                <button
+                  class="db-card-link db-card-link-danger"
+                  type="submit"
+                  formaction="/itapiru/admin/groups/delete"
+                  {{ editingGroupSubgroups > 0 ? 'disabled' : '' }}
+                  title="{{ editingGroupSubgroups > 0 ? 'Remova os subgrupos antes de excluir este grupo.' : 'Excluir grupo' }}"
+                >Excluir grupo</button>
+              </div>
+            </form>
+          {% else %}
+            <div class="db-admin-cards-scroll">
+              <table class="db-admin-list-table" aria-label="Lista de grupos">
+                <thead>
+                  <tr>
+                    <th>Slug</th>
+                    <th>Grupo</th>
+                    <th>Subgrupos</th>
+                    <th>Ordem</th>
+                    <th class="db-admin-th-actions">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for group in listedGroups|default(groups) %}
+                    <tr>
+                      <td>{{ group.slug }}</td>
+                      <td>{{ group.label|label_case }}</td>
+                      <td>{{ group.subgroups_count|default(0) }}</td>
+                      <td>{{ group.order|default(loop.index) }}</td>
+                      <td class="db-admin-td-actions">
+                        <div class="db-admin-table-actions">
+                          <a class="db-card-link db-icon-action" href="/itapiru/admin?entity=groups&mode=edit&slug={{ group.slug }}" title="Editar grupo" aria-label="Editar grupo">
+                            <i class="bi bi-pencil-square" aria-hidden="true"></i>
+                          </a>
+                          <form method="post" action="/itapiru/admin/groups/delete" class="db-inline-form">
+                            <input type="hidden" name="csrf_token" value="{{ csrfToken }}">
+                            <input type="hidden" name="slug" value="{{ group.slug }}">
+                            <button
+                              class="db-card-link db-card-link-danger db-icon-action"
+                              type="submit"
+                              {{ group.subgroups_count|default(0) > 0 ? 'disabled' : '' }}
+                              title="{{ group.subgroups_count|default(0) > 0 ? 'Remova os subgrupos antes de excluir este grupo.' : 'Excluir grupo' }}"
+                              aria-label="Excluir grupo"
+                            >
+                              <i class="bi bi-trash" aria-hidden="true"></i>
+                            </button>
+                          </form>
+                        </div>
+                      </td>
+                    </tr>
+                  {% else %}
+                    <tr>
+                      <td colspan="5">Nenhum grupo cadastrado.</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+
+            {% if groupsPagination.totalPages|default(1) > 1 %}
+              <nav class="db-admin-pagination" aria-label="Paginação de grupos">
+                <form class="db-admin-pagination-size" method="get" action="/itapiru/admin">
+                  <input type="hidden" name="entity" value="groups">
+                  <input type="hidden" name="mode" value="list">
+                  <label class="db-admin-pagination-size-label" for="groups-per-page">Itens:</label>
+                  <select id="groups-per-page" class="db-form-input db-admin-pagination-select" name="per_page" onchange="this.form.submit()">
+                    {% for option in allowedPerPage|default([5,10,15,20,25,50]) %}
+                      <option value="{{ option }}" {{ currentPerPage|default(10) == option ? 'selected' : '' }}>{{ option }}</option>
+                    {% endfor %}
+                  </select>
+                </form>
+
+                {% set prevPage = groupsPagination.page - 1 %}
+                {% set nextPage = groupsPagination.page + 1 %}
+
+                {% if groupsPagination.page > 1 %}
+                  <a class="db-card-link db-card-link-secondary" href="/itapiru/admin?{{ groupsPaginationQuery|merge({'page': prevPage})|url_encode }}">Anterior</a>
+                {% else %}
+                  <span class="db-card-link db-card-link-secondary is-disabled" aria-disabled="true">Anterior</span>
+                {% endif %}
+
+                <span class="db-admin-pagination-info">Página {{ groupsPagination.page }} de {{ groupsPagination.totalPages }}</span>
+
+                {% if groupsPagination.page < groupsPagination.totalPages %}
+                  <a class="db-card-link db-card-link-secondary" href="/itapiru/admin?{{ groupsPaginationQuery|merge({'page': nextPage})|url_encode }}">Próxima</a>
+                {% else %}
+                  <span class="db-card-link db-card-link-secondary is-disabled" aria-disabled="true">Próxima</span>
+                {% endif %}
+              </nav>
+            {% endif %}
+          {% endif %}
+        </article>
+
+      {% elseif adminEntity == 'subgroups' %}
+        <article class="db-card db-card--standard db-readme-card db-admin-entity-card">
+          <div class="db-admin-entity-head">
+            <h3 class="db-admin-entity-title">Subgrupos</h3>
+            {% if adminMode == 'new' %}
+              <a class="db-card-link db-card-link-secondary" href="/itapiru/admin?entity=subgroups">Voltar para lista</a>
+            {% else %}
+              <a class="db-card-link" href="/itapiru/admin?entity=subgroups&mode=new">Novo subgrupo</a>
+            {% endif %}
+          </div>
+
+          {% if adminMode == 'new' %}
+            <form class="db-contact-form" method="post" action="/itapiru/admin/sections/create">
+              <input type="hidden" name="csrf_token" value="{{ csrfToken }}">
+              <input type="hidden" name="_form" value="subgroup_create">
+              <div class="db-form-grid">
+                <label class="db-form-field">
+                  <span class="db-form-label">Slug</span>
+                  <input class="db-form-input" name="slug" placeholder="ex: secao-1" required>
+                </label>
+                <label class="db-form-field">
+                  <span class="db-form-label">Ordem</span>
+                  <input class="db-form-input" type="number" name="order" value="99" min="1" required>
+                </label>
+              </div>
+              <label class="db-form-field">
+                <span class="db-form-label">Subgrupo</span>
+                <input class="db-form-input" name="label" required>
+              </label>
+              <label class="db-form-field">
+                <span class="db-form-label">Descrição</span>
+                <input class="db-form-input" name="description" required>
+              </label>
+              <label class="db-form-field">
+                <span class="db-form-label">Grupo</span>
+                <select class="db-form-input" name="group_slug" required>
+                  {% for group in groups|default([]) %}
+                    <option value="{{ group.slug }}">{{ group.label|label_case }} ({{ group.slug }})</option>
+                  {% endfor %}
+                </select>
+              </label>
+              <div class="db-form-actions">
+                <button class="db-card-link" type="submit">Criar subgrupo</button>
+              </div>
+            </form>
+
+          {% elseif adminMode == 'edit' and editingSection %}
+            <form class="db-contact-form" method="post" action="/itapiru/admin/sections/update" hx-boost="false">
+              <input type="hidden" name="csrf_token" value="{{ csrfToken }}">
+              <input type="hidden" name="_form" value="subgroup_update">
+              <input type="hidden" name="original_slug" value="{{ editingSection.slug }}">
+              <div class="db-form-grid">
+                <label class="db-form-field">
+                  <span class="db-form-label">Slug</span>
+                  <input class="db-form-input" name="slug" value="{{ editingSection.slug }}" required>
+                </label>
+                <label class="db-form-field">
+                  <span class="db-form-label">Ordem</span>
+                  <input class="db-form-input" type="number" name="order" value="{{ editingSection.order }}" min="1" required>
+                </label>
+              </div>
+              <label class="db-form-field">
+                <span class="db-form-label">Subgrupo</span>
+                <input class="db-form-input" name="label" value="{{ editingSection.label }}" required>
+              </label>
+              <label class="db-form-field">
+                <span class="db-form-label">Descrição</span>
+                <input class="db-form-input" name="description" value="{{ editingSection.description }}" required>
+              </label>
+              <label class="db-form-field">
+                <span class="db-form-label">Grupo</span>
+                <select class="db-form-input" name="group_slug" required>
+                  {% for group in groups|default([]) %}
+                    <option value="{{ group.slug }}" {{ group.slug == editingSection.group_slug|default('') ? 'selected' : '' }}>{{ group.label|label_case }} ({{ group.slug }})</option>
+                  {% endfor %}
+                </select>
+              </label>
+              <div class="db-admin-form-actions-inline">
+                <a class="db-card-link db-card-link-secondary" href="/itapiru/admin?entity=subgroups">Voltar para lista</a>
+                <button class="db-card-link" type="submit">Salvar subgrupo</button>
+                {% set editingSectionCards = sectionCardsCount[editingSection.slug]|default(0) %}
+                <button
+                  class="db-card-link db-card-link-danger"
+                  type="submit"
+                  formaction="/itapiru/admin/sections/delete"
+                  {{ editingSectionCards > 0 ? 'disabled' : '' }}
+                  title="{{ editingSectionCards > 0 ? 'Remova os cards antes de excluir este subgrupo.' : 'Excluir subgrupo' }}"
+                >Excluir subgrupo</button>
+              </div>
+            </form>
+
+          {% else %}
+            <div class="db-admin-cards-scroll">
+              <table class="db-admin-list-table" aria-label="Lista de subgrupos">
+                <thead>
+                  <tr>
+                    <th>Slug</th>
+                    <th>Subgrupo</th>
+                    <th>Grupo</th>
+                    <th>Ordem</th>
+                    <th class="db-admin-th-actions">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for slug, section in listedSections|default(sections) %}
+                    <tr>
+                      <td>{{ slug }}</td>
+                      <td>{{ section.label|label_case }}</td>
+                      <td>{{ section.group|default('Geral')|label_case }}</td>
+                      <td>{{ section.order|default(loop.index) }}</td>
+                      <td class="db-admin-td-actions">
+                        <div class="db-admin-table-actions">
+                          <a class="db-card-link db-icon-action" href="/itapiru/admin?entity=subgroups&mode=edit&slug={{ slug }}" title="Editar subgrupo" aria-label="Editar subgrupo">
+                            <i class="bi bi-pencil-square" aria-hidden="true"></i>
+                          </a>
+                          <form method="post" action="/itapiru/admin/sections/delete" class="db-inline-form">
+                            <input type="hidden" name="csrf_token" value="{{ csrfToken }}">
+                            <input type="hidden" name="slug" value="{{ slug }}">
+                            <button
+                              class="db-card-link db-card-link-danger db-icon-action"
+                              type="submit"
+                              {{ sectionCardsCount[slug]|default(0) > 0 ? 'disabled' : '' }}
+                              title="{{ sectionCardsCount[slug]|default(0) > 0 ? 'Remova os cards antes de excluir este subgrupo.' : 'Excluir subgrupo' }}"
+                              aria-label="Excluir subgrupo"
+                            >
+                              <i class="bi bi-trash" aria-hidden="true"></i>
+                            </button>
+                          </form>
+                        </div>
+                      </td>
+                    </tr>
+                  {% else %}
+                    <tr>
+                      <td colspan="5">Nenhum subgrupo cadastrado.</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            {% if sectionsPagination.totalPages|default(1) > 1 %}
+              <nav class="db-admin-pagination" aria-label="Paginação de subgrupos">
+                <form class="db-admin-pagination-size" method="get" action="/itapiru/admin">
+                  <input type="hidden" name="entity" value="subgroups">
+                  <input type="hidden" name="mode" value="list">
+                  <label class="db-admin-pagination-size-label" for="sections-per-page">Itens:</label>
+                  <select id="sections-per-page" class="db-form-input db-admin-pagination-select" name="per_page" onchange="this.form.submit()">
+                    {% for option in allowedPerPage|default([5,10,15,20,25,50]) %}
+                      <option value="{{ option }}" {{ currentPerPage|default(10) == option ? 'selected' : '' }}>{{ option }}</option>
+                    {% endfor %}
+                  </select>
+                </form>
+
+                {% set prevPage = sectionsPagination.page - 1 %}
+                {% set nextPage = sectionsPagination.page + 1 %}
+
+                {% if sectionsPagination.page > 1 %}
+                  <a class="db-card-link db-card-link-secondary" href="/itapiru/admin?{{ sectionsPaginationQuery|merge({'page': prevPage})|url_encode }}">Anterior</a>
+                {% else %}
+                  <span class="db-card-link db-card-link-secondary is-disabled" aria-disabled="true">Anterior</span>
+                {% endif %}
+
+                <span class="db-admin-pagination-info">Página {{ sectionsPagination.page }} de {{ sectionsPagination.totalPages }}</span>
+
+                {% if sectionsPagination.page < sectionsPagination.totalPages %}
+                  <a class="db-card-link db-card-link-secondary" href="/itapiru/admin?{{ sectionsPaginationQuery|merge({'page': nextPage})|url_encode }}">Próxima</a>
+                {% else %}
+                  <span class="db-card-link db-card-link-secondary is-disabled" aria-disabled="true">Próxima</span>
+                {% endif %}
+              </nav>
+            {% endif %}
+          {% endif %}
+        </article>
+
+      {% else %}
+        <article class="db-card db-card--standard db-readme-card db-admin-entity-card">
+          <div class="db-admin-entity-head">
+            <h3 class="db-admin-entity-title">Cards</h3>
+            {% if adminMode == 'new' %}
+              <a class="db-card-link db-card-link-secondary" href="/itapiru/admin?entity=cards">Voltar para lista</a>
+            {% else %}
+              <a class="db-card-link" href="/itapiru/admin?entity=cards&mode=new">Novo card</a>
+            {% endif %}
+          </div>
+
+          {% if adminMode == 'new' %}
+            <form class="db-contact-form" method="post" action="/itapiru/admin/cards/create">
+              <input type="hidden" name="csrf_token" value="{{ csrfToken }}">
+              <div class="db-form-grid">
+                <label class="db-form-field">
+                  <span class="db-form-label">Grupo</span>
+                  <select class="db-form-input" name="group_slug" data-subgroup-group-select required>
+                    {% for group in groups|default([]) %}
+                      <option value="{{ group.slug }}">{{ group.label|label_case }}</option>
+                    {% endfor %}
+                  </select>
+                </label>
+                <label class="db-form-field">
+                  <span class="db-form-label">Subgrupo</span>
+                  <select class="db-form-input" name="subgroup_slug" data-subgroup-select required>
+                    {% for slug, section in sections %}
+                      <option value="{{ slug }}" data-group-slug="{{ section.group_slug|default('geral') }}">{{ section.label|label_case }} ({{ section.group|default('Geral')|label_case }})</option>
+                    {% endfor %}
+                  </select>
+                </label>
+              </div>
+
+              <div class="db-form-grid">
+                <label class="db-form-field">
+                  <span class="db-form-label">Ordem</span>
+                  <input class="db-form-input" type="number" name="order" value="99" min="1" required>
+                </label>
+                <label class="db-form-field"><span class="db-form-label">Status</span>
+                  <select class="db-form-input" name="status" required>
+                    <option>Interno</option>
+                    <option>Externo</option>
+                    <option>Sistema</option>
+                  </select>
+                </label>
+              </div>
+
+              <label class="db-form-field"><span class="db-form-label">TÍTULO DO CARD</span><input class="db-form-input" name="title" required></label>
+
+              <div class="db-form-grid">
+                <label class="db-form-field"><span class="db-form-label">URL</span><input class="db-form-input" name="href" placeholder="https://..."></label>
+                <label class="db-form-field"><span class="db-form-label">Ícone (Bootstrap)</span><input class="db-form-input" name="icon" value="bi-globe2"></label>
+              </div>
+
+              <div class="db-form-grid">
+                <label class="db-form-field"><span class="db-form-label">Métrica</span><input class="db-form-input" name="metric"></label>
+                <label class="db-form-field"><span class="db-form-label">Tendência</span><input class="db-form-input" name="trend"></label>
+              </div>
+
+              <label class="db-form-field"><span class="db-form-label">Descrição</span><input class="db-form-input" name="description"></label>
+              <label class="db-form-field"><span class="db-form-label">Externo?</span>
+                <select class="db-form-input" name="external"><option value="1">Sim</option><option value="0">Não</option></select>
+              </label>
+              <div class="db-form-actions db-form-actions-wrap">
+                <button class="db-card-link" type="submit">Criar card</button>
+              </div>
+            </form>
+
+          {% elseif adminMode == 'edit' and editingCard %}
+            <form class="db-contact-form" method="post" action="/itapiru/admin/cards/update">
+              <input type="hidden" name="csrf_token" value="{{ csrfToken }}">
+              <input type="hidden" name="id" value="{{ editingCard.id }}">
+              <div class="db-form-grid">
+                <label class="db-form-field">
+                  <span class="db-form-label">Grupo</span>
+                  <select class="db-form-input" name="group_slug" data-subgroup-group-select required>
+                    {% for group in groups|default([]) %}
+                      <option value="{{ group.slug }}" {{ editingCard.group_slug|default('') == group.slug ? 'selected' : '' }}>{{ group.label|label_case }}</option>
+                    {% endfor %}
+                  </select>
+                </label>
+                <label class="db-form-field">
+                  <span class="db-form-label">Subgrupo</span>
+                  <select class="db-form-input" name="subgroup_slug" data-subgroup-select required>
+                    {% for slug, section in sections %}
+                      <option value="{{ slug }}" data-group-slug="{{ section.group_slug|default('geral') }}" {{ editingCard.section_slug == slug ? 'selected' : '' }}>{{ section.label|label_case }} ({{ section.group|default('Geral')|label_case }})</option>
+                    {% endfor %}
+                  </select>
+                </label>
+              </div>
+
+              <div class="db-form-grid">
+                <label class="db-form-field">
+                  <span class="db-form-label">Ordem</span>
+                  <input class="db-form-input" type="number" name="order" value="{{ editingCard.order }}" min="1" required>
+                </label>
+                <label class="db-form-field"><span class="db-form-label">Status</span>
+                  <select class="db-form-input" name="status" required>
+                    <option {{ editingCard.status == 'Interno' ? 'selected' : '' }}>Interno</option>
+                    <option {{ editingCard.status == 'Externo' ? 'selected' : '' }}>Externo</option>
+                    <option {{ editingCard.status == 'Sistema' ? 'selected' : '' }}>Sistema</option>
+                  </select>
+                </label>
+              </div>
+
+              <label class="db-form-field"><span class="db-form-label">TÍTULO DO CARD</span><input class="db-form-input" name="title" value="{{ editingCard.title }}" required></label>
+              <div class="db-form-grid">
+                <label class="db-form-field"><span class="db-form-label">URL</span><input class="db-form-input" name="href" value="{{ editingCard.href }}"></label>
+                <label class="db-form-field"><span class="db-form-label">Ícone (Bootstrap)</span><input class="db-form-input" name="icon" value="{{ editingCard.icon }}"></label>
+              </div>
+              <div class="db-form-grid">
+                <label class="db-form-field"><span class="db-form-label">Métrica</span><input class="db-form-input" name="metric" value="{{ editingCard.metric }}"></label>
+                <label class="db-form-field"><span class="db-form-label">Tendência</span><input class="db-form-input" name="trend" value="{{ editingCard.trend }}"></label>
+              </div>
+              <label class="db-form-field"><span class="db-form-label">Descrição</span><input class="db-form-input" name="description" value="{{ editingCard.description }}"></label>
+              <label class="db-form-field"><span class="db-form-label">Externo?</span>
+                <select class="db-form-input" name="external"><option value="1" {{ editingCard.external ? 'selected' : '' }}>Sim</option><option value="0" {{ not editingCard.external ? 'selected' : '' }}>Não</option></select>
+              </label>
+              <div class="db-admin-form-actions-inline">
+                <a class="db-card-link db-card-link-secondary" href="/itapiru/admin?entity=cards">Voltar para lista</a>
+                <button class="db-card-link" type="submit">Salvar card</button>
+                <button class="db-card-link db-card-link-danger" type="submit" formaction="/itapiru/admin/cards/delete">Excluir card</button>
+              </div>
+            </form>
+
+          {% else %}
+            <form class="db-contact-form db-admin-filters" method="get" action="/itapiru/admin">
+              <input type="hidden" name="entity" value="cards">
+              <input type="hidden" name="mode" value="list">
+              <input type="hidden" name="per_page" value="{{ currentPerPage|default(10) }}">
+              <div class="db-admin-filters-row">
+                <label class="db-form-field db-admin-filter-field is-search">
+                  <span class="db-form-label">Buscar</span>
+                  <input class="db-form-input" type="text" name="card_q" value="{{ cardFilters.q|default('') }}" placeholder="Título ou descrição">
+                </label>
+                <label class="db-form-field db-admin-filter-field is-section">
+                  <span class="db-form-label">Grupo</span>
+                  <select class="db-form-input" name="card_group">
+                    <option value="">Todos</option>
+                    {% for group in groups|default([]) %}
+                      <option value="{{ group.slug }}" {{ cardFilters.group|default('') == group.slug ? 'selected' : '' }}>{{ group.label|label_case }}</option>
+                    {% endfor %}
+                  </select>
+                </label>
+                <label class="db-form-field db-admin-filter-field is-section">
+                  <span class="db-form-label">Subgrupo</span>
+                  <select class="db-form-input" name="card_section">
+                    <option value="">Todos</option>
+                    {% for slug, section in sections %}
+                      <option value="{{ slug }}" {{ cardFilters.section|default('') == slug ? 'selected' : '' }}>{{ section.label|label_case }}</option>
+                    {% endfor %}
+                  </select>
+                </label>
+                <label class="db-form-field db-admin-filter-field is-status">
+                  <span class="db-form-label">Status</span>
+                  <select class="db-form-input" name="card_status">
+                    <option value="">Todos</option>
+                    <option value="Interno" {{ cardFilters.status|default('') == 'Interno' ? 'selected' : '' }}>Interno</option>
+                    <option value="Externo" {{ cardFilters.status|default('') == 'Externo' ? 'selected' : '' }}>Externo</option>
+                    <option value="Sistema" {{ cardFilters.status|default('') == 'Sistema' ? 'selected' : '' }}>Sistema</option>
+                  </select>
+                </label>
+                <div class="db-form-actions db-admin-filters-actions">
+                  <button class="db-card-link" type="submit">Filtrar</button>
+                  <a class="db-card-link db-card-link-secondary" href="/itapiru/admin?entity=cards">Limpar</a>
+                </div>
+              </div>
+            </form>
+
+            <div class="db-admin-cards-scroll">
+              <table class="db-admin-list-table db-admin-list-table--cards" aria-label="Lista de cards">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Grupo</th>
+                    <th>Subgrupo</th>
+                    <th>TÍTULO DO CARD</th>
+                    <th>URL</th>
+                    <th>Status</th>
+                    <th>Ordem</th>
+                    <th class="db-admin-th-actions">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for card in listedCards|default(filteredCards|default(cards)) %}
+                    <tr class="db-admin-card-row">
+                      <td data-label="ID">{{ card.id }}</td>
+                      <td data-label="Grupo">{{ card.group_label|default('-')|label_case }}</td>
+                      <td data-label="Subgrupo">{{ card.section_label|default(card.section_slug)|label_case }}</td>
+                      <td data-label="TÍTULO DO CARD">{{ card.title }}</td>
+                      <td data-label="URL" class="db-admin-cell-url" title="{{ card.href }}">{{ card.href }}</td>
+                      <td data-label="Status">{{ card.status }}</td>
+                      <td data-label="Ordem">{{ card.order }}</td>
+                      <td class="db-admin-td-actions">
+                        <div class="db-admin-cards-actions-inline">
+                          <button class="db-card-link db-card-link-secondary db-icon-action" type="button" onclick="document.getElementById('card-preview-{{ card.id }}').showModal();" title="Visualizar card" aria-label="Visualizar card">
+                            <i class="bi bi-eye" aria-hidden="true"></i>
+                          </button>
+                          <a class="db-card-link db-icon-action" href="/itapiru/admin?entity=cards&mode=edit&id={{ card.id }}" title="Editar card" aria-label="Editar card">
+                            <i class="bi bi-pencil-square" aria-hidden="true"></i>
+                          </a>
+                          <form method="post" action="/itapiru/admin/cards/delete" class="db-inline-form">
+                            <input type="hidden" name="csrf_token" value="{{ csrfToken }}">
+                            <input type="hidden" name="id" value="{{ card.id }}">
+                            <button class="db-card-link db-card-link-danger db-icon-action" type="submit" title="Excluir card" aria-label="Excluir card">
+                              <i class="bi bi-trash" aria-hidden="true"></i>
+                            </button>
+                          </form>
+                        </div>
+                      </td>
+                    </tr>
+                  {% else %}
+                    <tr>
+                      <td colspan="8">Nenhum card cadastrado.</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+
+            {% if cardsPagination.totalPages|default(1) > 1 %}
+              <nav class="db-admin-pagination" aria-label="Paginação de cards">
+                <form class="db-admin-pagination-size" method="get" action="/itapiru/admin">
+                  <input type="hidden" name="entity" value="cards">
+                  <input type="hidden" name="mode" value="list">
+                  <input type="hidden" name="card_q" value="{{ cardFilters.q|default('') }}">
+                  <input type="hidden" name="card_group" value="{{ cardFilters.group|default('') }}">
+                  <input type="hidden" name="card_section" value="{{ cardFilters.section|default('') }}">
+                  <input type="hidden" name="card_status" value="{{ cardFilters.status|default('') }}">
+                  <label class="db-admin-pagination-size-label" for="cards-per-page">Itens:</label>
+                  <select id="cards-per-page" class="db-form-input db-admin-pagination-select" name="per_page" onchange="this.form.submit()">
+                    {% for option in allowedPerPage|default([5,10,15,20,25,50]) %}
+                      <option value="{{ option }}" {{ currentPerPage|default(10) == option ? 'selected' : '' }}>{{ option }}</option>
+                    {% endfor %}
+                  </select>
+                </form>
+
+                {% set prevPage = cardsPagination.page - 1 %}
+                {% set nextPage = cardsPagination.page + 1 %}
+
+                {% if cardsPagination.page > 1 %}
+                  <a class="db-card-link db-card-link-secondary" href="/itapiru/admin?{{ cardsPaginationQuery|merge({'page': prevPage})|url_encode }}">Anterior</a>
+                {% else %}
+                  <span class="db-card-link db-card-link-secondary is-disabled" aria-disabled="true">Anterior</span>
+                {% endif %}
+
+                <span class="db-admin-pagination-info">Página {{ cardsPagination.page }} de {{ cardsPagination.totalPages }}</span>
+
+                {% if cardsPagination.page < cardsPagination.totalPages %}
+                  <a class="db-card-link db-card-link-secondary" href="/itapiru/admin?{{ cardsPaginationQuery|merge({'page': nextPage})|url_encode }}">Próxima</a>
+                {% else %}
+                  <span class="db-card-link db-card-link-secondary is-disabled" aria-disabled="true">Próxima</span>
+                {% endif %}
+              </nav>
+            {% endif %}
+          {% endif %}
+        </article>
+      {% endif %}
+
+      {% include 'components/dashboard-footer.twig' with {
+        lastUpdated: lastUpdated
+      } %}
+    </div>
+  </main>
+</div>
+
+<script>
+  (function () {
+    const forms = document.querySelectorAll('form');
+    forms.forEach((form) => {
+      const groupSelect = form.querySelector('[data-subgroup-group-select]');
+      const subgroupSelect = form.querySelector('[data-subgroup-select]');
+      if (!groupSelect || !subgroupSelect) {
+        return;
+      }
+
+      const allOptions = Array.from(subgroupSelect.options).map((option) => ({
+        value: option.value,
+        text: option.text,
+        groupSlug: String(option.getAttribute('data-group-slug') || '').toLowerCase(),
+        selected: option.selected,
+      }));
+
+      const updateSubgroups = () => {
+        const selectedGroup = String(groupSelect.value || '').toLowerCase();
+        const currentValue = String(subgroupSelect.value || '').toLowerCase();
+        const filtered = allOptions.filter((item) => selectedGroup === '' || item.groupSlug === selectedGroup);
+
+        subgroupSelect.innerHTML = '';
+
+        filtered.forEach((item) => {
+          const option = document.createElement('option');
+          option.value = item.value;
+          option.text = item.text;
+          option.setAttribute('data-group-slug', item.groupSlug);
+          subgroupSelect.appendChild(option);
+        });
+
+        if (filtered.length === 0) {
+          const option = document.createElement('option');
+          option.value = '';
+          option.text = 'Nenhum subgrupo disponível para este grupo';
+          subgroupSelect.appendChild(option);
+          subgroupSelect.disabled = true;
+          return;
+        }
+
+        subgroupSelect.disabled = false;
+
+        const selectedStillExists = filtered.some((item) => item.value.toLowerCase() === currentValue);
+        if (selectedStillExists) {
+          subgroupSelect.value = currentValue;
+          return;
+        }
+
+        const initiallySelected = filtered.find((item) => item.selected);
+        subgroupSelect.value = initiallySelected ? initiallySelected.value : filtered[0].value;
+      };
+
+      groupSelect.addEventListener('change', updateSubgroups);
+      updateSubgroups();
+    });
+  })();
+</script>
+{% endblock %}

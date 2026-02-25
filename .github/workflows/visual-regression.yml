@@ -1,4 +1,4 @@
-name: Visual Regression
+name: Itapiru Visual Regression
 
 on:
   push:
@@ -9,6 +9,7 @@ on:
 
 jobs:
   visual-tests:
+    name: Itapiru Visual Tests
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -34,13 +35,13 @@ jobs:
       - name: Install Node dependencies
         run: npm ci
 
-      - name: Install Playwright browser
+      - name: Install Playwright browser (Chromium)
         run: npx playwright install --with-deps chromium
 
-      - name: Run visual regression tests
+      - name: Run visual regression tests (itapiru)
         run: npm run test:visual
 
-      - name: Upload Playwright report (always)
+      - name: Upload Playwright report (always, itapiru)
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -48,7 +49,7 @@ jobs:
           path: playwright-report/
           if-no-files-found: ignore
 
-      - name: Upload test results on failure
+      - name: Upload test results on failure (itapiru)
         if: failure()
         uses: actions/upload-artifact@v4
         with:

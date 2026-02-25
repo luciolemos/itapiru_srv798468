@@ -1,0 +1,6 @@
+<footer class="db-footer" aria-label="Rodapé do dashboard">
+  <p class="db-footer-copy">© {{ "now"|date("Y") }} 16º BI Mtz. Todos os direitos reservados.</p>
+  {% if lastUpdated is defined and lastUpdated %}
+    <p class="db-footer-copy">Última atualização: {{ lastUpdated }}</p>
+  {% endif %}
+</footer>

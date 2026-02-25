@@ -1,0 +1,31 @@
+<header class="db-navbar" aria-label="Barra superior do dashboard">
+  <div class="db-navbar-row">
+    <div class="db-navbar-actions">
+      <button
+        type="button"
+        class="db-sidebar-toggle"
+        data-sidebar-toggle
+        aria-controls="db-sidebar"
+        aria-expanded="false"
+        aria-label="Alternar menu lateral"
+      >
+        <i class="bi bi-list" aria-hidden="true"></i>
+      </button>
+
+      {% if breadcrumbs is defined and breadcrumbs is not empty %}
+        <nav class="db-breadcrumb" aria-label="Breadcrumb">
+          {% for item in breadcrumbs %}
+            {% if item.url is defined and item.url is not empty %}
+              <a href="{{ item.url }}" class="db-breadcrumb-link">{{ item.label }}</a>
+            {% else %}
+              <span class="db-breadcrumb-current">{{ item.label }}</span>
+            {% endif %}
+            {% if not loop.last %}
+              <span class="db-breadcrumb-sep" aria-hidden="true">/</span>
+            {% endif %}
+          {% endfor %}
+        </nav>
+      {% endif %}
+    </div>
+  </div>
+</header>

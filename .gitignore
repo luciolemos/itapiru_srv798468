@@ -4,4 +4,8 @@
 /vendor/
 /logs/*
 !/logs/README.md
+/var/data/*
+!/var/data/README.md
+/var/backups/*
+!/var/backups/README.md
 .phpunit.result.cache
