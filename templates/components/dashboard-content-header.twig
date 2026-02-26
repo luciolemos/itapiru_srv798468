@@ -1,4 +1,18 @@
 <section class="db-content-header" aria-label="Cabeçalho do conteúdo">
+  {% if breadcrumbs is defined and breadcrumbs is not empty %}
+    <nav class="db-breadcrumb" aria-label="Breadcrumb">
+      {% for item in breadcrumbs %}
+        {% if item.url is defined and item.url is not empty %}
+          <a href="{{ item.url }}" class="db-breadcrumb-link">{{ item.label }}</a>
+        {% else %}
+          <span class="db-breadcrumb-current">{{ item.label }}</span>
+        {% endif %}
+        {% if not loop.last %}
+          <span class="db-breadcrumb-sep" aria-hidden="true">/</span>
+        {% endif %}
+      {% endfor %}
+    </nav>
+  {% endif %}
   <h2 class="db-navbar-title">{{ title }}</h2>
   {% if subtitle is defined and subtitle is not empty %}
     <p class="db-navbar-subtitle">{{ subtitle }}</p>

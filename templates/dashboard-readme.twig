@@ -139,6 +139,10 @@
 
     <div id="db-content" class="db-main-body">
       {% include 'components/dashboard-content-header.twig' with {
+        breadcrumbs: [
+          { label: 'Dashboard', url: '/itapiru' },
+          { label: readmePageTitle|default('Guia do usuário') }
+        ],
         title: readmePageTitle|default('Guia do usuário'),
         subtitle: readmePageSubtitle|default('Guia rápido de conteúdo e manutenção do dashboard')
       } %}

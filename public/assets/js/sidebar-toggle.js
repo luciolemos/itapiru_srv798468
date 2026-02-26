@@ -281,6 +281,97 @@
     }
   };
 
+  const initAccountAvatarPreview = (root = document) => {
+    const scope = root instanceof Element || root instanceof Document ? root : document;
+    const forms = scope.querySelectorAll('form.db-avatar-form');
+
+    forms.forEach((form) => {
+      if (!(form instanceof HTMLFormElement)) {
+        return;
+      }
+
+      if (form.dataset.avatarPreviewBound === '1') {
+        return;
+      }
+
+      const preview = form.querySelector('[data-account-avatar-preview]');
+      const badge = form.querySelector('[data-account-avatar-badge]');
+      const uploadInput = form.querySelector('[data-avatar-upload-input]');
+      const optionRadios = form.querySelectorAll('[data-avatar-option-radio]');
+
+      if (!(preview instanceof HTMLImageElement)) {
+        return;
+      }
+
+      if (uploadInput instanceof HTMLInputElement) {
+        const applyPreviewFromFile = () => {
+          const selectedFile = uploadInput.files && uploadInput.files[0] ? uploadInput.files[0] : null;
+          if (!selectedFile) {
+            return;
+          }
+
+          const previousObjectUrl = preview.dataset.objectUrl || '';
+          if (previousObjectUrl) {
+            URL.revokeObjectURL(previousObjectUrl);
+            preview.dataset.objectUrl = '';
+          }
+
+          if (typeof FileReader === 'function') {
+            const reader = new FileReader();
+            reader.onload = () => {
+              if (typeof reader.result === 'string' && reader.result !== '') {
+                preview.src = reader.result;
+              }
+            };
+            reader.readAsDataURL(selectedFile);
+          } else {
+            const objectUrl = URL.createObjectURL(selectedFile);
+            preview.src = objectUrl;
+            preview.dataset.objectUrl = objectUrl;
+          }
+
+          if (badge) {
+            badge.textContent = 'Pré-visualização';
+          }
+        };
+
+        uploadInput.addEventListener('change', applyPreviewFromFile);
+        uploadInput.addEventListener('input', applyPreviewFromFile);
+      }
+
+      optionRadios.forEach((radio) => {
+        if (!(radio instanceof HTMLInputElement)) {
+          return;
+        }
+
+        radio.addEventListener('change', () => {
+          if (!radio.checked) {
+            return;
+          }
+
+          const label = radio.closest('.db-avatar-option');
+          const optionImage = label ? label.querySelector('[data-avatar-option-image]') : null;
+          if (!(optionImage instanceof HTMLImageElement)) {
+            return;
+          }
+
+          const previousObjectUrl = preview.dataset.objectUrl || '';
+          if (previousObjectUrl) {
+            URL.revokeObjectURL(previousObjectUrl);
+            preview.dataset.objectUrl = '';
+          }
+
+          preview.src = optionImage.src;
+          if (badge) {
+            badge.textContent = 'Padrão';
+          }
+        });
+      });
+
+      form.dataset.avatarPreviewBound = '1';
+    });
+  };
+
   const handleGroupToggleEvent = (event) => {
     const targetElement = resolveEventTargetElement(event);
     if (!targetElement) {
@@ -324,6 +415,21 @@
       return;
     }
 
+    const passwordToggle = targetElement ? targetElement.closest('[data-password-toggle]') : null;
+    if (passwordToggle) {
+      event.preventDefault();
+      const wrapper = passwordToggle.closest('.db-password-wrap');
+      const input = wrapper ? wrapper.querySelector('[data-password-input]') : null;
+      if (!input) {
+        return;
+      }
+
+      const showPassword = input.type === 'password';
+      input.type = showPassword ? 'text' : 'password';
+      passwordToggle.textContent = showPassword ? 'Ocultar' : 'Mostrar';
+      return;
+    }
+
     const menuLink = event.target.closest('.db-menu-item');
     if (menuLink && mobileQuery.matches) {
       closeSidebar();
@@ -363,8 +469,10 @@
   document.body.addEventListener('htmx:afterSwap', () => {
     applyPersistedState();
     applyGroupState();
+    initAccountAvatarPreview();
   });
 
   applyPersistedState();
   applyGroupState();
+  initAccountAvatarPreview();
 })();

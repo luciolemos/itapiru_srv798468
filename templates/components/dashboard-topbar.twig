@@ -1,30 +1,47 @@
 <header class="db-navbar" aria-label="Barra superior do dashboard">
   <div class="db-navbar-row">
     <div class="db-navbar-actions">
-      <button
-        type="button"
-        class="db-sidebar-toggle"
-        data-sidebar-toggle
-        aria-controls="db-sidebar"
-        aria-expanded="false"
-        aria-label="Alternar menu lateral"
-      >
-        <i class="bi bi-list" aria-hidden="true"></i>
-      </button>
+      <div class="db-navbar-left">
+        <button
+          type="button"
+          class="db-sidebar-toggle"
+          data-sidebar-toggle
+          aria-controls="db-sidebar"
+          aria-expanded="false"
+          aria-label="Alternar menu lateral"
+        >
+          <i class="bi bi-list" aria-hidden="true"></i>
+        </button>
+      </div>
 
-      {% if breadcrumbs is defined and breadcrumbs is not empty %}
-        <nav class="db-breadcrumb" aria-label="Breadcrumb">
-          {% for item in breadcrumbs %}
-            {% if item.url is defined and item.url is not empty %}
-              <a href="{{ item.url }}" class="db-breadcrumb-link">{{ item.label }}</a>
-            {% else %}
-              <span class="db-breadcrumb-current">{{ item.label }}</span>
-            {% endif %}
-            {% if not loop.last %}
-              <span class="db-breadcrumb-sep" aria-hidden="true">/</span>
-            {% endif %}
-          {% endfor %}
-        </nav>
+      {% if isAdminLogged %}
+        {% set userDisplayName = adminUsername|default('')|trim %}
+        {% if userDisplayName == '' %}
+          {% set userDisplayName = 'admin' %}
+        {% endif %}
+
+        <details class="db-user-menu" data-user-menu>
+          <summary class="db-user-menu-toggle" aria-label="Abrir menu do usuário">
+            <span class="db-user-avatar" data-initial="{{ userDisplayName|slice(0, 1)|upper }}" aria-hidden="true">
+              <img
+                src="{{ adminAvatarUrl|default('/assets/img/avatar/face6_620_620.png') }}"
+                alt=""
+                loading="lazy"
+                onerror="this.parentElement.classList.add('is-fallback'); this.remove();"
+              >
+            </span>
+            <span class="db-user-name">{{ userDisplayName }}</span>
+            <i class="bi bi-chevron-down" aria-hidden="true"></i>
+          </summary>
+
+          <div class="db-user-menu-panel" role="menu" aria-label="Menu do usuário">
+            <a class="db-user-menu-item" role="menuitem" href="/itapiru/admin/account">Conta</a>
+            <form method="post" action="/itapiru/logout" hx-boost="false" class="db-user-menu-form">
+              <input type="hidden" name="csrf_token" value="{{ csrfToken|default('') }}">
+              <button class="db-user-menu-item is-danger" type="submit">Sair</button>
+            </form>
+          </div>
+        </details>
       {% endif %}
     </div>
   </div>

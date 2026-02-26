@@ -139,6 +139,10 @@
 
     <div id="db-content" class="db-main-body">
       {% include 'components/dashboard-content-header.twig' with {
+        breadcrumbs: [
+          { label: 'Dashboard', url: '/itapiru' },
+          { label: 'Início' }
+        ],
         title: 'Visão geral do dashboard',
         subtitle: 'Selecione uma seção no menu lateral para visualizar os cards específicos'
       } %}

@@ -1,4 +1,5 @@
 const { test, expect } = require('@playwright/test');
+const { loginAsAdmin } = require('./helpers/admin-auth');
 
 test.describe('Sidebar active state consistency', () => {
   const assertSingleActive = async (page, route) => {
@@ -17,12 +18,7 @@ test.describe('Sidebar active state consistency', () => {
   });
 
   test('admin routes keep exactly one active sidebar item', async ({ page }) => {
-    await page.goto('/itapiru/login');
-    await page.waitForLoadState('networkidle');
-
-    await page.getByLabel('Usuário').fill('admin');
-    await page.getByLabel('Senha').fill('admin123');
-    await page.getByRole('button', { name: 'Entrar' }).click();
+    await loginAsAdmin(page);
     await page.waitForURL('**/itapiru/admin**');
 
     await assertSingleActive(page, '/itapiru/admin?entity=sections');

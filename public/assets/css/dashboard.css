@@ -260,18 +260,25 @@ body {
 
 .db-navbar-row {
   display: flex;
+  width: 100%;
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .db-navbar-actions {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 0.55rem;
   min-width: 0;
   width: 100%;
+}
+
+.db-navbar-left {
+  display: inline-flex;
+  align-items: center;
 }
 
 .db-sidebar-toggle {
@@ -302,6 +309,127 @@ body {
 
 .db-sidebar-backdrop {
   display: none;
+}
+
+.db-user-menu {
+  position: relative;
+  margin-left: auto;
+}
+
+.db-user-menu-toggle {
+  list-style: none;
+  display: inline-flex;
+  height: 2rem;
+  align-items: center;
+  gap: 0.45rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  padding: 0.28rem 0.55rem 0.28rem 0.3rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.db-user-menu-toggle::-webkit-details-marker {
+  display: none;
+}
+
+.db-user-avatar {
+  position: relative;
+  overflow: hidden;
+  width: 1.65rem;
+  height: 1.65rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 18%, var(--surface));
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.db-user-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.db-user-avatar::after {
+  content: attr(data-initial);
+  position: absolute;
+  inset: 0;
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+}
+
+.db-user-avatar.is-fallback::after {
+  opacity: 1;
+}
+
+.db-user-name {
+  max-width: 9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.db-user-menu-panel {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  right: 0;
+  min-width: 12rem;
+  display: grid;
+  gap: 0.12rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--accent) 10%, transparent);
+  padding: 0.35rem;
+  z-index: 50;
+}
+
+.db-user-menu-item {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: flex-start;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text);
+  text-decoration: none;
+  font: inherit;
+  font-size: 0.83rem;
+  font-weight: 600;
+  padding: 0.5rem 0.65rem;
+  cursor: pointer;
+}
+
+.db-user-menu-item:hover {
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+}
+
+.db-user-menu-item.is-danger {
+  color: var(--danger);
+}
+
+.db-user-menu-item.is-disabled,
+.db-user-menu-item:disabled {
+  color: var(--muted);
+  cursor: not-allowed;
+  background: transparent;
+}
+
+.db-user-menu-form {
+  margin: 0;
 }
 
 @media (min-width: 1101px) {
@@ -838,6 +966,142 @@ body {
   flex-wrap: wrap;
 }
 
+.db-form-hint {
+  font-size: 0.76rem;
+  color: var(--muted);
+}
+
+.db-avatar-form {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.db-account-current-avatar {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.db-account-current-avatar img {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 999px;
+  object-fit: cover;
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--border));
+}
+
+.db-account-current-avatar p {
+  margin: 0;
+  display: inline-flex;
+  gap: 0.5rem;
+  align-items: center;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.db-account-current-avatar-badge {
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--border));
+  border-radius: 999px;
+  padding: 0.1rem 0.45rem;
+  font-size: 0.72rem;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, #ffffff);
+}
+
+.db-section-subtitle {
+  margin: 0.3rem 0 0;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.db-form-grid-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.db-password-wrap {
+  position: relative;
+  display: block;
+}
+
+.db-password-wrap .db-form-input {
+  padding-right: 4.35rem;
+}
+
+.db-password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 0.4rem;
+  transform: translateY(-50%);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--accent);
+  font: inherit;
+  font-size: 0.74rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 0.32rem 0.48rem;
+  cursor: pointer;
+}
+
+.db-password-toggle:hover {
+  background: color-mix(in srgb, var(--accent) 8%, #ffffff);
+}
+
+.db-avatar-grid {
+  display: grid;
+  gap: 0.7rem;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+}
+
+.db-avatar-option {
+  display: grid;
+  gap: 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  padding: 0.55rem;
+  cursor: pointer;
+  text-align: center;
+}
+
+.db-avatar-option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.db-avatar-option img {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 1px solid color-mix(in srgb, var(--border) 85%, #ffffff);
+}
+
+.db-avatar-option span {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.db-avatar-option:hover {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+}
+
+.db-avatar-option.is-selected {
+  border-color: color-mix(in srgb, var(--accent) 60%, var(--border));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
+@media (max-width: 980px) {
+  .db-form-grid-3 {
+    grid-template-columns: 1fr;
+  }
+}
+
 .db-form-alert {
   border: 1px solid var(--border);
   border-radius: 10px;
@@ -1351,14 +1615,22 @@ body {
   }
 
   .db-navbar-row {
-    align-items: flex-start;
-    flex-direction: column;
+    align-items: center;
+    flex-direction: row;
     gap: 0.5rem;
   }
 
   .db-navbar-actions {
     width: 100%;
     justify-content: space-between;
+  }
+
+  .db-user-menu {
+    margin-left: auto;
+  }
+
+  .db-user-name {
+    max-width: 6.5rem;
   }
 
   .db-top-menu {

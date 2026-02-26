@@ -129,6 +129,11 @@
 
     <div id="db-content" class="db-main-body">
       {% include 'components/dashboard-content-header.twig' with {
+        breadcrumbs: [
+          { label: 'Dashboard', url: '/itapiru' },
+          { label: 'Admin' },
+          { label: adminLabel }
+        ],
         title: 'Administração do dashboard',
         subtitle: adminEntity == 'groups'
           ? 'Gerencie os grupos de primeiro nível do sidebar'

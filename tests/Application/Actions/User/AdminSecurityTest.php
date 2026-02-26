@@ -8,6 +8,9 @@ use Tests\TestCase;
 
 class AdminSecurityTest extends TestCase
 {
+    private const DEFAULT_ADMIN_USER = 'admin';
+    private const DEFAULT_ADMIN_PASSWORD = 'admin123';
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -37,8 +40,8 @@ class AdminSecurityTest extends TestCase
         $app = $this->getAppInstance();
 
         $request = $this->createRequest('POST', '/itapiru/login')->withParsedBody([
-            'username' => 'admin',
-            'password' => 'admin123',
+            'username' => $this->adminUsername(),
+            'password' => $this->adminPassword(),
         ]);
 
         $response = $app->handle($request);
@@ -58,7 +61,7 @@ class AdminSecurityTest extends TestCase
         for ($attempt = 1; $attempt <= 5; $attempt++) {
             $request = $this->createRequest('POST', '/itapiru/login')->withParsedBody([
                 'csrf_token' => $csrf,
-                'username' => 'admin',
+                'username' => $this->adminUsername(),
                 'password' => 'senha-incorreta',
             ]);
 
@@ -87,8 +90,8 @@ class AdminSecurityTest extends TestCase
 
         $request = $this->createRequest('POST', '/itapiru/login')->withParsedBody([
             'csrf_token' => $csrf,
-            'username' => 'admin',
-            'password' => 'admin123',
+            'username' => $this->adminUsername(),
+            'password' => $this->adminPassword(),
         ]);
 
         $response = $app->handle($request);
@@ -103,7 +106,7 @@ class AdminSecurityTest extends TestCase
         $app = $this->getAppInstance();
 
         $_SESSION['is_admin'] = true;
-        $_SESSION['admin_user'] = 'admin';
+        $_SESSION['admin_user'] = $this->adminUsername();
         $_SESSION['csrf_token'] = 'token-valido';
 
         $request = $this->createRequest('POST', '/itapiru/admin/sections/create')->withParsedBody([
@@ -134,8 +137,8 @@ class AdminSecurityTest extends TestCase
 
         $request = $this->createRequest('POST', '/itapiru/login')->withParsedBody([
             'csrf_token' => $csrf,
-            'username' => 'admin',
-            'password' => 'admin123',
+            'username' => $this->adminUsername(),
+            'password' => $this->adminPassword(),
         ]);
 
         $response = $app->handle($request);
@@ -143,7 +146,7 @@ class AdminSecurityTest extends TestCase
         $this->assertEquals(302, $response->getStatusCode());
         $this->assertEquals('/itapiru/admin', $response->getHeaderLine('Location'));
         $this->assertTrue((bool) ($_SESSION['is_admin'] ?? false));
-        $this->assertEquals('admin', $_SESSION['admin_user'] ?? null);
+        $this->assertEquals($this->adminUsername(), $_SESSION['admin_user'] ?? null);
 
         $attemptState = $_SESSION['admin_login_attempts'] ?? null;
         $this->assertIsArray($attemptState);
@@ -156,7 +159,7 @@ class AdminSecurityTest extends TestCase
         $app = $this->getAppInstance();
 
         $_SESSION['is_admin'] = true;
-        $_SESSION['admin_user'] = 'admin';
+        $_SESSION['admin_user'] = $this->adminUsername();
         $_SESSION['csrf_token'] = 'token-valido';
 
         $request = $this->createRequest('POST', '/itapiru/logout')->withParsedBody([
@@ -168,7 +171,7 @@ class AdminSecurityTest extends TestCase
         $this->assertEquals(302, $response->getStatusCode());
         $this->assertEquals('/itapiru/admin', $response->getHeaderLine('Location'));
         $this->assertTrue((bool) ($_SESSION['is_admin'] ?? false));
-        $this->assertEquals('admin', $_SESSION['admin_user'] ?? null);
+        $this->assertEquals($this->adminUsername(), $_SESSION['admin_user'] ?? null);
     }
 
     public function testAdminLogoutWithValidCsrfClearsSessionAndRedirectsToLogin(): void
@@ -176,7 +179,7 @@ class AdminSecurityTest extends TestCase
         $app = $this->getAppInstance();
 
         $_SESSION['is_admin'] = true;
-        $_SESSION['admin_user'] = 'admin';
+        $_SESSION['admin_user'] = $this->adminUsername();
         $_SESSION['csrf_token'] = 'token-valido';
 
         $request = $this->createRequest('POST', '/itapiru/logout')->withParsedBody([
@@ -202,5 +205,17 @@ class AdminSecurityTest extends TestCase
         $this->assertNotSame('', $token);
 
         return $token;
+    }
+
+    private function adminUsername(): string
+    {
+        $value = trim((string) getenv('ITAPIRU_ADMIN_USER'));
+        return $value !== '' ? $value : self::DEFAULT_ADMIN_USER;
+    }
+
+    private function adminPassword(): string
+    {
+        $value = (string) getenv('ITAPIRU_ADMIN_PASSWORD');
+        return $value !== '' ? $value : self::DEFAULT_ADMIN_PASSWORD;
     }
 }

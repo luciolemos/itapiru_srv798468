@@ -139,6 +139,10 @@
 
     <div id="db-content" class="db-main-body">
       {% include 'components/dashboard-content-header.twig' with {
+        breadcrumbs: [
+          { label: 'Dashboard', url: '/itapiru' },
+          { label: activeSectionMeta.label|label_case }
+        ],
         title: activeSectionMeta.label|label_case,
         subtitle: 'Links para páginas na web, Sistemas/Subsistemas peculiar à Seção'
       } %}

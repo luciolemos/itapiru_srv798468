@@ -1,0 +1,249 @@
+{% extends 'layouts/base.twig' %}
+
+{% block title %}Conta | Dashboard{% endblock %}
+
+{% block content %}
+<div class="db-shell">
+  <aside id="db-sidebar" class="db-sidebar" data-sidebar aria-label="Menu de seções">
+    <div class="db-sidebar-header">
+      <img
+        class="db-om-logo"
+        src="{{ asset_base_path }}/assets/img/om.png"
+        alt="Imagem institucional"
+      >
+      <h1 class="db-brand">{{ dashboardTitle }}</h1>
+      <p class="db-caption">{{ dashboardSubtitle }}</p>
+    </div>
+
+    <nav class="db-menu" aria-label="Navegação de seções">
+      <a href="/itapiru" hx-boost="false" class="db-menu-item{{ activeSection == 'home' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'home' ? 'page' : 'false' }}">
+        Início
+      </a>
+      <span class="db-menu-divider" aria-hidden="true"></span>
+      {% set sidebarGroups = groupedSections|default([]) %}
+      {% for group in sidebarGroups %}
+        {% set groupSlugs = group.items|keys %}
+        {% set isGroupOpen = loop.first or (activeSection is defined and activeSection in groupSlugs) %}
+        <section class="db-menu-group-block" data-menu-group>
+          <button
+            type="button"
+            class="db-menu-group-toggle"
+            data-menu-group-toggle
+            data-group-key="group-{{ loop.index0 }}-{{ group.label|lower|trim|replace({' ': '-'}) }}"
+            aria-expanded="{{ isGroupOpen ? 'true' : 'false' }}"
+          >
+            <span class="db-menu-group">{{ group.label|label_case }}</span>
+            <i class="bi bi-chevron-down" aria-hidden="true"></i>
+          </button>
+          <div class="db-menu-group-items" data-menu-group-items {{ isGroupOpen ? '' : 'hidden' }}>
+            {% for slug, section in group.items %}
+              <a href="/itapiru/{{ slug }}" hx-boost="false" class="db-menu-item" aria-current="false">
+                {{ section.label|label_case }}
+              </a>
+              {% if not loop.last %}
+                <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </section>
+        {% if not loop.last %}
+          <span class="db-menu-divider" aria-hidden="true"></span>
+        {% endif %}
+      {% endfor %}
+      <span class="db-menu-divider" aria-hidden="true"></span>
+      {% set isDocsMenuOpen = activeSection in ['readme', 'readme-seed', 'readme-sqlite'] %}
+      <section class="db-menu-group-block" data-menu-group>
+        <button
+          type="button"
+          class="db-menu-group-toggle"
+          data-menu-group-toggle
+          data-group-key="docs-menu"
+          aria-expanded="{{ isDocsMenuOpen ? 'true' : 'false' }}"
+        >
+          <span class="db-menu-group">Documentação</span>
+          <i class="bi bi-chevron-down" aria-hidden="true"></i>
+        </button>
+        <div class="db-menu-group-items" data-menu-group-items {{ isDocsMenuOpen ? '' : 'hidden' }}>
+          <a href="/itapiru/readme" hx-boost="false" class="db-menu-item{{ activeSection == 'readme' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'readme' ? 'page' : 'false' }}">
+            Guia do usuário
+          </a>
+          <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
+          <a href="/itapiru/readme-seed" hx-boost="false" class="db-menu-item{{ activeSection == 'readme-seed' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'readme-seed' ? 'page' : 'false' }}">
+            Guia de Seed
+          </a>
+          <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
+          <a href="/itapiru/readme-sqlite" hx-boost="false" class="db-menu-item{{ activeSection == 'readme-sqlite' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'readme-sqlite' ? 'page' : 'false' }}">
+            Guia do banco
+          </a>
+        </div>
+      </section>
+      <span class="db-menu-divider" aria-hidden="true"></span>
+      <a href="/itapiru/contato" hx-boost="false" class="db-menu-item{{ activeSection == 'contato' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'contato' ? 'page' : 'false' }}">
+        Contato
+      </a>
+      <span class="db-menu-divider" aria-hidden="true"></span>
+      {% set isAdminMenuOpen = activeSection == 'admin' %}
+      <section class="db-menu-group-block" data-menu-group>
+        <button
+          type="button"
+          class="db-menu-group-toggle"
+          data-menu-group-toggle
+          data-group-key="admin-menu"
+          aria-expanded="{{ isAdminMenuOpen ? 'true' : 'false' }}"
+        >
+          <span class="db-menu-group">Admin</span>
+          <i class="bi bi-chevron-down" aria-hidden="true"></i>
+        </button>
+        <div class="db-menu-group-items" data-menu-group-items {{ isAdminMenuOpen ? '' : 'hidden' }}>
+          <a href="/itapiru/admin?entity=groups" hx-boost="false" class="db-menu-item{{ activeSection == 'admin' and adminEntity == 'groups' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'admin' and adminEntity == 'groups' ? 'page' : 'false' }}">
+            Grupos
+          </a>
+          <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
+          <a href="/itapiru/admin?entity=subgroups" hx-boost="false" class="db-menu-item{{ activeSection == 'admin' and adminEntity == 'subgroups' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'admin' and adminEntity == 'subgroups' ? 'page' : 'false' }}">
+            Subgrupos
+          </a>
+          <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
+          <a href="/itapiru/admin?entity=cards" hx-boost="false" class="db-menu-item{{ activeSection == 'admin' and adminEntity == 'cards' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'admin' and adminEntity == 'cards' ? 'page' : 'false' }}">
+            Cards
+          </a>
+          <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
+          <a href="/itapiru/admin/account" hx-boost="false" class="db-menu-item{{ activeSection == 'admin' and adminEntity == 'account' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'admin' and adminEntity == 'account' ? 'page' : 'false' }}">
+            Conta
+          </a>
+        </div>
+      </section>
+      <form method="post" action="/itapiru/logout" hx-boost="false" class="db-menu-form">
+        <input type="hidden" name="csrf_token" value="{{ csrfToken|default('') }}">
+        <button class="db-menu-item" type="submit">Sair</button>
+      </form>
+    </nav>
+  </aside>
+  <div class="db-sidebar-backdrop" data-sidebar-backdrop aria-hidden="true"></div>
+
+  <main class="db-main" aria-label="Conta administrativa">
+    {% include 'components/dashboard-topbar.twig' with {
+      lastUpdated: lastUpdated,
+      breadcrumbs: [
+        { label: 'Dashboard', url: '/itapiru' },
+        { label: 'Admin', url: '/itapiru/admin' },
+        { label: 'Conta' }
+      ]
+    } %}
+
+    <div id="db-content" class="db-main-body">
+      {% include 'components/dashboard-content-header.twig' with {
+        breadcrumbs: [
+          { label: 'Dashboard', url: '/itapiru' },
+          { label: 'Admin', url: '/itapiru/admin' },
+          { label: 'Conta' }
+        ],
+        title: 'Conta administrativa',
+        subtitle: 'Atualize nome de usuário, senha e foto do perfil'
+      } %}
+
+      {% if flashMessage %}
+        {% set flashIsError = flashMessage starts with 'Falha' or flashMessage starts with 'Senha atual inválida' or flashMessage starts with 'A nova senha' or flashMessage starts with 'A confirmação' or flashMessage starts with 'Informe um nome' or flashMessage starts with 'Avatar inválido' or flashMessage starts with 'Já existe' or flashMessage starts with 'Formato de foto' or flashMessage starts with 'A foto deve' %}
+        <div class="db-form-alert {{ flashIsError ? 'is-error' : 'is-success' }}" role="status">{{ flashMessage }}</div>
+      {% endif %}
+
+      <article class="db-card db-card--standard db-readme-card db-avatar-settings-card">
+        <form class="db-avatar-form" method="post" action="/itapiru/admin/account/update" autocomplete="off" enctype="multipart/form-data" hx-boost="false">
+          <input type="hidden" name="csrf_token" value="{{ csrfToken }}">
+          <input type="hidden" name="avatar_current" value="{{ accountForm.current_avatar_value|default('') }}">
+
+          <div class="db-form-grid">
+            <label class="db-form-field">
+              <span class="db-form-label">Nome de usuário</span>
+              <input class="db-form-input" type="text" name="username" value="{{ accountForm.username|default(adminUsername|default('admin')) }}" minlength="3" maxlength="60" required>
+            </label>
+          </div>
+
+          <h3 class="db-section-subtitle">Foto do usuário</h3>
+          <div class="db-account-current-avatar">
+            <img
+              src="{{ accountForm.current_avatar_url|default(adminAvatarUrl|default('/assets/img/avatar/face6_620_620.png')) }}"
+              alt="Foto atual do usuário"
+              loading="lazy"
+              data-account-avatar-preview
+            >
+            <p>
+              Foto atual
+              {% if accountForm.is_custom_avatar|default(false) %}
+                <span class="db-account-current-avatar-badge" data-account-avatar-badge>Upload local</span>
+              {% else %}
+                <span class="db-account-current-avatar-badge" data-account-avatar-badge>Padrão</span>
+              {% endif %}
+            </p>
+          </div>
+
+          <label class="db-form-field">
+            <span class="db-form-label">Enviar nova foto (opcional)</span>
+            <input
+              class="db-form-input"
+              type="file"
+              name="avatar_upload"
+              accept=".png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp"
+              data-avatar-upload-input
+              onchange="(function(input){var file=input.files&&input.files[0];if(!file){return;}var root=input.closest('form');if(!root){return;}var preview=root.querySelector('[data-account-avatar-preview]');if(!preview){return;}var badge=root.querySelector('[data-account-avatar-badge]');if(typeof FileReader==='function'){var reader=new FileReader();reader.onload=function(){if(typeof reader.result==='string'&&reader.result!==''){preview.src=reader.result;if(badge){badge.textContent='Pré-visualização';}}};reader.readAsDataURL(file);return;}if(window.URL&&typeof window.URL.createObjectURL==='function'){preview.src=window.URL.createObjectURL(file);if(badge){badge.textContent='Pré-visualização';}}})(this)"
+            >
+            <span class="db-form-hint">Se enviar uma imagem, ela substitui a seleção de avatar padrão.</span>
+          </label>
+
+          <h3 class="db-section-subtitle">Ou escolha um avatar padrão</h3>
+          <div class="db-avatar-grid" role="radiogroup" aria-label="Seleção de avatar">
+            {% set selectedAvatar = accountForm.avatar|default('') %}
+            {% for avatar in avatarOptions %}
+              {% set isSelected = avatar.filename == selectedAvatar %}
+              <label class="db-avatar-option{{ isSelected ? ' is-selected' : '' }}">
+                <input
+                  type="radio"
+                  name="avatar"
+                  value="{{ avatar.filename }}"
+                  data-avatar-option-radio
+                  {{ isSelected ? 'checked' : '' }}
+                >
+                <img src="{{ avatar.url }}" alt="{{ avatar.label }}" loading="lazy" data-avatar-option-image>
+                <span>{{ avatar.label }}</span>
+              </label>
+            {% endfor %}
+          </div>
+
+          <h3 class="db-section-subtitle">Redefinir senha</h3>
+          <div class="db-form-grid db-form-grid-3">
+            <label class="db-form-field">
+              <span class="db-form-label">Senha atual</span>
+              <span class="db-password-wrap">
+                <input class="db-form-input" type="password" name="current_password" autocomplete="current-password" data-password-input>
+                <button type="button" class="db-password-toggle" data-password-toggle>Mostrar</button>
+              </span>
+            </label>
+            <label class="db-form-field">
+              <span class="db-form-label">Nova senha</span>
+              <span class="db-password-wrap">
+                <input class="db-form-input" type="password" name="new_password" minlength="8" autocomplete="new-password" data-password-input>
+                <button type="button" class="db-password-toggle" data-password-toggle>Mostrar</button>
+              </span>
+            </label>
+            <label class="db-form-field">
+              <span class="db-form-label">Confirmar nova senha</span>
+              <span class="db-password-wrap">
+                <input class="db-form-input" type="password" name="confirm_password" minlength="8" autocomplete="new-password" data-password-input>
+                <button type="button" class="db-password-toggle" data-password-toggle>Mostrar</button>
+              </span>
+            </label>
+          </div>
+
+          <div class="db-form-actions">
+            <button type="submit" class="db-card-link">Salvar conta</button>
+            <a href="/itapiru/admin" class="db-card-link db-card-link-secondary">Voltar</a>
+          </div>
+        </form>
+      </article>
+
+      {% include 'components/dashboard-footer.twig' with {
+        lastUpdated: lastUpdated
+      } %}
+    </div>
+  </main>
+</div>
+{% endblock %}

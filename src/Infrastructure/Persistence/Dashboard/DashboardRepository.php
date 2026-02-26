@@ -425,6 +425,93 @@ class DashboardRepository
         return password_verify($password, $hash);
     }
 
+    public function updateAdminAccount(string $currentUsername, string $newUsername, ?string $newPasswordHash = null): void
+    {
+        $current = trim($currentUsername);
+        $next = trim($newUsername);
+
+        if ($current === '' || $next === '') {
+            throw new \RuntimeException('Usuário inválido.');
+        }
+
+        $this->pdo->beginTransaction();
+        try {
+            $stmt = $this->pdo->prepare('SELECT id FROM admins WHERE username = :username LIMIT 1');
+            $stmt->execute(['username' => $current]);
+            $adminId = (int) ($stmt->fetchColumn() ?: 0);
+
+            if ($adminId <= 0) {
+                throw new \RuntimeException('Conta administrativa não encontrada.');
+            }
+
+            if (is_string($newPasswordHash) && $newPasswordHash !== '') {
+                $update = $this->pdo->prepare('UPDATE admins SET username = :username, password_hash = :password_hash WHERE id = :id');
+                $update->execute([
+                    'id' => $adminId,
+                    'username' => $next,
+                    'password_hash' => $newPasswordHash,
+                ]);
+            } else {
+                $update = $this->pdo->prepare('UPDATE admins SET username = :username WHERE id = :id');
+                $update->execute([
+                    'id' => $adminId,
+                    'username' => $next,
+                ]);
+            }
+
+            $this->pdo->commit();
+        } catch (\Throwable $throwable) {
+            $this->pdo->rollBack();
+            throw $throwable;
+        }
+    }
+
+    public function getConfigValue(string $key, string $default = ''): string
+    {
+        $normalizedKey = trim($key);
+        if ($normalizedKey === '') {
+            return $default;
+        }
+
+        $stmt = $this->pdo->prepare('SELECT config_value FROM app_config WHERE config_key = :key LIMIT 1');
+        $stmt->execute(['key' => $normalizedKey]);
+        $value = $stmt->fetchColumn();
+
+        if (!is_string($value)) {
+            return $default;
+        }
+
+        return $value;
+    }
+
+    public function setConfigValue(string $key, string $value): void
+    {
+        $normalizedKey = trim($key);
+        if ($normalizedKey === '') {
+            throw new \RuntimeException('Chave de configuração inválida.');
+        }
+
+        $stmt = $this->pdo->prepare('INSERT INTO app_config (config_key, config_value)
+            VALUES (:key, :value)
+            ON CONFLICT(config_key) DO UPDATE SET config_value = excluded.config_value');
+
+        $stmt->execute([
+            'key' => $normalizedKey,
+            'value' => $value,
+        ]);
+    }
+
+    public function deleteConfigValue(string $key): void
+    {
+        $normalizedKey = trim($key);
+        if ($normalizedKey === '') {
+            return;
+        }
+
+        $stmt = $this->pdo->prepare('DELETE FROM app_config WHERE config_key = :key');
+        $stmt->execute(['key' => $normalizedKey]);
+    }
+
     private function bootstrap(): void
     {
         $isNewDatabase = !is_file($this->dbPath);

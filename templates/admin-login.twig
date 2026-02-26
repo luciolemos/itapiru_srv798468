@@ -139,6 +139,10 @@
 
     <div id="db-content" class="db-main-body">
       {% include 'components/dashboard-content-header.twig' with {
+        breadcrumbs: [
+          { label: 'Dashboard', url: '/itapiru' },
+          { label: 'Login' }
+        ],
         title: 'Acesso administrativo',
         subtitle: 'Entre para gerenciar seções e cards do dashboard'
       } %}

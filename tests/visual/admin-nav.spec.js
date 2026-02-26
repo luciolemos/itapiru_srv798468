@@ -1,7 +1,8 @@
 const { test, expect } = require('@playwright/test');
+const { loginAsAdmin } = require('./helpers/admin-auth');
 
 test.describe('Admin navigation flow', () => {
-  test('login, switch between sections/cards from sidebar, and keep breadcrumb in topbar', async ({ page }) => {
+  test('login, switch between sections/cards from sidebar, and keep breadcrumb above content title', async ({ page }) => {
     const ensureSidebarOpen = async () => {
       const isMobile = await page.evaluate(() => window.matchMedia('(max-width: 1100px)').matches);
       if (!isMobile) {
@@ -17,17 +18,13 @@ test.describe('Admin navigation flow', () => {
       await expect(shell).toHaveClass(/is-sidebar-open/);
     };
 
-    await page.goto('/itapiru/login');
-    await page.waitForLoadState('networkidle');
-
-    await page.getByLabel('Usuário').fill('admin');
-    await page.getByLabel('Senha').fill('admin123');
-    await page.getByRole('button', { name: 'Entrar' }).click();
+    await loginAsAdmin(page);
 
     await expect(page).toHaveURL(/\/itapiru\/admin/);
 
     await expect(page.locator('.db-top-menu')).toHaveCount(0);
-    await expect(page.locator('.db-navbar .db-breadcrumb')).toBeVisible();
+    await expect(page.locator('.db-navbar .db-breadcrumb')).toHaveCount(0);
+    await expect(page.locator('#db-content .db-content-header .db-breadcrumb')).toBeVisible();
 
     await ensureSidebarOpen();
     const sidebarNav = page.locator('.db-menu');

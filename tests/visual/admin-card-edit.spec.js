@@ -1,13 +1,9 @@
 const { test, expect } = require('@playwright/test');
+const { loginAsAdmin } = require('./helpers/admin-auth');
 
 test.describe('Admin card edit persistence', () => {
   test('updates card URL and persists after save', async ({ page }) => {
-    await page.goto('/itapiru/login');
-    await page.waitForLoadState('networkidle');
-
-    await page.getByLabel('Usuário').fill('admin');
-    await page.getByLabel('Senha').fill('admin123');
-    await page.getByRole('button', { name: 'Entrar' }).click();
+    await loginAsAdmin(page);
 
     await page.goto('/itapiru/admin?entity=cards');
     await expect(page).toHaveURL(/entity=cards/);
