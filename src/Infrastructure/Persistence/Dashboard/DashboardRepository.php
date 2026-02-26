@@ -896,6 +896,12 @@ class DashboardRepository
         }
 
         $normalizedLabel = trim($label) !== '' ? trim($label) : 'Geral';
+
+        $groupIdByLabel = $this->getGroupIdByLabel($normalizedLabel);
+        if ($groupIdByLabel > 0) {
+            return $groupIdByLabel;
+        }
+
         $this->createGroup($slug, $normalizedLabel, $sortOrder);
 
         return $this->getGroupIdBySlug($slug);

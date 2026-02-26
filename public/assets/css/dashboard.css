@@ -131,19 +131,21 @@ body {
 
 .db-menu-group-toggle {
   width: 100%;
-  border: 0;
+  border: 1px solid transparent;
   background: transparent;
-  padding: 0.2rem 0.08rem 0.08rem;
+  padding: 0.42rem 0.62rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
   cursor: pointer;
   border-radius: 8px;
   touch-action: manipulation;
+  transition: background-color 140ms ease, border-color 140ms ease;
 }
 
 .db-menu-group-toggle:hover {
-  background: rgba(148, 163, 184, 0.12);
+  background: rgba(148, 163, 184, 0.10);
+  border-color: rgba(148, 163, 184, 0.28);
 }
 
 .db-menu-group-toggle:focus-visible {
