@@ -8,4 +8,6 @@
 !/var/data/README.md
 /var/backups/*
 !/var/backups/README.md
+/public/assets/img/avatar/uploads/*
+!/public/assets/img/avatar/uploads/.gitkeep
 .phpunit.result.cache
