@@ -170,10 +170,6 @@
             {% if card.href is defined and card.href and card.href != '#' %}
               <p class="db-link-url">{{ card.href }}</p>
             {% endif %}
-            {% if not card.external|default(false) %}
-              <p class="db-metric">{{ card.metric }}</p>
-              <p class="db-trend">{{ card.trend }}</p>
-            {% endif %}
             <p class="db-description">{{ card.description }}</p>
           </a>
         {% else %}

@@ -1575,8 +1575,6 @@ return function (App $app) {
             'external' => ((string) ($data['external'] ?? '0')) === '1',
             'icon' => trim((string) ($data['icon'] ?? 'bi-globe2')) ?: 'bi-globe2',
             'status' => trim((string) ($data['status'] ?? 'Interno')) ?: 'Interno',
-            'metric' => trim((string) ($data['metric'] ?? '')),
-            'trend' => trim((string) ($data['trend'] ?? '')),
             'description' => trim((string) ($data['description'] ?? '')),
             'order' => max(1, (int) ($data['order'] ?? 99)),
         ]);
@@ -1632,8 +1630,6 @@ return function (App $app) {
                 'external' => ((string) ($data['external'] ?? '0')) === '1',
                 'icon' => trim((string) ($data['icon'] ?? 'bi-globe2')) ?: 'bi-globe2',
                 'status' => trim((string) ($data['status'] ?? 'Interno')) ?: 'Interno',
-                'metric' => trim((string) ($data['metric'] ?? '')),
-                'trend' => trim((string) ($data['trend'] ?? '')),
                 'description' => trim((string) ($data['description'] ?? '')),
                 'order' => max(1, (int) ($data['order'] ?? 99)),
             ]);

@@ -363,8 +363,8 @@ class DashboardRepository
         $sectionSlug = $this->resolveSectionSlugForCard($card);
 
         $stmt = $this->pdo->prepare(
-            'INSERT INTO cards (section_slug, title, href, external, icon, status, metric, trend, description, sort_order)
-             VALUES (:section_slug, :title, :href, :external, :icon, :status, :metric, :trend, :description, :sort_order)'
+            'INSERT INTO cards (section_slug, title, href, external, icon, status, description, sort_order)
+             VALUES (:section_slug, :title, :href, :external, :icon, :status, :description, :sort_order)'
         );
 
         $stmt->execute([
@@ -374,8 +374,6 @@ class DashboardRepository
             'external' => $card['external'] ? 1 : 0,
             'icon' => $this->normalizeIcon((string) ($card['icon'] ?? 'bi-globe2')),
             'status' => $card['status'],
-            'metric' => $card['metric'],
-            'trend' => $card['trend'],
             'description' => $card['description'],
             'sort_order' => $card['order'],
         ]);
@@ -387,7 +385,7 @@ class DashboardRepository
 
         $stmt = $this->pdo->prepare(
             'UPDATE cards SET section_slug = :section_slug, title = :title, href = :href, external = :external,
-             icon = :icon, status = :status, metric = :metric, trend = :trend, description = :description,
+             icon = :icon, status = :status, description = :description,
              sort_order = :sort_order WHERE id = :id'
         );
 
@@ -399,8 +397,6 @@ class DashboardRepository
             'external' => $card['external'] ? 1 : 0,
             'icon' => $this->normalizeIcon((string) ($card['icon'] ?? 'bi-globe2')),
             'status' => $card['status'],
-            'metric' => $card['metric'],
-            'trend' => $card['trend'],
             'description' => $card['description'],
             'sort_order' => $card['order'],
         ]);
@@ -526,6 +522,7 @@ class DashboardRepository
         $this->pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 
         $this->createSchema();
+        $this->ensureCardsWithoutMetricAndTrend();
         $this->ensureSectionsGroupColumn();
         $this->ensureUniqueGroupLabels();
         $this->seedIfEmpty($isNewDatabase);
@@ -561,8 +558,6 @@ class DashboardRepository
             external INTEGER NOT NULL DEFAULT 0,
             icon TEXT NOT NULL DEFAULT "bi-globe2",
             status TEXT NOT NULL DEFAULT "Interno",
-            metric TEXT NOT NULL DEFAULT "",
-            trend TEXT NOT NULL DEFAULT "",
             description TEXT NOT NULL DEFAULT "",
             sort_order INTEGER NOT NULL DEFAULT 0
         )');
@@ -575,6 +570,53 @@ class DashboardRepository
         )');
 
         $this->pdo->exec('CREATE INDEX IF NOT EXISTS idx_groups_sort ON groups(sort_order)');
+    }
+
+    private function ensureCardsWithoutMetricAndTrend(): void
+    {
+        $columns = $this->pdo->query('PRAGMA table_info(cards)')->fetchAll(PDO::FETCH_ASSOC);
+        if ($columns === []) {
+            return;
+        }
+
+        $columnNames = array_map(
+            static fn (array $column): string => (string) ($column['name'] ?? ''),
+            $columns
+        );
+
+        if (!in_array('metric', $columnNames, true) && !in_array('trend', $columnNames, true)) {
+            return;
+        }
+
+        $this->pdo->beginTransaction();
+        try {
+            $this->pdo->exec('CREATE TABLE cards_new (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                section_slug TEXT NOT NULL,
+                title TEXT NOT NULL,
+                href TEXT NOT NULL DEFAULT "#",
+                external INTEGER NOT NULL DEFAULT 0,
+                icon TEXT NOT NULL DEFAULT "bi-globe2",
+                status TEXT NOT NULL DEFAULT "Interno",
+                description TEXT NOT NULL DEFAULT "",
+                sort_order INTEGER NOT NULL DEFAULT 0
+            )');
+            $this->pdo->exec('INSERT INTO cards_new (id, section_slug, title, href, external, icon, status, description, sort_order)
+                SELECT id, section_slug, title, href, external, icon, status, description, sort_order FROM cards');
+            $this->pdo->exec('DROP TABLE cards');
+            $this->pdo->exec('ALTER TABLE cards_new RENAME TO cards');
+
+            $sequence = (int) $this->pdo->query('SELECT COALESCE(MAX(id), 0) FROM cards')->fetchColumn();
+            $stmt = $this->pdo->prepare('DELETE FROM sqlite_sequence WHERE name = :name');
+            $stmt->execute(['name' => 'cards']);
+            $stmt = $this->pdo->prepare('INSERT INTO sqlite_sequence(name, seq) VALUES (:name, :seq)');
+            $stmt->execute(['name' => 'cards', 'seq' => $sequence]);
+
+            $this->pdo->commit();
+        } catch (\Throwable $throwable) {
+            $this->pdo->rollBack();
+            throw $throwable;
+        }
     }
 
     private function ensureUniqueGroupLabels(): void
@@ -759,8 +801,6 @@ class DashboardRepository
                         'external' => (bool) ($card['external'] ?? false),
                         'icon' => (string) ($card['icon'] ?? 'bi-globe2'),
                         'status' => (string) ($card['status'] ?? 'Interno'),
-                        'metric' => (string) ($card['metric'] ?? ''),
-                        'trend' => (string) ($card['trend'] ?? ''),
                         'description' => (string) ($card['description'] ?? ''),
                         'order' => (int) ($card['order'] ?? 0),
                     ]);
@@ -805,8 +845,6 @@ class DashboardRepository
             'external' => (int) ($row['external'] ?? 0) === 1,
             'icon' => $this->normalizeIcon((string) ($row['icon'] ?? 'bi-globe2')),
             'status' => (string) ($row['status'] ?? 'Interno'),
-            'metric' => (string) ($row['metric'] ?? ''),
-            'trend' => (string) ($row['trend'] ?? ''),
             'description' => (string) ($row['description'] ?? ''),
             'order' => (int) ($row['sort_order'] ?? 0),
         ];
