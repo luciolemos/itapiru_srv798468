@@ -1,6 +1,6 @@
 {% extends 'layouts/base.twig' %}
 
-{% block title %}Contato | 16º BI Mtz{% endblock %}
+{% block title %}Solicitar card | 16º BI Mtz{% endblock %}
 
 {% block content %}
 <div class="db-shell">
@@ -153,12 +153,12 @@
   </aside>
   <div class="db-sidebar-backdrop" data-sidebar-backdrop aria-hidden="true"></div>
 
-  <main class="db-main" aria-label="Contato interno do dashboard">
+  <main class="db-main" aria-label="Solicitação pública de card">
     {% include 'components/dashboard-topbar.twig' with {
       lastUpdated: lastUpdated,
       breadcrumbs: [
         { label: 'Dashboard', url: '/itapiru' },
-        { label: 'Contato' }
+        { label: 'Solicitar card' }
       ]
     } %}
 
@@ -166,30 +166,32 @@
       {% include 'components/dashboard-content-header.twig' with {
         breadcrumbs: [
           { label: 'Dashboard', url: '/itapiru' },
-          { label: 'Contato' }
+          { label: 'Solicitar card' }
         ],
-        title: 'Contato interno',
-        subtitle: 'Canais oficiais de contato e suporte do dashboard'
+        title: 'Solicitação de novo card',
+        subtitle: 'Envie sua sugestão de card para análise e aprovação da administração do Dashboard'
       } %}
 
-      <article class="db-card db-card--standard db-readme-card db-contact-card" aria-label="Formulário de contato">
+      <article class="db-card db-card--standard db-readme-card db-contact-card db-card-request-card" aria-label="Formulário de solicitação de card">
         <p class="db-contact-intro">
-          Use o formulário para dúvidas, correções de conteúdo e suporte operacional do dashboard.
+          Preencha os campos abaixo para sugerir um novo card. Após análise, o card poderá ser aprovado e publicado no painel.
         </p>
 
         {% if formSuccess %}
           <div class="db-form-alert is-success" role="status" aria-live="polite">
-            Mensagem enviada com sucesso.
+            Solicitação enviada com sucesso. Obrigado pela contribuição.
           </div>
         {% endif %}
 
         {% if formErrors is defined and formErrors is not empty %}
           <div class="db-form-alert is-error" role="alert">
-            Corrija os campos destacados para enviar sua mensagem.
+            Corrija os campos destacados para enviar a solicitação.
           </div>
         {% endif %}
 
-        <form class="db-contact-form" method="post" action="/itapiru/contato" novalidate>
+        <form class="db-contact-form" method="post" action="/itapiru/solicitar-card" novalidate>
+          <input type="hidden" name="csrf_token" value="{{ csrfToken }}">
+
           <label class="db-hp-field" aria-hidden="true">
             <span>Website</span>
             <input
@@ -201,75 +203,144 @@
             >
           </label>
 
-          <div class="db-form-grid">
+          <div class="db-form-grid db-form-grid-3">
             <label class="db-form-field">
-              <span class="db-form-label">Nome</span>
-              <input
-                class="db-form-input{{ formErrors.name is defined ? ' is-invalid' : '' }}"
-                type="text"
-                name="name"
-                value="{{ formData.name|default('') }}"
-                placeholder="Seu nome"
-                autocomplete="name"
-                maxlength="120"
-                required
-              >
-              {% if formErrors.name is defined %}
-                <span class="db-form-error">{{ formErrors.name }}</span>
+              <span class="db-form-label">Posto/graduação *</span>
+              <select class="db-form-input{{ formErrors.requester_rank is defined ? ' is-invalid' : '' }}" name="requester_rank" required>
+                <option value="">Selecione</option>
+                {% for rank in requesterRanks|default([]) %}
+                  <option value="{{ rank }}" {{ formData.requester_rank|default('') == rank ? 'selected' : '' }}>
+                    {{ rank }}
+                  </option>
+                {% endfor %}
+              </select>
+              {% if formErrors.requester_rank is defined %}
+                <span class="db-form-error">{{ formErrors.requester_rank }}</span>
               {% endif %}
             </label>
 
             <label class="db-form-field">
-              <span class="db-form-label">E-mail</span>
+              <span class="db-form-label">Seu nome *</span>
               <input
-                class="db-form-input{{ formErrors.email is defined ? ' is-invalid' : '' }}"
+                class="db-form-input{{ formErrors.requester_name is defined ? ' is-invalid' : '' }}"
+                type="text"
+                name="requester_name"
+                value="{{ formData.requester_name|default('') }}"
+                placeholder="Nome completo"
+                autocomplete="name"
+                maxlength="140"
+                required
+              >
+              {% if formErrors.requester_name is defined %}
+                <span class="db-form-error">{{ formErrors.requester_name }}</span>
+              {% endif %}
+            </label>
+
+            <label class="db-form-field">
+              <span class="db-form-label">E-mail *</span>
+              <input
+                class="db-form-input{{ formErrors.requester_contact is defined ? ' is-invalid' : '' }}"
                 type="email"
-                name="email"
-                value="{{ formData.email|default('') }}"
+                name="requester_contact"
+                value="{{ formData.requester_contact|default('') }}"
                 placeholder="nome@exemplo.mil.br"
-                autocomplete="email"
                 maxlength="180"
                 required
               >
-              {% if formErrors.email is defined %}
-                <span class="db-form-error">{{ formErrors.email }}</span>
+              {% if formErrors.requester_contact is defined %}
+                <span class="db-form-error">{{ formErrors.requester_contact }}</span>
+              {% endif %}
+            </label>
+          </div>
+
+          <div class="db-form-grid db-form-grid-4">
+            <label class="db-form-field">
+              <span class="db-form-label">Título do card *</span>
+              <input
+                class="db-form-input{{ formErrors.title is defined ? ' is-invalid' : '' }}"
+                type="text"
+                name="title"
+                value="{{ formData.title|default('') }}"
+                placeholder="Ex: DAP"
+                maxlength="160"
+                required
+              >
+              {% if formErrors.title is defined %}
+                <span class="db-form-error">{{ formErrors.title }}</span>
+              {% endif %}
+            </label>
+
+            <label class="db-form-field">
+              <span class="db-form-label">URL (https://) *</span>
+              <input
+                class="db-form-input{{ formErrors.href is defined ? ' is-invalid' : '' }}"
+                type="url"
+                name="href"
+                value="{{ formData.href|default('') }}"
+                placeholder="https://www.dap.eb.mil.br/"
+                maxlength="500"
+                required
+              >
+              {% if formErrors.href is defined %}
+                <span class="db-form-error">{{ formErrors.href }}</span>
+              {% endif %}
+            </label>
+
+            <label class="db-form-field">
+              <span class="db-form-label">Grupo *</span>
+              <select class="db-form-input{{ formErrors.group_slug is defined ? ' is-invalid' : '' }}" name="group_slug" required>
+                <option value="">Selecione um grupo</option>
+                {% for group in groups %}
+                  <option value="{{ group.slug }}" {{ formData.group_slug|default('') == group.slug ? 'selected' : '' }}>
+                    {{ group.label|label_case }}
+                  </option>
+                {% endfor %}
+              </select>
+              {% if formErrors.group_slug is defined %}
+                <span class="db-form-error">{{ formErrors.group_slug }}</span>
+              {% endif %}
+            </label>
+
+            <label class="db-form-field">
+              <span class="db-form-label">Subgrupo *</span>
+              <select class="db-form-input{{ formErrors.subgroup_slug is defined ? ' is-invalid' : '' }}" name="subgroup_slug" required>
+                <option value="">Selecione um subgrupo</option>
+                {% for slug, section in sections %}
+                  <option value="{{ slug }}" {{ formData.subgroup_slug|default('') == slug ? 'selected' : '' }}>
+                    {{ section.group|label_case }} · {{ section.label|label_case }}
+                  </option>
+                {% endfor %}
+              </select>
+              {% if formErrors.subgroup_slug is defined %}
+                <span class="db-form-error">{{ formErrors.subgroup_slug }}</span>
               {% endif %}
             </label>
           </div>
 
           <label class="db-form-field">
-            <span class="db-form-label">Assunto</span>
+            <span class="db-form-label">Descrição *</span>
             <input
-              class="db-form-input{{ formErrors.subject is defined ? ' is-invalid' : '' }}"
+              class="db-form-input{{ formErrors.justification is defined ? ' is-invalid' : '' }}"
               type="text"
-              name="subject"
-              value="{{ formData.subject|default('') }}"
-              placeholder="Assunto da mensagem"
-              maxlength="120"
+              name="justification"
+              value="{{ formData.justification|default('') }}"
+              placeholder="Ex: Diretoria de Assistência ao Pessoal"
+              maxlength="300"
               required
             >
-            {% if formErrors.subject is defined %}
-              <span class="db-form-error">{{ formErrors.subject }}</span>
+            {% if formErrors.justification is defined %}
+              <span class="db-form-error">{{ formErrors.justification }}</span>
             {% endif %}
           </label>
 
-          <label class="db-form-field">
-            <span class="db-form-label">Mensagem</span>
-            <textarea
-              class="db-form-input db-form-textarea{{ formErrors.message is defined ? ' is-invalid' : '' }}"
-              name="message"
-              rows="5"
-              placeholder="Escreva sua mensagem"
-              maxlength="1500"
-              required
-            >{{ formData.message|default('') }}</textarea>
-            {% if formErrors.message is defined %}
-              <span class="db-form-error">{{ formErrors.message }}</span>
-            {% endif %}
-          </label>
+          {% if formErrors.csrf is defined %}
+            <div class="db-form-alert is-error" role="alert">
+              {{ formErrors.csrf }}
+            </div>
+          {% endif %}
 
           <div class="db-form-actions">
-            <button type="submit" class="db-card-link">Enviar mensagem</button>
+            <button type="submit" class="db-card-link">Enviar solicitação</button>
           </div>
         </form>
       </article>

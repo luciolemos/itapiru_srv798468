@@ -16,6 +16,6 @@ class ListUserActionTest extends TestCase
         $response = $app->handle($request);
 
         $this->assertEquals(200, $response->getStatusCode());
-        $this->assertStringContainsString('Dashboard Público', (string) $response->getBody());
+        $this->assertStringContainsString('Visão geral do dashboard', (string) $response->getBody());
     }
 }

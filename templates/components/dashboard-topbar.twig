@@ -14,7 +14,51 @@
         </button>
       </div>
 
-      {% if isAdminLogged %}
+
+        <div class="db-navbar-right">
+          {% if isAdminLogged %}
+          {% set pendingCount = adminPendingRequestsCount|default(0) %}
+          {% set pendingItems = adminPendingRequests|default([]) %}
+
+          <details class="db-notification-menu" data-notification-menu>
+            <summary class="db-notification-toggle" aria-label="Abrir notificações de solicitações">
+              <i class="bi bi-bell" aria-hidden="true"></i>
+              <span class="db-notification-badge{{ pendingCount == 0 ? ' is-zero' : '' }}" aria-label="{{ pendingCount }} solicitações pendentes">
+                {{ pendingCount > 99 ? '99+' : pendingCount }}
+              </span>
+            </summary>
+
+            <div class="db-notification-panel" role="menu" aria-label="Solicitações pendentes">
+              <div class="db-notification-header">
+                <strong>Solicitações pendentes</strong>
+                <span>{{ pendingCount }}</span>
+              </div>
+
+              {% if pendingItems is not empty %}
+                <div class="db-notification-list">
+                  {% for pendingItem in pendingItems %}
+                    <a
+                      class="db-notification-item"
+                      data-request-id="{{ pendingItem.id|default(0) }}"
+                      role="menuitem"
+                      href="/itapiru/admin?entity=requests&request_status=pending&request_q={{ pendingItem.title|default('')|url_encode }}"
+                      hx-boost="false"
+                    >
+                      <span class="db-notification-item-title">{{ pendingItem.title|default('Sem título') }}</span>
+                      <span class="db-notification-item-meta">
+                        #{{ pendingItem.id|default('-') }} · {{ pendingItem.requester_rank|default('') }} {{ pendingItem.requester_name|default('') }}
+                      </span>
+                    </a>
+                  {% endfor %}
+                </div>
+              {% else %}
+                <p class="db-notification-empty">Nenhuma solicitação pendente no momento.</p>
+              {% endif %}
+
+              <a class="db-notification-footer" href="/itapiru/admin?entity=requests&request_status=pending" hx-boost="false">Abrir lista de solicitações</a>
+            </div>
+          </details>
+
         {% set userDisplayName = adminUsername|default('')|trim %}
         {% if userDisplayName == '' %}
           {% set userDisplayName = 'admin' %}
@@ -42,7 +86,8 @@
             </form>
           </div>
         </details>
-      {% endif %}
+        {% endif %}
+      </div>
     </div>
   </div>
 </header>

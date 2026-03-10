@@ -21,6 +21,7 @@ Depois que grupos e subgrupos são criados no admin, o próprio admin cria e man
 9. [Execução local](#rodar-localmente)
 10. [Operação do banco](#operação-do-banco)
 11. [Troubleshooting rápido](#troubleshooting-rápido)
+12. [Solicitações e notificações](#solicitações-e-notificações)
 
 ## O que a aplicação faz
 
@@ -39,6 +40,7 @@ Depois que grupos e subgrupos são criados no admin, o próprio admin cria e man
 - `/itapiru/{subgroup_slug}`
 - `/itapiru/readme`
 - `/itapiru/contato`
+- `/itapiru/solicitar-card`
 
 ### Administração
 
@@ -46,6 +48,7 @@ Depois que grupos e subgrupos são criados no admin, o próprio admin cria e man
 - `/itapiru/admin?entity=groups`
 - `/itapiru/admin?entity=subgroups`
 - `/itapiru/admin?entity=cards`
+- `/itapiru/admin?entity=requests`
 
 ## Menu em 2 níveis
 
@@ -148,3 +151,9 @@ Acesso local: `http://127.0.0.1:8081/itapiru`
 - **Não exclui subgrupo**: verificar cards vinculados.
 - **Sidebar não refletiu criação**: validar persistência em `groups`/`sections` e recarregar página.
 - **Formulário inválido**: abrir a tela correta (novo/editar) e reenviar.
+
+## Solicitações e notificações
+
+- O histórico de solicitações é cumulativo: registros com status `pending`, `approved` e `rejected` permanecem salvos e não são apagados ao aprovar/rejeitar.
+- O sino da topbar do admin exibe apenas as pendências mais recentes, com `LIMIT 5`.
+- O contador do sino reflete o total real de solicitações pendentes no banco.

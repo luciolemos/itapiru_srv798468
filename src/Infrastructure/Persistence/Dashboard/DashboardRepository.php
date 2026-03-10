@@ -84,7 +84,7 @@ class DashboardRepository
 
     public function createGroup(string $slug, string $label, int $sortOrder): void
     {
-        $normalizedLabel = trim($label);
+        $normalizedLabel = $this->normalizeGroupLabel($label);
         if ($normalizedLabel === '') {
             $normalizedLabel = $slug;
         }
@@ -106,6 +106,11 @@ class DashboardRepository
     {
         $normalizedOriginalSlug = $this->normalizeSlug($originalSlug, '');
         $normalizedNewSlug = $this->normalizeSlug($newSlug, '');
+        $normalizedLabel = $this->normalizeGroupLabel($label);
+
+        if ($normalizedLabel === '') {
+            $normalizedLabel = $this->normalizeGroupLabel($normalizedNewSlug);
+        }
 
         if ($normalizedOriginalSlug === '' || $normalizedNewSlug === '') {
             throw new \RuntimeException('Slug inválido para atualização de grupo.');
@@ -131,7 +136,7 @@ class DashboardRepository
                     SET label = :label, sort_order = :sort_order
                     WHERE id = :target_id');
                 $stmt->execute([
-                    'label' => $label,
+                    'label' => $normalizedLabel,
                     'sort_order' => $sortOrder,
                     'target_id' => $targetGroupId,
                 ]);
@@ -144,7 +149,7 @@ class DashboardRepository
                     WHERE id = :old_id');
                 $stmt->execute([
                     'new_slug' => $normalizedNewSlug,
-                    'label' => $label,
+                    'label' => $normalizedLabel,
                     'sort_order' => $sortOrder,
                     'old_id' => $oldGroupId,
                 ]);
@@ -218,7 +223,8 @@ class DashboardRepository
 
     public function getCardsForSection(string $sectionSlug): array
     {
-        $stmt = $this->pdo->prepare('SELECT c.*, COALESCE(g.slug, "geral") AS group_slug, COALESCE(g.label, "Geral") AS group_label
+        $stmt = $this->pdo->prepare('SELECT c.*, COALESCE(g.slug, "geral") AS group_slug,
+            COALESCE(g.label, "Geral") AS group_label
             FROM cards c
             LEFT JOIN sections s ON s.slug = c.section_slug
             LEFT JOIN groups g ON g.id = s.group_id
@@ -231,7 +237,8 @@ class DashboardRepository
 
     public function getAllCards(): array
     {
-        $stmt = $this->pdo->query('SELECT c.*, COALESCE(g.slug, "geral") AS group_slug, COALESCE(g.label, "Geral") AS group_label,
+        $stmt = $this->pdo->query('SELECT c.*, COALESCE(g.slug, "geral") AS group_slug,
+            COALESCE(g.label, "Geral") AS group_label,
             COALESCE(s.label, c.section_slug) AS section_label
             FROM cards c
             LEFT JOIN sections s ON s.slug = c.section_slug
@@ -241,8 +248,13 @@ class DashboardRepository
         return array_map(fn (array $row): array => $this->hydrateCard($row), $stmt->fetchAll(PDO::FETCH_ASSOC));
     }
 
-    public function upsertSection(string $slug, string $label, string $description, string $groupSlug, int $sortOrder): void
-    {
+    public function upsertSection(
+        string $slug,
+        string $label,
+        string $description,
+        string $groupSlug,
+        int $sortOrder
+    ): void {
         $rawGroupReference = trim($groupSlug);
         $normalizedGroupSlug = $this->normalizeSlug($groupSlug, '');
 
@@ -331,8 +343,14 @@ class DashboardRepository
         return $updated;
     }
 
-    public function renameSection(string $oldSlug, string $newSlug, string $label, string $description, string $groupSlug, int $sortOrder): void
-    {
+    public function renameSection(
+        string $oldSlug,
+        string $newSlug,
+        string $label,
+        string $description,
+        string $groupSlug,
+        int $sortOrder
+    ): void {
         if ($oldSlug === $newSlug) {
             $this->upsertSection($newSlug, $label, $description, $groupSlug, $sortOrder);
             return;
@@ -342,7 +360,9 @@ class DashboardRepository
         try {
             $this->upsertSection($newSlug, $label, $description, $groupSlug, $sortOrder);
 
-            $stmt = $this->pdo->prepare('UPDATE cards SET section_slug = :new_slug WHERE section_slug = :old_slug');
+            $stmt = $this->pdo->prepare(
+                'UPDATE cards SET section_slug = :new_slug WHERE section_slug = :old_slug'
+            );
             $stmt->execute([
                 'new_slug' => $newSlug,
                 'old_slug' => $oldSlug,
@@ -358,13 +378,13 @@ class DashboardRepository
         }
     }
 
-    public function createCard(array $card): void
+    public function createCard(array $card): int
     {
         $sectionSlug = $this->resolveSectionSlugForCard($card);
 
         $stmt = $this->pdo->prepare(
             'INSERT INTO cards (section_slug, title, href, external, icon, status, description, sort_order)
-             VALUES (:section_slug, :title, :href, :external, :icon, :status, :description, :sort_order)'
+               VALUES (:section_slug, :title, :href, :external, :icon, :status, :description, :sort_order)'
         );
 
         $stmt->execute([
@@ -376,6 +396,134 @@ class DashboardRepository
             'status' => $card['status'],
             'description' => $card['description'],
             'sort_order' => $card['order'],
+        ]);
+
+        return (int) $this->pdo->lastInsertId();
+    }
+
+    public function createCardRequest(array $payload): int
+    {
+        $stmt = $this->pdo->prepare('INSERT INTO card_requests (
+            requester_rank,
+            requester_name,
+            requester_contact,
+            title,
+            href,
+            group_slug,
+            subgroup_slug,
+            justification,
+            status,
+            created_at
+        ) VALUES (
+            :requester_rank,
+            :requester_name,
+            :requester_contact,
+            :title,
+            :href,
+            :group_slug,
+            :subgroup_slug,
+            :justification,
+            :status,
+            :created_at
+        )');
+
+        $stmt->execute([
+            'requester_rank' => trim((string) ($payload['requester_rank'] ?? '')),
+            'requester_name' => trim((string) ($payload['requester_name'] ?? '')),
+            'requester_contact' => trim((string) ($payload['requester_contact'] ?? '')),
+            'title' => trim((string) ($payload['title'] ?? '')),
+            'href' => trim((string) ($payload['href'] ?? '')),
+            'group_slug' => trim((string) ($payload['group_slug'] ?? '')),
+            'subgroup_slug' => trim((string) ($payload['subgroup_slug'] ?? '')),
+            'justification' => trim((string) ($payload['justification'] ?? '')),
+            'status' => trim((string) ($payload['status'] ?? 'pending')),
+            'created_at' => (string) ($payload['created_at'] ?? date('c')),
+        ]);
+
+        return (int) $this->pdo->lastInsertId();
+    }
+
+    public function getCardRequests(): array
+    {
+        $stmt = $this->pdo->query('SELECT r.*, COALESCE(g.label, r.group_slug) AS group_label,
+            COALESCE(s.label, r.subgroup_slug) AS subgroup_label
+            FROM card_requests r
+            LEFT JOIN groups g ON g.slug = r.group_slug
+            LEFT JOIN sections s ON s.slug = r.subgroup_slug
+            ORDER BY CASE r.status WHEN "pending" THEN 0 WHEN "approved" THEN 1 WHEN "rejected" THEN 2 ELSE 3 END,
+                     r.id DESC');
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    public function countPendingCardRequests(): int
+    {
+        $stmt = $this->pdo->query('SELECT COUNT(*) FROM card_requests WHERE status = "pending"');
+
+        return (int) ($stmt->fetchColumn() ?: 0);
+    }
+
+    public function getRecentPendingCardRequests(int $limit = 5): array
+    {
+        $safeLimit = max(1, min(20, $limit));
+
+        $stmt = $this->pdo->prepare('SELECT r.id,
+                r.requester_rank,
+                r.requester_name,
+                r.requester_contact,
+                r.title,
+                r.group_slug,
+                r.subgroup_slug,
+                r.created_at,
+                COALESCE(g.label, r.group_slug) AS group_label,
+                COALESCE(s.label, r.subgroup_slug) AS subgroup_label
+            FROM card_requests r
+            LEFT JOIN groups g ON g.slug = r.group_slug
+            LEFT JOIN sections s ON s.slug = r.subgroup_slug
+            WHERE r.status = "pending"
+            ORDER BY r.id DESC
+            LIMIT :limit');
+        $stmt->bindValue(':limit', $safeLimit, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    public function getCardRequestById(int $id): ?array
+    {
+        if ($id <= 0) {
+            return null;
+        }
+
+        $stmt = $this->pdo->prepare('SELECT * FROM card_requests WHERE id = :id LIMIT 1');
+        $stmt->execute(['id' => $id]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return is_array($row) ? $row : null;
+    }
+
+    public function updateCardRequestStatus(
+        int $id,
+        string $status,
+        string $processedBy,
+        ?int $createdCardId = null,
+        ?string $adminNote = null
+    ): void {
+        $stmt = $this->pdo->prepare('UPDATE card_requests
+            SET status = :status,
+                processed_by = :processed_by,
+                processed_at = :processed_at,
+                created_card_id = :created_card_id,
+                admin_note = :admin_note
+            WHERE id = :id');
+
+        $stmt->execute([
+            'id' => $id,
+            'status' => $status,
+            'processed_by' => trim($processedBy),
+            'processed_at' => date('c'),
+            'created_card_id' => $createdCardId,
+            'admin_note' => $adminNote,
         ]);
     }
 
@@ -421,8 +569,11 @@ class DashboardRepository
         return password_verify($password, $hash);
     }
 
-    public function updateAdminAccount(string $currentUsername, string $newUsername, ?string $newPasswordHash = null): void
-    {
+    public function updateAdminAccount(
+        string $currentUsername,
+        string $newUsername,
+        ?string $newPasswordHash = null
+    ): void {
         $current = trim($currentUsername);
         $next = trim($newUsername);
 
@@ -441,7 +592,9 @@ class DashboardRepository
             }
 
             if (is_string($newPasswordHash) && $newPasswordHash !== '') {
-                $update = $this->pdo->prepare('UPDATE admins SET username = :username, password_hash = :password_hash WHERE id = :id');
+                $update = $this->pdo->prepare(
+                    'UPDATE admins SET username = :username, password_hash = :password_hash WHERE id = :id'
+                );
                 $update->execute([
                     'id' => $adminId,
                     'username' => $next,
@@ -523,16 +676,53 @@ class DashboardRepository
 
         $this->createSchema();
         $this->ensureCardsWithoutMetricAndTrend();
+        $this->ensureCardRequestsRankColumn();
         $this->ensureSectionsGroupColumn();
         $this->ensureUniqueGroupLabels();
         $this->seedIfEmpty($isNewDatabase);
+        $this->ensureUppercaseGroupLabels();
         $this->ensureDefaultAdmin();
         $this->syncLegacySectionGroupLabels();
     }
 
+    private function ensureUppercaseGroupLabels(): void
+    {
+        $rows = $this->pdo->query('SELECT id, label FROM groups')->fetchAll(PDO::FETCH_ASSOC);
+        if ($rows === []) {
+            return;
+        }
+
+        $this->pdo->beginTransaction();
+        try {
+            $stmt = $this->pdo->prepare('UPDATE groups SET label = :label WHERE id = :id');
+
+            foreach ($rows as $row) {
+                $id = (int) ($row['id'] ?? 0);
+                $currentLabel = (string) ($row['label'] ?? '');
+                $upperLabel = $this->normalizeGroupLabel($currentLabel);
+
+                if ($id <= 0 || $upperLabel === '' || $upperLabel === $currentLabel) {
+                    continue;
+                }
+
+                $stmt->execute([
+                    'id' => $id,
+                    'label' => $upperLabel,
+                ]);
+            }
+
+            $this->pdo->commit();
+        } catch (\Throwable $throwable) {
+            $this->pdo->rollBack();
+            throw $throwable;
+        }
+    }
+
     private function createSchema(): void
     {
-        $this->pdo->exec('CREATE TABLE IF NOT EXISTS app_config (config_key TEXT PRIMARY KEY, config_value TEXT NOT NULL)');
+        $this->pdo->exec(
+            'CREATE TABLE IF NOT EXISTS app_config (config_key TEXT PRIMARY KEY, config_value TEXT NOT NULL)'
+        );
 
         $this->pdo->exec('CREATE TABLE IF NOT EXISTS groups (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -569,7 +759,43 @@ class DashboardRepository
             created_at TEXT NOT NULL
         )');
 
+        $this->pdo->exec('CREATE TABLE IF NOT EXISTS card_requests (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            requester_rank TEXT NOT NULL DEFAULT "",
+            requester_name TEXT NOT NULL,
+            requester_contact TEXT NOT NULL DEFAULT "",
+            title TEXT NOT NULL,
+            href TEXT NOT NULL,
+            group_slug TEXT NOT NULL,
+            subgroup_slug TEXT NOT NULL,
+            justification TEXT NOT NULL,
+            status TEXT NOT NULL DEFAULT "pending",
+            admin_note TEXT,
+            created_card_id INTEGER,
+            processed_by TEXT,
+            created_at TEXT NOT NULL,
+            processed_at TEXT
+        )');
+
         $this->pdo->exec('CREATE INDEX IF NOT EXISTS idx_groups_sort ON groups(sort_order)');
+        $this->pdo->exec('CREATE INDEX IF NOT EXISTS idx_card_requests_status ON card_requests(status)');
+    }
+
+    private function ensureCardRequestsRankColumn(): void
+    {
+        $columns = $this->pdo->query('PRAGMA table_info(card_requests)')->fetchAll(PDO::FETCH_ASSOC);
+        $hasRequesterRank = false;
+
+        foreach ($columns as $column) {
+            if ((string) ($column['name'] ?? '') === 'requester_rank') {
+                $hasRequesterRank = true;
+                break;
+            }
+        }
+
+        if (!$hasRequesterRank) {
+            $this->pdo->exec('ALTER TABLE card_requests ADD COLUMN requester_rank TEXT NOT NULL DEFAULT ""');
+        }
     }
 
     private function ensureCardsWithoutMetricAndTrend(): void
@@ -601,16 +827,42 @@ class DashboardRepository
                 description TEXT NOT NULL DEFAULT "",
                 sort_order INTEGER NOT NULL DEFAULT 0
             )');
-            $this->pdo->exec('INSERT INTO cards_new (id, section_slug, title, href, external, icon, status, description, sort_order)
-                SELECT id, section_slug, title, href, external, icon, status, description, sort_order FROM cards');
+
+            $this->pdo->exec('INSERT INTO cards_new (
+                id,
+                section_slug,
+                title,
+                href,
+                external,
+                icon,
+                status,
+                description,
+                sort_order
+            )
+            SELECT
+                id,
+                section_slug,
+                title,
+                href,
+                external,
+                icon,
+                status,
+                description,
+                sort_order
+            FROM cards');
+
             $this->pdo->exec('DROP TABLE cards');
             $this->pdo->exec('ALTER TABLE cards_new RENAME TO cards');
 
             $sequence = (int) $this->pdo->query('SELECT COALESCE(MAX(id), 0) FROM cards')->fetchColumn();
             $stmt = $this->pdo->prepare('DELETE FROM sqlite_sequence WHERE name = :name');
             $stmt->execute(['name' => 'cards']);
+
             $stmt = $this->pdo->prepare('INSERT INTO sqlite_sequence(name, seq) VALUES (:name, :seq)');
-            $stmt->execute(['name' => 'cards', 'seq' => $sequence]);
+            $stmt->execute([
+                'name' => 'cards',
+                'seq' => $sequence,
+            ]);
 
             $this->pdo->commit();
         } catch (\Throwable $throwable) {
@@ -669,18 +921,20 @@ class DashboardRepository
                     return $left['id'] <=> $right['id'];
                 });
 
-                $canonicalId = (int) ($duplicates[0]['id'] ?? 0);
+                $canonicalId = (int) $duplicates[0]['id'];
                 if ($canonicalId <= 0) {
                     continue;
                 }
 
                 foreach (array_slice($duplicates, 1) as $duplicate) {
-                    $duplicateId = (int) ($duplicate['id'] ?? 0);
+                    $duplicateId = (int) $duplicate['id'];
                     if ($duplicateId <= 0 || $duplicateId === $canonicalId) {
                         continue;
                     }
 
-                    $stmt = $this->pdo->prepare('UPDATE sections SET group_id = :canonical_id WHERE group_id = :duplicate_id');
+                    $stmt = $this->pdo->prepare(
+                        'UPDATE sections SET group_id = :canonical_id WHERE group_id = :duplicate_id'
+                    );
                     $stmt->execute([
                         'canonical_id' => $canonicalId,
                         'duplicate_id' => $duplicateId,
@@ -691,7 +945,9 @@ class DashboardRepository
                 }
             }
 
-            $this->pdo->exec('CREATE UNIQUE INDEX IF NOT EXISTS uq_groups_label_nocase ON groups(label COLLATE NOCASE)');
+            $this->pdo->exec(
+                'CREATE UNIQUE INDEX IF NOT EXISTS uq_groups_label_nocase ON groups(label COLLATE NOCASE)'
+            );
             $this->pdo->commit();
         } catch (\Throwable $throwable) {
             $this->pdo->rollBack();
@@ -765,7 +1021,10 @@ class DashboardRepository
         try {
             $title = (string) ($seed['title'] ?? 'Dashboard Público');
             $subtitle = (string) ($seed['subtitle'] ?? 'Painel público com cards dinâmicos por seção');
-            $cfg = $this->pdo->prepare('INSERT INTO app_config (config_key, config_value) VALUES (:k, :v) ON CONFLICT(config_key) DO UPDATE SET config_value = excluded.config_value');
+            $cfg = $this->pdo->prepare(
+                'INSERT INTO app_config (config_key, config_value) VALUES (:k, :v)
+                    ON CONFLICT(config_key) DO UPDATE SET config_value = excluded.config_value'
+            );
             $cfg->execute(['k' => 'title', 'v' => $title]);
             $cfg->execute(['k' => 'subtitle', 'v' => $subtitle]);
 
@@ -824,7 +1083,9 @@ class DashboardRepository
         $username = trim((string) ($_ENV['ADMIN_USER'] ?? 'admin'));
         $password = (string) ($_ENV['ADMIN_PASS'] ?? 'admin123');
 
-        $stmt = $this->pdo->prepare('INSERT INTO admins (username, password_hash, created_at) VALUES (:username, :password_hash, :created_at)');
+        $stmt = $this->pdo->prepare(
+            'INSERT INTO admins (username, password_hash, created_at) VALUES (:username, :password_hash, :created_at)'
+        );
         $stmt->execute([
             'username' => $username,
             'password_hash' => password_hash($password, PASSWORD_DEFAULT),
@@ -886,6 +1147,20 @@ class DashboardRepository
         $slug = trim($slug, '-');
 
         return $slug !== '' ? $slug : $fallback;
+    }
+
+    private function normalizeGroupLabel(string $value): string
+    {
+        $label = trim($value);
+        if ($label === '') {
+            return '';
+        }
+
+        if (function_exists('mb_strtoupper')) {
+            return mb_strtoupper($label, 'UTF-8');
+        }
+
+        return strtoupper($label);
     }
 
     private function getGroupIdBySlug(string $slug): int

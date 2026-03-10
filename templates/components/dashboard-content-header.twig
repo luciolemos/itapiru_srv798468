@@ -1,6 +1,7 @@
 <section class="db-content-header" aria-label="Cabeçalho do conteúdo">
   {% if breadcrumbs is defined and breadcrumbs is not empty %}
     <nav class="db-breadcrumb" aria-label="Breadcrumb">
+      <i class="bi bi-speedometer2 db-breadcrumb-icon" aria-hidden="true"></i>
       {% for item in breadcrumbs %}
         {% if item.url is defined and item.url is not empty %}
           <a href="{{ item.url }}" class="db-breadcrumb-link">{{ item.label }}</a>

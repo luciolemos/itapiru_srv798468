@@ -1,6 +1,6 @@
 {% extends 'layouts/base.twig' %}
 
-{% block title %}Admin | Dashboard{% endblock %}
+{% block title %}Admin | 16º BI Mtz{% endblock %}
 
 {% block content %}
 <div class="db-shell">
@@ -17,13 +17,14 @@
 
     <nav class="db-menu" aria-label="Navegação de seções">
       <a href="/itapiru" hx-boost="false" class="db-menu-item{{ activeSection == 'home' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'home' ? 'page' : 'false' }}">
-        Início
+        <i class="bi bi-speedometer2" aria-hidden="true"></i>
+        <span>PAINEL DE CONTROLE</span>
       </a>
       <span class="db-menu-divider" aria-hidden="true"></span>
       {% set sidebarGroups = groupedSections|default([]) %}
       {% for group in sidebarGroups %}
         {% set groupSlugs = group.items|keys %}
-        {% set isGroupOpen = loop.first or (activeSection is defined and activeSection in groupSlugs) %}
+        {% set isGroupOpen = activeSection is defined and activeSection in groupSlugs %}
         <section class="db-menu-group-block" data-menu-group>
           <button
             type="button"
@@ -32,13 +33,13 @@
             data-group-key="group-{{ loop.index0 }}-{{ group.label|lower|trim|replace({' ': '-'}) }}"
             aria-expanded="{{ isGroupOpen ? 'true' : 'false' }}"
           >
-            <span class="db-menu-group">{{ group.label|label_case }}</span>
+            <span class="db-menu-group">{{ group.label }}</span>
             <i class="bi bi-chevron-down" aria-hidden="true"></i>
           </button>
           <div class="db-menu-group-items" data-menu-group-items {{ isGroupOpen ? '' : 'hidden' }}>
             {% for slug, section in group.items %}
               <a href="/itapiru/{{ slug }}" hx-boost="false" class="db-menu-item" aria-current="false">
-                {{ section.label|label_case }}
+                {{ section.label }}
               </a>
               {% if not loop.last %}
                 <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
@@ -51,7 +52,7 @@
         {% endif %}
       {% endfor %}
       <span class="db-menu-divider" aria-hidden="true"></span>
-      {% set isDocsMenuOpen = activeSection in ['readme', 'readme-seed', 'readme-sqlite'] %}
+      {% set isDocsMenuOpen = activeSection in ['readme', 'readme-seed', 'readme-sqlite', 'guardiao', 'distintivo-om'] %}
       <section class="db-menu-group-block" data-menu-group>
         <button
           type="button"
@@ -60,7 +61,7 @@
           data-group-key="docs-menu"
           aria-expanded="{{ isDocsMenuOpen ? 'true' : 'false' }}"
         >
-          <span class="db-menu-group">Documentação</span>
+          <span class="db-menu-group"><i class="bi bi-journal-text" aria-hidden="true"></i>Documentação</span>
           <i class="bi bi-chevron-down" aria-hidden="true"></i>
         </button>
         <div class="db-menu-group-items" data-menu-group-items {{ isDocsMenuOpen ? '' : 'hidden' }}>
@@ -75,11 +76,30 @@
           <a href="/itapiru/readme-sqlite" hx-boost="false" class="db-menu-item{{ activeSection == 'readme-sqlite' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'readme-sqlite' ? 'page' : 'false' }}">
             Guia do banco
           </a>
+          <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
+          <a href="/itapiru/guardiao" hx-boost="false" class="db-menu-item{{ activeSection == 'guardiao' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'guardiao' ? 'page' : 'false' }}">
+            Guardião
+          </a>
+          <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
+          <a href="/itapiru/distintivo-om" hx-boost="false" class="db-menu-item{{ activeSection == 'distintivo-om' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'distintivo-om' ? 'page' : 'false' }}">
+            Distintivo da OM
+          </a>
         </div>
       </section>
       <span class="db-menu-divider" aria-hidden="true"></span>
+      <a href="/itapiru/faq" hx-boost="false" class="db-menu-item{{ activeSection == 'faq' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'faq' ? 'page' : 'false' }}">
+        <i class="bi bi-question-circle" aria-hidden="true"></i>
+        <span>FAQ DO GUARDIÃO</span>
+      </a>
+      <span class="db-menu-divider" aria-hidden="true"></span>
+      <a href="/itapiru/solicitar-card" hx-boost="false" class="db-menu-item{{ activeSection == 'solicitar-card' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'solicitar-card' ? 'page' : 'false' }}">
+        <i class="bi bi-person-vcard" aria-hidden="true"></i>
+        <span>SOLICITAR CARD</span>
+      </a>
+      <span class="db-menu-divider" aria-hidden="true"></span>
       <a href="/itapiru/contato" hx-boost="false" class="db-menu-item{{ activeSection == 'contato' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'contato' ? 'page' : 'false' }}">
-        Contato
+        <i class="bi bi-envelope" aria-hidden="true"></i>
+        <span>CONTATO</span>
       </a>
       <span class="db-menu-divider" aria-hidden="true"></span>
       {% set isAdminMenuOpen = activeSection == 'admin' %}
@@ -91,7 +111,7 @@
           data-group-key="admin-menu"
           aria-expanded="{{ isAdminMenuOpen ? 'true' : 'false' }}"
         >
-          <span class="db-menu-group">Admin</span>
+          <span class="db-menu-group"><i class="bi bi-shield-lock" aria-hidden="true"></i>Admin</span>
           <i class="bi bi-chevron-down" aria-hidden="true"></i>
         </button>
         <div class="db-menu-group-items" data-menu-group-items {{ isAdminMenuOpen ? '' : 'hidden' }}>
@@ -106,18 +126,26 @@
           <a href="/itapiru/admin?entity=cards" hx-boost="false" class="db-menu-item{{ activeSection == 'admin' and adminEntity == 'cards' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'admin' and adminEntity == 'cards' ? 'page' : 'false' }}">
             Cards
           </a>
+          <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
+          <a href="/itapiru/admin?entity=requests" hx-boost="false" class="db-menu-item{{ activeSection == 'admin' and adminEntity == 'requests' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'admin' and adminEntity == 'requests' ? 'page' : 'false' }}">
+            Solicitações
+          </a>
         </div>
       </section>
       <form method="post" action="/itapiru/logout" hx-boost="false" class="db-menu-form">
         <input type="hidden" name="csrf_token" value="{{ csrfToken|default('') }}">
-        <button class="db-menu-item" type="submit">Sair</button>
+        <button class="db-menu-item" type="submit"><i class="bi bi-box-arrow-right" aria-hidden="true"></i><span>SAIR</span></button>
       </form>
     </nav>
   </aside>
   <div class="db-sidebar-backdrop" data-sidebar-backdrop aria-hidden="true"></div>
 
   <main class="db-main" aria-label="Painel administrativo">
-    {% set adminLabel = adminEntity == 'groups' ? 'Grupos' : (adminEntity == 'subgroups' ? 'Subgrupos' : 'Cards') %}
+    {% set adminLabel = adminEntity == 'groups'
+      ? 'Grupos'
+      : (adminEntity == 'subgroups'
+        ? 'Subgrupos'
+        : (adminEntity == 'requests' ? 'Solicitações' : 'Cards')) %}
     {% include 'components/dashboard-topbar.twig' with {
       lastUpdated: lastUpdated,
       breadcrumbs: [
@@ -139,7 +167,9 @@
           ? 'Gerencie os grupos de primeiro nível do sidebar'
           : (adminEntity == 'subgroups'
             ? 'Gerencie os subgrupos de cada grupo do sidebar'
-            : 'Gerencie cards vinculando grupo e subgrupo')
+            : (adminEntity == 'requests'
+              ? 'Avalie solicitações públicas para criação de novos cards'
+              : 'Gerencie cards vinculando grupo e subgrupo'))
       } %}
 
       {% if flashMessage %}
@@ -283,7 +313,7 @@
                   <span class="db-card-link db-card-link-secondary is-disabled" aria-disabled="true">Anterior</span>
                 {% endif %}
 
-                <span class="db-admin-pagination-info">Página {{ groupsPagination.page }} de {{ groupsPagination.totalPages }}</span>
+                <span class="db-admin-pagination-info">Página {{ groupsPagination.page }} de {{ groupsPagination.totalPages }} • Registros {{ groupsPagination.startItem|default(0) }}{% if groupsPagination.endItem|default(0) > groupsPagination.startItem|default(0) %}–{{ groupsPagination.endItem|default(0) }}{% endif %} de {{ groupsPagination.totalItems|default(0) }}</span>
 
                 {% if groupsPagination.page < groupsPagination.totalPages %}
                   <a class="db-card-link db-card-link-secondary" href="/itapiru/admin?{{ groupsPaginationQuery|merge({'page': nextPage})|url_encode }}">Próxima</a>
@@ -456,7 +486,7 @@
                   <span class="db-card-link db-card-link-secondary is-disabled" aria-disabled="true">Anterior</span>
                 {% endif %}
 
-                <span class="db-admin-pagination-info">Página {{ sectionsPagination.page }} de {{ sectionsPagination.totalPages }}</span>
+                <span class="db-admin-pagination-info">Página {{ sectionsPagination.page }} de {{ sectionsPagination.totalPages }} • Registros {{ sectionsPagination.startItem|default(0) }}{% if sectionsPagination.endItem|default(0) > sectionsPagination.startItem|default(0) %}–{{ sectionsPagination.endItem|default(0) }}{% endif %} de {{ sectionsPagination.totalItems|default(0) }}</span>
 
                 {% if sectionsPagination.page < sectionsPagination.totalPages %}
                   <a class="db-card-link db-card-link-secondary" href="/itapiru/admin?{{ sectionsPaginationQuery|merge({'page': nextPage})|url_encode }}">Próxima</a>
@@ -468,7 +498,7 @@
           {% endif %}
         </article>
 
-      {% else %}
+      {% elseif adminEntity == 'cards' %}
         <article class="db-card db-card--standard db-readme-card db-admin-entity-card">
           <div class="db-admin-entity-head">
             <h3 class="db-admin-entity-title">Cards</h3>
@@ -705,7 +735,7 @@
                   <span class="db-card-link db-card-link-secondary is-disabled" aria-disabled="true">Anterior</span>
                 {% endif %}
 
-                <span class="db-admin-pagination-info">Página {{ cardsPagination.page }} de {{ cardsPagination.totalPages }}</span>
+                <span class="db-admin-pagination-info">Página {{ cardsPagination.page }} de {{ cardsPagination.totalPages }} • Registros {{ cardsPagination.startItem|default(0) }}{% if cardsPagination.endItem|default(0) > cardsPagination.startItem|default(0) %}–{{ cardsPagination.endItem|default(0) }}{% endif %} de {{ cardsPagination.totalItems|default(0) }}</span>
 
                 {% if cardsPagination.page < cardsPagination.totalPages %}
                   <a class="db-card-link db-card-link-secondary" href="/itapiru/admin?{{ cardsPaginationQuery|merge({'page': nextPage})|url_encode }}">Próxima</a>
@@ -714,6 +744,145 @@
                 {% endif %}
               </nav>
             {% endif %}
+          {% endif %}
+        </article>
+      {% else %}
+        <article class="db-card db-card--standard db-readme-card db-admin-entity-card">
+          <div class="db-admin-entity-head">
+            <h3 class="db-admin-entity-title">Solicitações de novos cards</h3>
+          </div>
+
+          <form class="db-contact-form db-admin-filters" method="get" action="/itapiru/admin">
+            <input type="hidden" name="entity" value="requests">
+            <input type="hidden" name="mode" value="list">
+            <input type="hidden" name="per_page" value="{{ currentPerPage|default(10) }}">
+            <div class="db-admin-filters-row">
+              <label class="db-form-field db-admin-filter-field is-search">
+                <span class="db-form-label">Buscar</span>
+                <input class="db-form-input" type="text" name="request_q" value="{{ requestFilters.q|default('') }}" placeholder="Solicitante, título, descrição ou URL">
+              </label>
+              <label class="db-form-field db-admin-filter-field is-status">
+                <span class="db-form-label">Status</span>
+                <select class="db-form-input" name="request_status">
+                  <option value="">Todos</option>
+                  <option value="pending" {{ requestFilters.status|default('') == 'pending' ? 'selected' : '' }}>Pendente</option>
+                  <option value="approved" {{ requestFilters.status|default('') == 'approved' ? 'selected' : '' }}>Aprovado</option>
+                  <option value="rejected" {{ requestFilters.status|default('') == 'rejected' ? 'selected' : '' }}>Rejeitado</option>
+                </select>
+              </label>
+              <div class="db-form-actions db-admin-filters-actions">
+                <button class="db-card-link" type="submit">Filtrar</button>
+                <a class="db-card-link db-card-link-secondary" href="/itapiru/admin?entity=requests">Limpar</a>
+              </div>
+            </div>
+          </form>
+
+          <div class="db-admin-cards-scroll">
+            <table class="db-admin-list-table" aria-label="Lista de solicitações de cards">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Posto/Grad.</th>
+                  <th>Solicitante</th>
+                  <th>Título</th>
+                  <th>Descrição</th>
+                  <th>URL</th>
+                  <th>Grupo</th>
+                  <th>Subgrupo</th>
+                  <th>Status</th>
+                  <th class="db-admin-th-actions">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for request in listedRequests|default(filteredRequests|default(cardRequests|default([]))) %}
+                  <tr>
+                    <td>{{ request.id }}</td>
+                    <td>{{ request.requester_rank|default('-') }}</td>
+                    <td>
+                      {{ request.requester_name }}
+                      {% if request.requester_contact %}
+                        <br><small>{{ request.requester_contact }}</small>
+                      {% endif %}
+                    </td>
+                    <td>{{ request.title }}</td>
+                    <td>{{ request.justification }}</td>
+                    <td class="db-admin-cell-url" title="{{ request.href }}">{{ request.href }}</td>
+                    <td>{{ request.group_label|default(request.group_slug)|label_case }}</td>
+                    <td>{{ request.subgroup_label|default(request.subgroup_slug)|label_case }}</td>
+                    <td>
+                      {% if request.status == 'approved' %}
+                        <span class="db-badge is-ok">Aprovado</span>
+                      {% elseif request.status == 'rejected' %}
+                        <span class="db-badge is-critical">Rejeitado</span>
+                      {% else %}
+                        <span class="db-badge is-warn">Pendente</span>
+                      {% endif %}
+                    </td>
+                    <td class="db-admin-td-actions">
+                      {% if request.status == 'pending' %}
+                        <div class="db-admin-table-actions">
+                          <form method="post" action="/itapiru/admin/card-requests/approve" class="db-inline-form">
+                            <input type="hidden" name="csrf_token" value="{{ csrfToken }}">
+                            <input type="hidden" name="id" value="{{ request.id }}">
+                            <button class="db-card-link db-icon-action" type="submit" title="Aprovar e criar card" aria-label="Aprovar solicitação">
+                              <i class="bi bi-check2-circle" aria-hidden="true"></i>
+                            </button>
+                          </form>
+                          <form method="post" action="/itapiru/admin/card-requests/reject" class="db-inline-form">
+                            <input type="hidden" name="csrf_token" value="{{ csrfToken }}">
+                            <input type="hidden" name="id" value="{{ request.id }}">
+                            <input type="hidden" name="admin_note" value="Solicitação rejeitada pelo administrador.">
+                            <button class="db-card-link db-card-link-danger db-icon-action" type="submit" title="Rejeitar solicitação" aria-label="Rejeitar solicitação">
+                              <i class="bi bi-x-circle" aria-hidden="true"></i>
+                            </button>
+                          </form>
+                        </div>
+                      {% else %}
+                        <span class="db-caption">{{ request.processed_by|default('-') }}</span>
+                      {% endif %}
+                    </td>
+                  </tr>
+                {% else %}
+                  <tr>
+                    <td colspan="10">Nenhuma solicitação registrada.</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          {% if requestsPagination.totalPages|default(1) > 1 %}
+            <nav class="db-admin-pagination" aria-label="Paginação de solicitações">
+              <form class="db-admin-pagination-size" method="get" action="/itapiru/admin">
+                <input type="hidden" name="entity" value="requests">
+                <input type="hidden" name="mode" value="list">
+                <input type="hidden" name="request_q" value="{{ requestFilters.q|default('') }}">
+                <input type="hidden" name="request_status" value="{{ requestFilters.status|default('') }}">
+                <label class="db-admin-pagination-size-label" for="requests-per-page">Itens:</label>
+                <select id="requests-per-page" class="db-form-input db-admin-pagination-select" name="per_page" onchange="this.form.submit()">
+                  {% for option in allowedPerPage|default([5,10,15,20,25,50]) %}
+                    <option value="{{ option }}" {{ currentPerPage|default(10) == option ? 'selected' : '' }}>{{ option }}</option>
+                  {% endfor %}
+                </select>
+              </form>
+
+              {% set prevPage = requestsPagination.page - 1 %}
+              {% set nextPage = requestsPagination.page + 1 %}
+
+              {% if requestsPagination.page > 1 %}
+                <a class="db-card-link db-card-link-secondary" href="/itapiru/admin?{{ requestsPaginationQuery|merge({'page': prevPage})|url_encode }}">Anterior</a>
+              {% else %}
+                <span class="db-card-link db-card-link-secondary is-disabled" aria-disabled="true">Anterior</span>
+              {% endif %}
+
+              <span class="db-admin-pagination-info">Página {{ requestsPagination.page }} de {{ requestsPagination.totalPages }} • Registros {{ requestsPagination.startItem|default(0) }}{% if requestsPagination.endItem|default(0) > requestsPagination.startItem|default(0) %}–{{ requestsPagination.endItem|default(0) }}{% endif %} de {{ requestsPagination.totalItems|default(0) }}</span>
+
+              {% if requestsPagination.page < requestsPagination.totalPages %}
+                <a class="db-card-link db-card-link-secondary" href="/itapiru/admin?{{ requestsPaginationQuery|merge({'page': nextPage})|url_encode }}">Próxima</a>
+              {% else %}
+                <span class="db-card-link db-card-link-secondary is-disabled" aria-disabled="true">Próxima</span>
+              {% endif %}
+            </nav>
           {% endif %}
         </article>
       {% endif %}
@@ -727,6 +896,110 @@
 
 <script>
   (function () {
+    const syncNotificationBadge = (nextCount) => {
+      const badge = document.querySelector('.db-notification-badge');
+      if (!badge) {
+        return;
+      }
+
+      const normalizedCount = Number.isFinite(nextCount) ? Math.max(0, Math.floor(nextCount)) : 0;
+      badge.textContent = normalizedCount > 99 ? '99+' : String(normalizedCount);
+      badge.setAttribute('aria-label', normalizedCount + ' solicitações pendentes');
+
+      if (normalizedCount === 0) {
+        badge.classList.add('is-zero');
+      } else {
+        badge.classList.remove('is-zero');
+      }
+
+      const panelCount = document.querySelector('.db-notification-header span');
+      if (panelCount) {
+        panelCount.textContent = String(normalizedCount);
+      }
+    };
+
+    const decreaseNotificationBadge = () => {
+      const badge = document.querySelector('.db-notification-badge');
+      if (!badge) {
+        return;
+      }
+
+      const currentRaw = String((badge.textContent || '').trim()).replace(/\+/g, '');
+      const currentCount = parseInt(currentRaw, 10);
+      if (Number.isNaN(currentCount)) {
+        return;
+      }
+
+      syncNotificationBadge(Math.max(0, currentCount - 1));
+    };
+
+    const removeNotificationItem = (requestId) => {
+      if (!Number.isFinite(requestId) || requestId <= 0) {
+        return;
+      }
+
+      const panel = document.querySelector('.db-notification-panel');
+      if (!panel) {
+        return;
+      }
+
+      const item = panel.querySelector('.db-notification-item[data-request-id="' + requestId + '"]');
+      if (!item) {
+        return;
+      }
+
+      const list = item.closest('.db-notification-list');
+      item.remove();
+
+      if (!list) {
+        return;
+      }
+
+      if (list.querySelector('.db-notification-item')) {
+        return;
+      }
+
+      list.remove();
+
+      if (!panel.querySelector('.db-notification-empty')) {
+        const emptyState = document.createElement('p');
+        emptyState.className = 'db-notification-empty';
+        emptyState.textContent = 'Nenhuma solicitação pendente no momento.';
+        const footer = panel.querySelector('.db-notification-footer');
+        if (footer) {
+          panel.insertBefore(emptyState, footer);
+        } else {
+          panel.appendChild(emptyState);
+        }
+      }
+    };
+
+    document.addEventListener('submit', (event) => {
+      const form = event.target;
+      if (!(form instanceof HTMLFormElement)) {
+        return;
+      }
+
+      const action = String(form.getAttribute('action') || '');
+      if (action !== '/itapiru/admin/card-requests/approve' && action !== '/itapiru/admin/card-requests/reject') {
+        return;
+      }
+
+      if (form.dataset.badgeUpdated === '1') {
+        return;
+      }
+
+      form.dataset.badgeUpdated = '1';
+
+      const requestIdField = form.querySelector('input[name="id"]');
+      const requestId = parseInt(String(requestIdField ? requestIdField.value : ''), 10);
+      if (!Number.isNaN(requestId)) {
+        removeNotificationItem(requestId);
+      }
+
+      decreaseNotificationBadge();
+    }, true);
+
     const forms = document.querySelectorAll('form');
     forms.forEach((form) => {
       const groupSelect = form.querySelector('[data-subgroup-group-select]');

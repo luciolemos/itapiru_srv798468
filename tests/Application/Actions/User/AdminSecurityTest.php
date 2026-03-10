@@ -47,7 +47,10 @@ class AdminSecurityTest extends TestCase
         $response = $app->handle($request);
 
         $this->assertEquals(200, $response->getStatusCode());
-        $this->assertStringContainsString('Sessão expirada. Atualize a página e tente novamente.', (string) $response->getBody());
+        $this->assertStringContainsString(
+            'Sessão expirada. Atualize a página e tente novamente.',
+            (string) $response->getBody()
+        );
         $this->assertEmpty($_SESSION['is_admin'] ?? null);
     }
 
@@ -70,7 +73,10 @@ class AdminSecurityTest extends TestCase
 
         $this->assertNotNull($response);
         $this->assertEquals(200, $response->getStatusCode());
-        $this->assertStringContainsString('Muitas tentativas. Acesso bloqueado por 10 minutos.', (string) $response->getBody());
+        $this->assertStringContainsString(
+            'Muitas tentativas. Acesso bloqueado por 10 minutos.',
+            (string) $response->getBody()
+        );
 
         $attemptState = $_SESSION['admin_login_attempts'] ?? null;
         $this->assertIsArray($attemptState);
@@ -121,7 +127,10 @@ class AdminSecurityTest extends TestCase
 
         $this->assertEquals(302, $response->getStatusCode());
         $this->assertEquals('/itapiru/admin?entity=subgroups', $response->getHeaderLine('Location'));
-        $this->assertEquals('Falha de validação CSRF. Atualize a página e tente novamente.', $_SESSION['admin_flash'] ?? null);
+        $this->assertEquals(
+            'Falha de validação CSRF. Atualize a página e tente novamente.',
+            $_SESSION['admin_flash'] ?? null
+        );
     }
 
     public function testAdminLoginWithValidCsrfAndCredentialsRedirectsAndResetsAttempts(): void

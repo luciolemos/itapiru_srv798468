@@ -1,6 +1,6 @@
 {% extends 'layouts/base.twig' %}
 
-{% block title %}{{ readmePageTitle|default('Guia do usuário') }} | Dashboard Público{% endblock %}
+{% block title %}{{ readmePageTitle|default('Guia do usuário') }} | 16º BI Mtz{% endblock %}
 
 {% block content %}
 <div class="db-shell">
@@ -17,13 +17,14 @@
 
     <nav class="db-menu" aria-label="Navegação de seções">
       <a href="/itapiru" hx-boost="false" class="db-menu-item{{ activeSection == 'home' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'home' ? 'page' : 'false' }}">
-        Início
+        <i class="bi bi-speedometer2" aria-hidden="true"></i>
+        <span>PAINEL DE CONTROLE</span>
       </a>
       <span class="db-menu-divider" aria-hidden="true"></span>
       {% set sidebarGroups = groupedSections|default([]) %}
       {% for group in sidebarGroups %}
           {% set groupSlugs = group.items|keys %}
-          {% set isGroupOpen = loop.first or (activeSection is defined and activeSection in groupSlugs) %}
+          {% set isGroupOpen = activeSection is defined and activeSection in groupSlugs %}
           <section class="db-menu-group-block" data-menu-group>
           <button
             type="button"
@@ -32,7 +33,7 @@
               data-group-key="group-{{ loop.index0 }}-{{ group.label|lower|trim|replace({' ': '-'}) }}"
             aria-expanded="{{ isGroupOpen ? 'true' : 'false' }}"
           >
-            <span class="db-menu-group">{{ group.label|label_case }}</span>
+            <span class="db-menu-group">{{ group.label }}</span>
             <i class="bi bi-chevron-down" aria-hidden="true"></i>
           </button>
           <div class="db-menu-group-items" data-menu-group-items {{ isGroupOpen ? '' : 'hidden' }}>
@@ -43,7 +44,7 @@
                 class="db-menu-item{{ activeSection == slug ? ' is-active' : '' }}"
                 aria-current="{{ activeSection == slug ? 'page' : 'false' }}"
               >
-                {{ section.label|label_case }}
+                {{ section.label }}
               </a>
               {% if not loop.last %}
                 <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
@@ -56,7 +57,7 @@
         {% endif %}
       {% endfor %}
       <span class="db-menu-divider" aria-hidden="true"></span>
-      {% set isDocsMenuOpen = activeSection in ['readme', 'readme-seed', 'readme-sqlite'] %}
+      {% set isDocsMenuOpen = activeSection in ['readme', 'readme-seed', 'readme-sqlite', 'guardiao', 'distintivo-om'] %}
       <section class="db-menu-group-block" data-menu-group>
         <button
           type="button"
@@ -65,7 +66,7 @@
           data-group-key="docs-menu"
           aria-expanded="{{ isDocsMenuOpen ? 'true' : 'false' }}"
         >
-          <span class="db-menu-group">Documentação</span>
+          <span class="db-menu-group"><i class="bi bi-journal-text" aria-hidden="true"></i>Documentação</span>
           <i class="bi bi-chevron-down" aria-hidden="true"></i>
         </button>
         <div class="db-menu-group-items" data-menu-group-items {{ isDocsMenuOpen ? '' : 'hidden' }}>
@@ -80,11 +81,30 @@
           <a href="/itapiru/readme-sqlite" hx-boost="false" class="db-menu-item{{ activeSection == 'readme-sqlite' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'readme-sqlite' ? 'page' : 'false' }}">
             Guia do banco
           </a>
+          <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
+          <a href="/itapiru/guardiao" hx-boost="false" class="db-menu-item{{ activeSection == 'guardiao' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'guardiao' ? 'page' : 'false' }}">
+            Guardião
+          </a>
+          <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
+          <a href="/itapiru/distintivo-om" hx-boost="false" class="db-menu-item{{ activeSection == 'distintivo-om' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'distintivo-om' ? 'page' : 'false' }}">
+            Distintivo da OM
+          </a>
         </div>
       </section>
       <span class="db-menu-divider" aria-hidden="true"></span>
+      <a href="/itapiru/faq" hx-boost="false" class="db-menu-item{{ activeSection == 'faq' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'faq' ? 'page' : 'false' }}">
+        <i class="bi bi-question-circle" aria-hidden="true"></i>
+        <span>FAQ DO GUARDIÃO</span>
+      </a>
+      <span class="db-menu-divider" aria-hidden="true"></span>
+      <a href="/itapiru/solicitar-card" hx-boost="false" class="db-menu-item{{ activeSection == 'solicitar-card' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'solicitar-card' ? 'page' : 'false' }}">
+        <i class="bi bi-person-vcard" aria-hidden="true"></i>
+        <span>SOLICITAR CARD</span>
+      </a>
+      <span class="db-menu-divider" aria-hidden="true"></span>
       <a href="/itapiru/contato" hx-boost="false" class="db-menu-item{{ activeSection == 'contato' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'contato' ? 'page' : 'false' }}">
-        Contato
+        <i class="bi bi-envelope" aria-hidden="true"></i>
+        <span>CONTATO</span>
       </a>
       {% if isAdminLogged|default(false) %}
         <span class="db-menu-divider" aria-hidden="true"></span>
@@ -97,7 +117,7 @@
             data-group-key="admin-menu"
             aria-expanded="{{ isAdminMenuOpen ? 'true' : 'false' }}"
           >
-            <span class="db-menu-group">Admin</span>
+            <span class="db-menu-group"><i class="bi bi-shield-lock" aria-hidden="true"></i>Admin</span>
             <i class="bi bi-chevron-down" aria-hidden="true"></i>
           </button>
           <div class="db-menu-group-items" data-menu-group-items {{ isAdminMenuOpen ? '' : 'hidden' }}>
@@ -112,16 +132,21 @@
             <a href="/itapiru/admin?entity=cards" hx-boost="false" class="db-menu-item{{ activeSection == 'admin' and adminEntity|default('') == 'cards' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'admin' and adminEntity|default('') == 'cards' ? 'page' : 'false' }}">
               Cards
             </a>
+            <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
+            <a href="/itapiru/admin?entity=requests" hx-boost="false" class="db-menu-item{{ activeSection == 'admin' and adminEntity|default('') == 'requests' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'admin' and adminEntity|default('') == 'requests' ? 'page' : 'false' }}">
+              Solicitações
+            </a>
           </div>
         </section>
         <form method="post" action="/itapiru/logout" hx-boost="false" class="db-menu-form">
           <input type="hidden" name="csrf_token" value="{{ csrfToken|default('') }}">
-          <button class="db-menu-item" type="submit">Sair</button>
+          <button class="db-menu-item" type="submit"><i class="bi bi-box-arrow-right" aria-hidden="true"></i><span>SAIR</span></button>
         </form>
       {% else %}
         <span class="db-menu-divider" aria-hidden="true"></span>
         <a href="/itapiru/login" hx-boost="false" class="db-menu-item{{ activeSection == 'login' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'login' ? 'page' : 'false' }}">
-          Login
+          <i class="bi bi-box-arrow-in-right" aria-hidden="true"></i>
+          <span>LOGIN</span>
         </a>
       {% endif %}
     </nav>

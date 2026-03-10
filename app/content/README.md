@@ -10,6 +10,7 @@ Este diretório contém o arquivo de seed inicial do itapiru.
 4. [Regras importantes](#regras-importantes)
 5. [Observações de operação](#observações-de-operação)
 6. [Onde o conteúdo é renderizado](#onde-o-conteúdo-é-renderizado)
+7. [Solicitações e notificações](#solicitações-e-notificações)
 
 ## Arquivo principal
 
@@ -27,6 +28,8 @@ Em produção normal, grupos, subgrupos e cards devem ser mantidos via:
 - `/itapiru/admin?entity=groups`
 - `/itapiru/admin?entity=subgroups`
 - `/itapiru/admin?entity=cards`
+- `/itapiru/admin?entity=requests`
+- `/itapiru/solicitar-card`
 
 ## Estrutura esperada do seed
 
@@ -90,3 +93,9 @@ return [
 - Página de subgrupo/cards: `templates/dashboard.twig`
 - Regras de roteamento e render: `app/routes.php`
 - Persistência e bootstrap: `src/Infrastructure/Persistence/Dashboard/DashboardRepository.php`
+
+## Solicitações e notificações
+
+- O histórico de solicitações é cumulativo: registros com status `pending`, `approved` e `rejected` permanecem salvos e não são apagados ao aprovar/rejeitar.
+- O sino da topbar do admin exibe apenas as pendências mais recentes, com `LIMIT 5`.
+- O contador do sino reflete o total real de solicitações pendentes no banco.

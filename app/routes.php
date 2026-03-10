@@ -135,14 +135,31 @@ return function (App $app) {
         return '/itapiru/admin/avatar?v=' . rawurlencode($version);
     };
 
-    $navbarAuthContext = static function () use ($ensureCsrfToken, $resolveAdminAvatarUrl): array {
+    $navbarAuthContext = static function () use ($app, $ensureCsrfToken, $resolveAdminAvatarUrl): array {
         $adminUsername = (string) ($_SESSION['admin_user'] ?? '');
+        $isAdminLogged = !empty($_SESSION['is_admin']);
+        $adminPendingRequestsCount = 0;
+        $adminPendingRequests = [];
+
+        if ($isAdminLogged) {
+            try {
+                /** @var DashboardRepository $repo */
+                $repo = $app->getContainer()->get(DashboardRepository::class);
+                $adminPendingRequestsCount = $repo->countPendingCardRequests();
+                $adminPendingRequests = $repo->getRecentPendingCardRequests(5);
+            } catch (\Throwable $throwable) {
+                $adminPendingRequestsCount = 0;
+                $adminPendingRequests = [];
+            }
+        }
 
         return [
-            'isAdminLogged' => !empty($_SESSION['is_admin']),
+            'isAdminLogged' => $isAdminLogged,
             'adminUsername' => $adminUsername,
             'adminAvatarUrl' => $resolveAdminAvatarUrl($adminUsername),
             'csrfToken' => $ensureCsrfToken(),
+            'adminPendingRequestsCount' => $adminPendingRequestsCount,
+            'adminPendingRequests' => $adminPendingRequests,
         ];
     };
 
@@ -221,6 +238,26 @@ return function (App $app) {
 
         return $href;
     };
+
+    $requesterRanks = [
+        'General de Exército',
+        'General de Divisão',
+        'General de Brigada',
+        'Coronel',
+        'Tenente-Coronel',
+        'Major',
+        'Capitão',
+        '1º Tenente',
+        '2º Tenente',
+        'Aspirante-a-Oficial',
+        'Subtenente',
+        '1º Sargento',
+        '2º Sargento',
+        '3º Sargento',
+        'Cabo (Cb)',
+        'Soldado (Sd)',
+    ];
+    $requesterRanksMap = array_fill_keys($requesterRanks, true);
 
     $buildAdminLoginViewData = static function (
         DashboardRepository $repo,
@@ -409,6 +446,133 @@ return function (App $app) {
         ], $navbarAuthContext()));
     });
 
+    $app->get('/itapiru/guardiao', function (Request $request, Response $response) use ($app, $navbarAuthContext, $buildGroupedSections) {
+        /** @var DashboardRepository $repo */
+        $repo = $app->getContainer()->get(DashboardRepository::class);
+        $twig = $app->getContainer()->get(Twig::class);
+
+        $meta = $repo->getMeta();
+        $sections = $repo->getSections();
+        $lastUpdated = date('d/m/Y H:i');
+        $guardiaoHtml = '<figure class="db-guardian-figure db-guardian-zoom" style="--guardian-zoom-scale: 2.1;"><img class="db-guardian-zoom-image" src="/itapiru/assets/img/guardiao16.png" alt="Guardião 16"></figure>';
+
+        return $twig->render($response, 'dashboard-readme.twig', array_merge([
+            'sections' => $sections,
+            'groupedSections' => $buildGroupedSections($sections, $repo->getAllGroups()),
+            'activeSection' => 'guardiao',
+            'dashboardTitle' => $meta['title'] ?? 'Dashboard Público',
+            'dashboardSubtitle' => $meta['subtitle'] ?? 'Painel público com cards dinâmicos por seção',
+            'lastUpdated' => $lastUpdated,
+            'readmePageTitle' => 'Guardião do 16º BI Mtz',
+            'readmePageSubtitle' => 'Assistente visual para consulta de documentação',
+            'readmeHtml' => $guardiaoHtml,
+        ], $navbarAuthContext()));
+    });
+
+    $app->get('/itapiru/distintivo-om', function (Request $request, Response $response) use ($app, $navbarAuthContext, $buildGroupedSections) {
+        /** @var DashboardRepository $repo */
+        $repo = $app->getContainer()->get(DashboardRepository::class);
+        $twig = $app->getContainer()->get(Twig::class);
+
+        $meta = $repo->getMeta();
+        $sections = $repo->getSections();
+        $lastUpdated = date('d/m/Y H:i');
+        $distintivoHtml = '<figure class="db-guardian-figure"><img src="/itapiru/assets/img/om3.png" alt="Distintivo da OM"></figure>';
+
+        return $twig->render($response, 'dashboard-readme.twig', array_merge([
+            'sections' => $sections,
+            'groupedSections' => $buildGroupedSections($sections, $repo->getAllGroups()),
+            'activeSection' => 'distintivo-om',
+            'dashboardTitle' => $meta['title'] ?? 'Dashboard Público',
+            'dashboardSubtitle' => $meta['subtitle'] ?? 'Painel público com cards dinâmicos por seção',
+            'lastUpdated' => $lastUpdated,
+            'readmePageTitle' => 'Distintivo da OM',
+            'readmePageSubtitle' => 'Identidade visual institucional',
+            'readmeHtml' => $distintivoHtml,
+        ], $navbarAuthContext()));
+    });
+
+        $app->get('/itapiru/faq', function (Request $request, Response $response) use ($app, $navbarAuthContext, $buildGroupedSections) {
+                /** @var DashboardRepository $repo */
+                $repo = $app->getContainer()->get(DashboardRepository::class);
+                $twig = $app->getContainer()->get(Twig::class);
+
+                $meta = $repo->getMeta();
+                $sections = $repo->getSections();
+                $lastUpdated = date('d/m/Y H:i');
+                $faqHtml = <<<'HTML'
+<div class="db-faq-list" aria-label="Perguntas frequentes do Guardião">
+    <p class="db-kicker">Solicitações</p>
+    <details class="db-faq-item" open>
+        <summary>Como solicito um novo card?</summary>
+        <p>Use o menu <strong>Solicitar card</strong>, preencha os campos obrigatórios (posto/graduação, nome, e-mail, título, URL, grupo, subgrupo e descrição) e envie a solicitação.</p>
+    </details>
+    <details class="db-faq-item">
+        <summary>Quem aprova as solicitações de card?</summary>
+        <p>Usuários com acesso ao <strong>Admin</strong>. Em <strong>Admin &gt; Solicitações</strong>, o administrador pode aprovar (criando o card automaticamente) ou rejeitar.</p>
+    </details>
+    <details class="db-faq-item">
+        <summary>A URL da solicitação tem alguma regra?</summary>
+        <p>Sim. O campo <strong>URL</strong> é obrigatório e deve começar com <strong>https://</strong>.</p>
+    </details>
+    <details class="db-faq-item">
+        <summary>Posso acompanhar o status da minha solicitação?</summary>
+        <p>No momento, o acompanhamento é realizado pela Subseção de Desenvolvimento de Sistemas (SDS) da Seção de Informática da OM. Em caso de dúvida, entre em contato com o setor responsável pelo Dashboard através do ramal 6215 ou outro de nossos canais.</p>
+    </details>
+
+    <p class="db-kicker">Administração</p>
+    <details class="db-faq-item" open>
+        <summary>Posso criar card direto no Admin?</summary>
+        <p>Sim. Em <strong>Admin &gt; Cards</strong>, o administrador pode cadastrar manualmente quando necessário.</p>
+    </details>
+    <details class="db-faq-item">
+        <summary>Como crio um menu de grupo?</summary>
+        <p>No menu <strong>Admin</strong>, acesse <strong>Grupos</strong> e cadastre um novo grupo. Ele passa a aparecer como agrupador no menu lateral conforme os subgrupos vinculados.</p>
+    </details>
+    <details class="db-faq-item">
+        <summary>Como crio um menu de subgrupo?</summary>
+        <p>No menu <strong>Admin</strong>, acesse <strong>Subgrupos</strong>, selecione o grupo pai e salve. O subgrupo é exibido dentro do grupo correspondente no menu lateral.</p>
+    </details>
+    <details class="db-faq-item">
+        <summary>Posso editar o card depois de aprovado?</summary>
+        <p>Sim. Em <strong>Admin &gt; Cards</strong>, localize o item e use a ação de edição para alterar dados e salvar as mudanças.</p>
+    </details>
+    <details class="db-faq-item">
+        <summary>Quem pode criar e editar grupos, subgrupos e cards?</summary>
+        <p>Apenas usuários com acesso ao menu <strong>Admin</strong> (perfil administrador autenticado) podem criar e editar grupos, subgrupos e cards no dashboard.</p>
+    </details>
+    <details class="db-faq-item">
+        <summary>Como o Guardião me ajuda no dashboard?</summary>
+        <p>O Guardião direciona você rapidamente para conteúdos de apoio, documentação e orientações de uso, reduzindo o tempo para encontrar informações importantes.</p>
+    </details>
+    <details class="db-faq-item">
+        <summary>O botão do Guardião cobre algum botão da tela. O que faço?</summary>
+        <p>Arraste o botão do Guardião para outro canto da tela. A posição é salva automaticamente no navegador.</p>
+    </details>
+    <details class="db-faq-item">
+        <summary>Posso acessar esta FAQ pelo menu lateral?</summary>
+        <p>Sim. No grupo <strong>Documentação</strong>, use o item <strong>FAQ do Guardião</strong> para abrir esta tela dentro da área interna do dashboard.</p>
+    </details>
+    <details class="db-faq-item">
+        <summary>Como envio melhorias para o Guardião/FAQ?</summary>
+        <p>Centralize sugestões na Subseção de Desenvolvimento de Sistemas (SDS) da Seção de Informática da OM para inclusão de novas perguntas e ajustes de texto conforme a rotina do batalhão, preferencialmente pelo ramal 6215 ou por outro de nossos canais.</p>
+    </details>
+</div>
+HTML;
+
+                return $twig->render($response, 'dashboard-readme.twig', array_merge([
+                        'sections' => $sections,
+                        'groupedSections' => $buildGroupedSections($sections, $repo->getAllGroups()),
+                        'activeSection' => 'faq',
+                        'dashboardTitle' => $meta['title'] ?? 'Dashboard Público',
+                        'dashboardSubtitle' => $meta['subtitle'] ?? 'Painel público com cards dinâmicos por seção',
+                        'lastUpdated' => $lastUpdated,
+                        'readmePageTitle' => 'FAQ do Guardião',
+                        'readmePageSubtitle' => 'Perguntas e respostas rápidas sobre uso do assistente virtual',
+                        'readmeHtml' => $faqHtml,
+                ], $navbarAuthContext()));
+        });
+
     $app->get('/itapiru/contato', function (Request $request, Response $response) use ($app, $navbarAuthContext, $buildGroupedSections) {
         /** @var DashboardRepository $repo */
         $repo = $app->getContainer()->get(DashboardRepository::class);
@@ -434,6 +598,189 @@ return function (App $app) {
                 'website' => '',
             ],
             'formSuccess' => false,
+        ], $navbarAuthContext()));
+    });
+
+    $app->get('/itapiru/solicitar-card', function (Request $request, Response $response) use ($app, $navbarAuthContext, $buildGroupedSections, $ensureCsrfToken, $requesterRanks) {
+        /** @var DashboardRepository $repo */
+        $repo = $app->getContainer()->get(DashboardRepository::class);
+        $twig = $app->getContainer()->get(Twig::class);
+
+        $meta = $repo->getMeta();
+        $sections = $repo->getSections();
+        $groups = $repo->getAllGroups();
+        $lastUpdated = date('d/m/Y H:i');
+
+        return $twig->render($response, 'dashboard-card-request.twig', array_merge([
+            'sections' => $sections,
+            'groupedSections' => $buildGroupedSections($sections, $groups),
+            'groups' => $groups,
+            'requesterRanks' => $requesterRanks,
+            'activeSection' => 'solicitar-card',
+            'dashboardTitle' => $meta['title'] ?? 'Dashboard Público',
+            'dashboardSubtitle' => $meta['subtitle'] ?? 'Painel público com cards dinâmicos por seção',
+            'lastUpdated' => $lastUpdated,
+            'csrfToken' => $ensureCsrfToken(),
+            'formErrors' => [],
+            'formSuccess' => false,
+            'formData' => [
+                'requester_rank' => '',
+                'requester_name' => '',
+                'requester_contact' => '',
+                'title' => '',
+                'href' => '',
+                'group_slug' => '',
+                'subgroup_slug' => '',
+                'justification' => '',
+                'website' => '',
+            ],
+        ], $navbarAuthContext()));
+    });
+
+    $app->post('/itapiru/solicitar-card', function (Request $request, Response $response) use ($app, $navbarAuthContext, $buildGroupedSections, $ensureCsrfToken, $isValidCsrf, $requesterRanks, $requesterRanksMap) {
+        /** @var DashboardRepository $repo */
+        $repo = $app->getContainer()->get(DashboardRepository::class);
+        $twig = $app->getContainer()->get(Twig::class);
+
+        $meta = $repo->getMeta();
+        $sections = $repo->getSections();
+        $groups = $repo->getAllGroups();
+        $groupsBySlug = $repo->getGroupsBySlug();
+        $lastUpdated = date('d/m/Y H:i');
+
+        $parsedBody = $request->getParsedBody();
+        $payload = is_array($parsedBody) ? $parsedBody : [];
+
+        $formData = [
+            'requester_name' => trim((string) ($payload['requester_name'] ?? '')),
+            'requester_rank' => trim((string) ($payload['requester_rank'] ?? '')),
+            'requester_contact' => trim((string) ($payload['requester_contact'] ?? '')),
+            'title' => trim((string) ($payload['title'] ?? '')),
+            'href' => trim((string) ($payload['href'] ?? '')),
+            'group_slug' => strtolower(trim((string) ($payload['group_slug'] ?? ''))),
+            'subgroup_slug' => strtolower(trim((string) ($payload['subgroup_slug'] ?? ''))),
+            'justification' => trim((string) ($payload['justification'] ?? '')),
+            'website' => trim((string) ($payload['website'] ?? '')),
+        ];
+
+        if ($formData['website'] !== '') {
+            return $twig->render($response, 'dashboard-card-request.twig', array_merge([
+                'sections' => $sections,
+                'groupedSections' => $buildGroupedSections($sections, $groups),
+                'groups' => $groups,
+                'requesterRanks' => $requesterRanks,
+                'activeSection' => 'solicitar-card',
+                'dashboardTitle' => $meta['title'] ?? 'Dashboard Público',
+                'dashboardSubtitle' => $meta['subtitle'] ?? 'Painel público com cards dinâmicos por seção',
+                'lastUpdated' => $lastUpdated,
+                'csrfToken' => $ensureCsrfToken(),
+                'formErrors' => [],
+                'formSuccess' => true,
+                'formData' => [
+                    'requester_rank' => '',
+                    'requester_name' => '',
+                    'requester_contact' => '',
+                    'title' => '',
+                    'href' => '',
+                    'group_slug' => '',
+                    'subgroup_slug' => '',
+                    'justification' => '',
+                    'website' => '',
+                ],
+            ], $navbarAuthContext()));
+        }
+
+        $formErrors = [];
+
+        if (!$isValidCsrf($request)) {
+            $formErrors['csrf'] = 'Sessão expirada. Atualize a página e tente novamente.';
+        }
+
+        if ($formData['requester_rank'] === '' || !isset($requesterRanksMap[$formData['requester_rank']])) {
+            $formErrors['requester_rank'] = 'Selecione seu posto/graduação.';
+        }
+
+        if ($formData['requester_name'] === '') {
+            $formErrors['requester_name'] = 'Informe seu nome.';
+        }
+
+        if ($formData['requester_contact'] === '') {
+            $formErrors['requester_contact'] = 'Informe seu e-mail.';
+        } elseif (filter_var($formData['requester_contact'], FILTER_VALIDATE_EMAIL) === false) {
+            $formErrors['requester_contact'] = 'Informe um e-mail válido.';
+        }
+
+        if ($formData['title'] === '') {
+            $formErrors['title'] = 'Informe o título do card.';
+        }
+
+        if ($formData['href'] === '') {
+            $formErrors['href'] = 'Informe a URL completa (https://).';
+        } elseif (preg_match('/^https:\/\//i', $formData['href']) !== 1) {
+            $formErrors['href'] = 'A URL deve começar com https://';
+        }
+
+        if ($formData['group_slug'] === '' || !isset($groupsBySlug[$formData['group_slug']])) {
+            $formErrors['group_slug'] = 'Selecione um grupo válido.';
+        }
+
+        if ($formData['subgroup_slug'] === '' || !isset($sections[$formData['subgroup_slug']])) {
+            $formErrors['subgroup_slug'] = 'Selecione um subgrupo válido.';
+        }
+
+        if ($formData['subgroup_slug'] !== '' && isset($sections[$formData['subgroup_slug']])) {
+            $sectionGroupSlug = strtolower((string) ($sections[$formData['subgroup_slug']]['group_slug'] ?? ''));
+            if ($formData['group_slug'] !== '' && $sectionGroupSlug !== $formData['group_slug']) {
+                $formErrors['subgroup_slug'] = 'O subgrupo selecionado não pertence ao grupo informado.';
+            }
+        }
+
+        if ($formData['justification'] === '') {
+            $formErrors['justification'] = 'Explique brevemente por que o card deve ser criado.';
+        }
+
+        $formSuccess = false;
+        if ($formErrors === []) {
+            $repo->createCardRequest([
+                'requester_rank' => $formData['requester_rank'],
+                'requester_name' => $formData['requester_name'],
+                'requester_contact' => $formData['requester_contact'],
+                'title' => $formData['title'],
+                'href' => $formData['href'],
+                'group_slug' => $formData['group_slug'],
+                'subgroup_slug' => $formData['subgroup_slug'],
+                'justification' => $formData['justification'],
+                'status' => 'pending',
+                'created_at' => date('c'),
+            ]);
+
+            $formSuccess = true;
+            $formData = [
+                'requester_rank' => '',
+                'requester_name' => '',
+                'requester_contact' => '',
+                'title' => '',
+                'href' => '',
+                'group_slug' => '',
+                'subgroup_slug' => '',
+                'justification' => '',
+                'website' => '',
+            ];
+        }
+
+        return $twig->render($response, 'dashboard-card-request.twig', array_merge([
+            'sections' => $sections,
+            'groupedSections' => $buildGroupedSections($sections, $groups),
+            'groups' => $groups,
+            'requesterRanks' => $requesterRanks,
+            'activeSection' => 'solicitar-card',
+            'dashboardTitle' => $meta['title'] ?? 'Dashboard Público',
+            'dashboardSubtitle' => $meta['subtitle'] ?? 'Painel público com cards dinâmicos por seção',
+            'lastUpdated' => $lastUpdated,
+            'csrfToken' => $ensureCsrfToken(),
+            'formErrors' => $formErrors,
+            'formSuccess' => $formSuccess,
+            'formData' => $formData,
         ], $navbarAuthContext()));
     });
 
@@ -720,17 +1067,22 @@ return function (App $app) {
             $sectionCardsCount[$sectionSlug]++;
         }
 
+        $cardRequests = $repo->getCardRequests();
+
         $query = $request->getQueryParams();
         $entity = (string) ($query['entity'] ?? 'groups');
         if ($entity === 'sections') {
             $entity = 'subgroups';
         }
-        if (!in_array($entity, ['groups', 'subgroups', 'cards'], true)) {
+        if (!in_array($entity, ['groups', 'subgroups', 'cards', 'requests'], true)) {
             $entity = 'groups';
         }
 
         $mode = (string) ($query['mode'] ?? 'list');
         if (!in_array($mode, ['list', 'new', 'edit'], true)) {
+            $mode = 'list';
+        }
+        if ($entity === 'requests') {
             $mode = 'list';
         }
 
@@ -782,6 +1134,16 @@ return function (App $app) {
             'section' => strtolower(trim((string) ($query['card_section'] ?? ''))),
             'status' => trim((string) ($query['card_status'] ?? '')),
         ];
+
+        $requestFilters = [
+            'q' => trim((string) ($query['request_q'] ?? '')),
+            'status' => strtolower(trim((string) ($query['request_status'] ?? ''))),
+        ];
+
+        $allowedRequestStatuses = ['pending', 'approved', 'rejected'];
+        if ($requestFilters['status'] !== '' && !in_array($requestFilters['status'], $allowedRequestStatuses, true)) {
+            $requestFilters['status'] = '';
+        }
 
         $allowedStatuses = ['Interno', 'Externo', 'Sistema'];
         if ($cardFilters['status'] !== '' && !in_array($cardFilters['status'], $allowedStatuses, true)) {
@@ -839,6 +1201,43 @@ return function (App $app) {
             }));
         }
 
+        $filteredRequests = $cardRequests;
+        if ($entity === 'requests' && $mode === 'list') {
+            $requestSearchTerm = function_exists('mb_strtolower')
+                ? mb_strtolower($requestFilters['q'])
+                : strtolower($requestFilters['q']);
+
+            $filteredRequests = array_values(array_filter($cardRequests, static function (array $requestRow) use ($requestFilters, $requestSearchTerm): bool {
+                $status = strtolower(trim((string) ($requestRow['status'] ?? '')));
+                if ($requestFilters['status'] !== '' && $status !== $requestFilters['status']) {
+                    return false;
+                }
+
+                if ($requestSearchTerm !== '') {
+                    $haystack = implode(' ', [
+                        (string) ($requestRow['requester_rank'] ?? ''),
+                        (string) ($requestRow['requester_name'] ?? ''),
+                        (string) ($requestRow['requester_contact'] ?? ''),
+                        (string) ($requestRow['title'] ?? ''),
+                        (string) ($requestRow['justification'] ?? ''),
+                        (string) ($requestRow['href'] ?? ''),
+                        (string) ($requestRow['group_label'] ?? ''),
+                        (string) ($requestRow['subgroup_label'] ?? ''),
+                    ]);
+
+                    $normalizedHaystack = function_exists('mb_strtolower')
+                        ? mb_strtolower($haystack)
+                        : strtolower($haystack);
+
+                    if (strpos($normalizedHaystack, $requestSearchTerm) === false) {
+                        return false;
+                    }
+                }
+
+                return true;
+            }));
+        }
+
         $allowedPerPage = [5, 10, 15, 20, 25, 50];
         $perPage = (int) ($query['per_page'] ?? 10);
         if (!in_array($perPage, $allowedPerPage, true)) {
@@ -849,6 +1248,7 @@ return function (App $app) {
         $listedGroups = $groups;
         $listedSections = $sections;
         $listedCards = $filteredCards;
+        $listedRequests = $filteredRequests;
 
         $groupsPagination = [
             'page' => 1,
@@ -867,6 +1267,31 @@ return function (App $app) {
             'totalPages' => 1,
             'totalItems' => count($filteredCards),
         ];
+
+        $requestsPagination = [
+            'page' => 1,
+            'totalPages' => 1,
+            'totalItems' => count($filteredRequests),
+        ];
+
+        $appendPaginationRange = static function (array $pagination, int $itemsPerPage): array {
+            $totalItems = max(0, (int) ($pagination['totalItems'] ?? 0));
+            $page = max(1, (int) ($pagination['page'] ?? 1));
+
+            if ($totalItems === 0) {
+                $pagination['startItem'] = 0;
+                $pagination['endItem'] = 0;
+                return $pagination;
+            }
+
+            $startItem = (($page - 1) * $itemsPerPage) + 1;
+            $endItem = min($totalItems, $startItem + $itemsPerPage - 1);
+
+            $pagination['startItem'] = $startItem;
+            $pagination['endItem'] = $endItem;
+
+            return $pagination;
+        };
 
         if ($entity === 'groups' && $mode === 'list') {
             $totalItems = count($groups);
@@ -910,6 +1335,25 @@ return function (App $app) {
             ];
         }
 
+        if ($entity === 'requests' && $mode === 'list') {
+            $totalItems = count($filteredRequests);
+            $totalPages = max(1, (int) ceil($totalItems / $perPage));
+            $page = min($requestedPage, $totalPages);
+            $offset = ($page - 1) * $perPage;
+
+            $listedRequests = array_slice($filteredRequests, $offset, $perPage);
+            $requestsPagination = [
+                'page' => $page,
+                'totalPages' => $totalPages,
+                'totalItems' => $totalItems,
+            ];
+        }
+
+        $groupsPagination = $appendPaginationRange($groupsPagination, $perPage);
+        $sectionsPagination = $appendPaginationRange($sectionsPagination, $perPage);
+        $cardsPagination = $appendPaginationRange($cardsPagination, $perPage);
+        $requestsPagination = $appendPaginationRange($requestsPagination, $perPage);
+
         $groupsPaginationQuery = [
             'entity' => 'groups',
             'mode' => 'list',
@@ -932,6 +1376,14 @@ return function (App $app) {
             'card_status' => $cardFilters['status'],
         ];
 
+        $requestsPaginationQuery = [
+            'entity' => 'requests',
+            'mode' => 'list',
+            'per_page' => $perPage,
+            'request_q' => $requestFilters['q'],
+            'request_status' => $requestFilters['status'],
+        ];
+
         return $twig->render($response, 'admin-dashboard.twig', array_merge([
             'groups' => $groups,
             'groupsBySlug' => $groupsBySlug,
@@ -942,14 +1394,19 @@ return function (App $app) {
             'listedGroups' => $listedGroups,
             'listedSections' => $listedSections,
             'listedCards' => $listedCards,
+            'listedRequests' => $listedRequests,
             'filteredCards' => $filteredCards,
+            'filteredRequests' => $filteredRequests,
             'cardFilters' => $cardFilters,
+            'requestFilters' => $requestFilters,
             'groupsPagination' => $groupsPagination,
             'sectionsPagination' => $sectionsPagination,
             'cardsPagination' => $cardsPagination,
+            'requestsPagination' => $requestsPagination,
             'groupsPaginationQuery' => $groupsPaginationQuery,
             'sectionsPaginationQuery' => $sectionsPaginationQuery,
             'cardsPaginationQuery' => $cardsPaginationQuery,
+            'requestsPaginationQuery' => $requestsPaginationQuery,
             'allowedPerPage' => $allowedPerPage,
             'currentPerPage' => $perPage,
             'flashMessage' => $flashPull(),
@@ -964,7 +1421,88 @@ return function (App $app) {
             'editingGroup' => $editingGroup,
             'editingSection' => $editingSection,
             'editingCard' => $editingCard,
+            'cardRequests' => $cardRequests,
         ], $navbarAuthContext()));
+    });
+
+    $app->post('/itapiru/admin/card-requests/approve', function (Request $request, Response $response) use ($app, $isValidCsrf, $normalizeHref) {
+        if (empty($_SESSION['is_admin'])) {
+            return $response->withHeader('Location', '/itapiru/login')->withStatus(302);
+        }
+
+        if (!$isValidCsrf($request)) {
+            $_SESSION['admin_flash'] = 'Falha ao aprovar solicitação: token CSRF inválido.';
+            return $response->withHeader('Location', '/itapiru/admin?entity=requests')->withStatus(302);
+        }
+
+        /** @var DashboardRepository $repo */
+        $repo = $app->getContainer()->get(DashboardRepository::class);
+        $data = (array) ($request->getParsedBody() ?? []);
+        $id = (int) ($data['id'] ?? 0);
+
+        $requestRow = $repo->getCardRequestById($id);
+        if (!$requestRow || (string) ($requestRow['status'] ?? '') !== 'pending') {
+            $_SESSION['admin_flash'] = 'Solicitação inválida ou já processada.';
+            return $response->withHeader('Location', '/itapiru/admin?entity=requests')->withStatus(302);
+        }
+
+        $sectionSlug = strtolower(trim((string) ($requestRow['subgroup_slug'] ?? '')));
+        $title = trim((string) ($requestRow['title'] ?? ''));
+        $href = $normalizeHref((string) ($requestRow['href'] ?? ''));
+        $description = trim((string) ($requestRow['justification'] ?? ''));
+
+        if ($sectionSlug === '' || $title === '' || preg_match('/^https:\/\//i', $href) !== 1) {
+            $_SESSION['admin_flash'] = 'Falha ao aprovar: dados da solicitação estão incompletos.';
+            return $response->withHeader('Location', '/itapiru/admin?entity=requests')->withStatus(302);
+        }
+
+        try {
+            $createdCardId = $repo->createCard([
+                'section_slug' => $sectionSlug,
+                'title' => $title,
+                'href' => $href,
+                'external' => true,
+                'icon' => 'bi-globe2',
+                'status' => 'Externo',
+                'description' => $description,
+                'order' => 99,
+            ]);
+
+            $repo->updateCardRequestStatus($id, 'approved', (string) ($_SESSION['admin_user'] ?? 'admin'), $createdCardId);
+            $_SESSION['admin_flash'] = 'Solicitação aprovada e card criado com sucesso.';
+        } catch (\Throwable $throwable) {
+            $_SESSION['admin_flash'] = 'Falha ao aprovar solicitação: ' . $throwable->getMessage();
+        }
+
+        return $response->withHeader('Location', '/itapiru/admin?entity=requests')->withStatus(302);
+    });
+
+    $app->post('/itapiru/admin/card-requests/reject', function (Request $request, Response $response) use ($app, $isValidCsrf) {
+        if (empty($_SESSION['is_admin'])) {
+            return $response->withHeader('Location', '/itapiru/login')->withStatus(302);
+        }
+
+        if (!$isValidCsrf($request)) {
+            $_SESSION['admin_flash'] = 'Falha ao rejeitar solicitação: token CSRF inválido.';
+            return $response->withHeader('Location', '/itapiru/admin?entity=requests')->withStatus(302);
+        }
+
+        /** @var DashboardRepository $repo */
+        $repo = $app->getContainer()->get(DashboardRepository::class);
+        $data = (array) ($request->getParsedBody() ?? []);
+        $id = (int) ($data['id'] ?? 0);
+        $note = trim((string) ($data['admin_note'] ?? ''));
+
+        $requestRow = $repo->getCardRequestById($id);
+        if (!$requestRow || (string) ($requestRow['status'] ?? '') !== 'pending') {
+            $_SESSION['admin_flash'] = 'Solicitação inválida ou já processada.';
+            return $response->withHeader('Location', '/itapiru/admin?entity=requests')->withStatus(302);
+        }
+
+        $repo->updateCardRequestStatus($id, 'rejected', (string) ($_SESSION['admin_user'] ?? 'admin'), null, $note);
+        $_SESSION['admin_flash'] = 'Solicitação rejeitada.';
+
+        return $response->withHeader('Location', '/itapiru/admin?entity=requests')->withStatus(302);
     });
 
     $app->get('/itapiru/admin/account', function (Request $request, Response $response) use ($app, $ensureCsrfToken, $flashPull, $navbarAuthContext, $buildGroupedSections, $allowedAdminAvatarFiles, $normalizeAdminAvatarFile, $adminAvatarConfigKey, $isValidUploadedAvatarPath) {

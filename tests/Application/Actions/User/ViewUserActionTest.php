@@ -12,11 +12,11 @@ class ViewUserActionTest extends TestCase
     {
         $app = $this->getAppInstance();
 
-        $request = $this->createRequest('GET', '/itapiru/subgrupo1');
+        $request = $this->createRequest('GET', '/itapiru/1secao');
         $response = $app->handle($request);
 
         $this->assertEquals(200, $response->getStatusCode());
-        $this->assertStringContainsString('SUBGRUPO1', (string) $response->getBody());
+        $this->assertStringContainsString('1ª Seção', (string) $response->getBody());
     }
 
     public function testInvalidDashboardSectionRedirectsToDashboardHome()

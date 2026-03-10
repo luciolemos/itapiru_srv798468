@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-  {% set assetVersion = '20260224-1' %}
+  {% set assetVersion = '20260226-1' %}
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}Dashboard{% endblock %}</title>
+  <title>{% block title %}16º BI Mtz{% endblock %}</title>
   <script>
     (function () {
       try {
@@ -17,7 +17,9 @@
   </script>
   <link rel="stylesheet" href="{{ asset_base_path }}/assets/css/dashboard.css?v={{ assetVersion }}">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-  <link rel="icon" type="image/png" href="{{ asset_base_path }}/assets/img/brand/nc6.png">
+  <link rel="icon" type="image/x-icon" href="{{ asset_base_path }}/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ asset_base_path }}/assets/img/om-favicon.png">
+  <link rel="apple-touch-icon" href="{{ asset_base_path }}/assets/img/om.png">
   <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
   {% block head %}{% endblock %}
 </head>
@@ -33,6 +35,18 @@
     hx-indicator="#db-loading"
   >
     {% block content %}{% endblock %}
+  </div>
+  <a
+    class="db-floating-assistant"
+    href="{{ asset_base_path }}/faq"
+    draggable="false"
+    aria-label="Abrir FAQ do Guardião"
+    title="Abrir FAQ do Guardião"
+  >
+    <img src="{{ asset_base_path }}/assets/img/guardiao16.png" alt="Guardião 16" draggable="false">
+  </a>
+  <div class="db-floating-assistant-bubble" role="note" data-assistant-bubble>
+    🪖 Olá! Sou o Cb Guardião do 16º BI Mtz, seu assistente virtual. Minha missão é oferecer uma experiência digital moderna, segura e intuitiva, integrando você aos principais sistemas corporativos do Exército Brasileiro com praticidade e eficiência.
   </div>
   <script src="{{ asset_base_path }}/assets/js/sidebar-toggle.js?v={{ assetVersion }}" defer></script>
 </body>
