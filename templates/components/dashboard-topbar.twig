@@ -41,7 +41,7 @@
                       class="db-notification-item"
                       data-request-id="{{ pendingItem.id|default(0) }}"
                       role="menuitem"
-                      href="/itapiru/admin?entity=requests&request_status=pending&request_q={{ pendingItem.title|default('')|url_encode }}"
+                      href="{{ app_base_path }}/admin?entity=requests&request_status=pending&request_q={{ pendingItem.title|default('')|url_encode }}"
                       hx-boost="false"
                     >
                       <span class="db-notification-item-title">{{ pendingItem.title|default('Sem título') }}</span>
@@ -55,7 +55,7 @@
                 <p class="db-notification-empty">Nenhuma solicitação pendente no momento.</p>
               {% endif %}
 
-              <a class="db-notification-footer" href="/itapiru/admin?entity=requests&request_status=pending" hx-boost="false">Abrir lista de solicitações</a>
+              <a class="db-notification-footer" href="{{ app_base_path }}/admin?entity=requests&request_status=pending" hx-boost="false">Abrir lista de solicitações</a>
             </div>
           </details>
 
@@ -68,7 +68,7 @@
           <summary class="db-user-menu-toggle" aria-label="Abrir menu do usuário">
             <span class="db-user-avatar" data-initial="{{ userDisplayName|slice(0, 1)|upper }}" aria-hidden="true">
               <img
-                src="{{ adminAvatarUrl|default('/assets/img/avatar/face6_620_620.png') }}"
+                src="{{ adminAvatarUrl|default(asset_base_path ~ '/assets/img/avatar/face6_620_620.png') }}"
                 alt=""
                 loading="lazy"
                 onerror="this.parentElement.classList.add('is-fallback'); this.remove();"
@@ -79,8 +79,8 @@
           </summary>
 
           <div class="db-user-menu-panel" role="menu" aria-label="Menu do usuário">
-            <a class="db-user-menu-item" role="menuitem" href="/itapiru/admin/account">Conta</a>
-            <form method="post" action="/itapiru/logout" hx-boost="false" class="db-user-menu-form">
+            <a class="db-user-menu-item" role="menuitem" href="{{ app_base_path }}/admin/account">Conta</a>
+            <form method="post" action="{{ app_base_path }}/logout" hx-boost="false" class="db-user-menu-form">
               <input type="hidden" name="csrf_token" value="{{ csrfToken|default('') }}">
               <button class="db-user-menu-item is-danger" type="submit">Sair</button>
             </form>

@@ -16,7 +16,7 @@
     </div>
 
     <nav class="db-menu" aria-label="Navegação de seções">
-      <a href="/itapiru" hx-boost="false" class="db-menu-item{{ activeSection == 'home' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'home' ? 'page' : 'false' }}">
+      <a href="{{ app_url() }}" hx-boost="false" class="db-menu-item{{ activeSection == 'home' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'home' ? 'page' : 'false' }}">
         <i class="bi bi-speedometer2" aria-hidden="true"></i>
         <span>PAINEL DE CONTROLE</span>
       </a>
@@ -39,7 +39,7 @@
           <div class="db-menu-group-items" data-menu-group-items {{ isGroupOpen ? '' : 'hidden' }}>
             {% for slug, section in group.items %}
               <a
-                href="/itapiru/{{ slug }}"
+                href="{{ app_base_path }}/{{ slug }}"
                 hx-boost="false"
                 class="db-menu-item{{ activeSection == slug ? ' is-active' : '' }}"
                 aria-current="{{ activeSection == slug ? 'page' : 'false' }}"
@@ -70,39 +70,39 @@
           <i class="bi bi-chevron-down" aria-hidden="true"></i>
         </button>
         <div class="db-menu-group-items" data-menu-group-items {{ isDocsMenuOpen ? '' : 'hidden' }}>
-          <a href="/itapiru/readme" hx-boost="false" class="db-menu-item{{ activeSection == 'readme' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'readme' ? 'page' : 'false' }}">
+          <a href="{{ app_base_path }}/readme" hx-boost="false" class="db-menu-item{{ activeSection == 'readme' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'readme' ? 'page' : 'false' }}">
             Guia do usuário
           </a>
           <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
-          <a href="/itapiru/readme-seed" hx-boost="false" class="db-menu-item{{ activeSection == 'readme-seed' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'readme-seed' ? 'page' : 'false' }}">
+          <a href="{{ app_base_path }}/readme-seed" hx-boost="false" class="db-menu-item{{ activeSection == 'readme-seed' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'readme-seed' ? 'page' : 'false' }}">
             Guia de Seed
           </a>
           <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
-          <a href="/itapiru/readme-sqlite" hx-boost="false" class="db-menu-item{{ activeSection == 'readme-sqlite' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'readme-sqlite' ? 'page' : 'false' }}">
+          <a href="{{ app_base_path }}/readme-sqlite" hx-boost="false" class="db-menu-item{{ activeSection == 'readme-sqlite' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'readme-sqlite' ? 'page' : 'false' }}">
             Guia do banco
           </a>
           <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
-          <a href="/itapiru/guardiao" hx-boost="false" class="db-menu-item{{ activeSection == 'guardiao' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'guardiao' ? 'page' : 'false' }}">
+          <a href="{{ app_base_path }}/guardiao" hx-boost="false" class="db-menu-item{{ activeSection == 'guardiao' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'guardiao' ? 'page' : 'false' }}">
             Guardião
           </a>
           <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
-          <a href="/itapiru/distintivo-om" hx-boost="false" class="db-menu-item{{ activeSection == 'distintivo-om' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'distintivo-om' ? 'page' : 'false' }}">
+          <a href="{{ app_base_path }}/distintivo-om" hx-boost="false" class="db-menu-item{{ activeSection == 'distintivo-om' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'distintivo-om' ? 'page' : 'false' }}">
             Distintivo da OM
           </a>
         </div>
       </section>
       <span class="db-menu-divider" aria-hidden="true"></span>
-      <a href="/itapiru/faq" hx-boost="false" class="db-menu-item{{ activeSection == 'faq' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'faq' ? 'page' : 'false' }}">
+      <a href="{{ app_base_path }}/faq" hx-boost="false" class="db-menu-item{{ activeSection == 'faq' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'faq' ? 'page' : 'false' }}">
         <i class="bi bi-question-circle" aria-hidden="true"></i>
         <span>FAQ DO GUARDIÃO</span>
       </a>
       <span class="db-menu-divider" aria-hidden="true"></span>
-      <a href="/itapiru/solicitar-card" hx-boost="false" class="db-menu-item{{ activeSection == 'solicitar-card' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'solicitar-card' ? 'page' : 'false' }}">
+      <a href="{{ app_base_path }}/solicitar-card" hx-boost="false" class="db-menu-item{{ activeSection == 'solicitar-card' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'solicitar-card' ? 'page' : 'false' }}">
         <i class="bi bi-person-vcard" aria-hidden="true"></i>
         <span>SOLICITAR CARD</span>
       </a>
       <span class="db-menu-divider" aria-hidden="true"></span>
-      <a href="/itapiru/contato" hx-boost="false" class="db-menu-item{{ activeSection == 'contato' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'contato' ? 'page' : 'false' }}">
+      <a href="{{ app_base_path }}/contato" hx-boost="false" class="db-menu-item{{ activeSection == 'contato' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'contato' ? 'page' : 'false' }}">
         <i class="bi bi-envelope" aria-hidden="true"></i>
         <span>CONTATO</span>
       </a>
@@ -121,30 +121,30 @@
             <i class="bi bi-chevron-down" aria-hidden="true"></i>
           </button>
           <div class="db-menu-group-items" data-menu-group-items {{ isAdminMenuOpen ? '' : 'hidden' }}>
-            <a href="/itapiru/admin?entity=groups" hx-boost="false" class="db-menu-item{{ activeSection == 'admin' and adminEntity|default('groups') == 'groups' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'admin' and adminEntity|default('groups') == 'groups' ? 'page' : 'false' }}">
+            <a href="{{ app_base_path }}/admin?entity=groups" hx-boost="false" class="db-menu-item{{ activeSection == 'admin' and adminEntity|default('groups') == 'groups' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'admin' and adminEntity|default('groups') == 'groups' ? 'page' : 'false' }}">
               Grupos
             </a>
             <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
-            <a href="/itapiru/admin?entity=subgroups" hx-boost="false" class="db-menu-item{{ activeSection == 'admin' and adminEntity|default('') == 'subgroups' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'admin' and adminEntity|default('') == 'subgroups' ? 'page' : 'false' }}">
+            <a href="{{ app_base_path }}/admin?entity=subgroups" hx-boost="false" class="db-menu-item{{ activeSection == 'admin' and adminEntity|default('') == 'subgroups' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'admin' and adminEntity|default('') == 'subgroups' ? 'page' : 'false' }}">
               Subgrupos
             </a>
             <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
-            <a href="/itapiru/admin?entity=cards" hx-boost="false" class="db-menu-item{{ activeSection == 'admin' and adminEntity|default('') == 'cards' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'admin' and adminEntity|default('') == 'cards' ? 'page' : 'false' }}">
+            <a href="{{ app_base_path }}/admin?entity=cards" hx-boost="false" class="db-menu-item{{ activeSection == 'admin' and adminEntity|default('') == 'cards' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'admin' and adminEntity|default('') == 'cards' ? 'page' : 'false' }}">
               Cards
             </a>
             <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
-            <a href="/itapiru/admin?entity=requests" hx-boost="false" class="db-menu-item{{ activeSection == 'admin' and adminEntity|default('') == 'requests' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'admin' and adminEntity|default('') == 'requests' ? 'page' : 'false' }}">
+            <a href="{{ app_base_path }}/admin?entity=requests" hx-boost="false" class="db-menu-item{{ activeSection == 'admin' and adminEntity|default('') == 'requests' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'admin' and adminEntity|default('') == 'requests' ? 'page' : 'false' }}">
               Solicitações
             </a>
           </div>
         </section>
-        <form method="post" action="/itapiru/logout" hx-boost="false" class="db-menu-form">
+        <form method="post" action="{{ app_base_path }}/logout" hx-boost="false" class="db-menu-form">
           <input type="hidden" name="csrf_token" value="{{ csrfToken|default('') }}">
           <button class="db-menu-item" type="submit"><i class="bi bi-box-arrow-right" aria-hidden="true"></i><span>SAIR</span></button>
         </form>
       {% else %}
         <span class="db-menu-divider" aria-hidden="true"></span>
-        <a href="/itapiru/login" hx-boost="false" class="db-menu-item{{ activeSection == 'login' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'login' ? 'page' : 'false' }}">
+        <a href="{{ app_base_path }}/login" hx-boost="false" class="db-menu-item{{ activeSection == 'login' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'login' ? 'page' : 'false' }}">
           <i class="bi bi-box-arrow-in-right" aria-hidden="true"></i>
           <span>LOGIN</span>
         </a>
@@ -157,7 +157,7 @@
     {% include 'components/dashboard-topbar.twig' with {
       lastUpdated: lastUpdated,
       breadcrumbs: [
-        { label: 'Dashboard', url: '/itapiru' },
+        { label: 'Dashboard', url: '{{ app_base_path }}' },
         { label: 'PAINEL DE CONTROLE' }
       ]
     } %}
@@ -165,7 +165,7 @@
     <div id="db-content" class="db-main-body">
       {% include 'components/dashboard-content-header.twig' with {
         breadcrumbs: [
-          { label: 'Dashboard', url: '/itapiru' },
+          { label: 'Dashboard', url: '{{ app_base_path }}' },
           { label: 'PAINEL DE CONTROLE' }
         ],
         title: 'Visão geral do dashboard',
@@ -206,7 +206,7 @@
             </header>
             <p class="db-description">{{ section.description }}</p>
             <p class="db-card-link-wrap">
-              <a class="db-card-link" href="/itapiru/{{ slug }}">Abrir seção</a>
+              <a class="db-card-link" href="{{ app_base_path }}/{{ slug }}">Abrir seção</a>
             </p>
           </article>
         {% endfor %}

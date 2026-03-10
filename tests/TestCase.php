@@ -26,6 +26,8 @@ class TestCase extends PHPUnit_TestCase
      */
     protected function getAppInstance(): App
     {
+        $_ENV['APP_BASE_PATH'] = '/itapiru';
+
         // Instantiate PHP-DI ContainerBuilder
         $containerBuilder = new ContainerBuilder();
 
@@ -76,7 +78,20 @@ class TestCase extends PHPUnit_TestCase
         array $cookies = [],
         array $serverParams = []
     ): Request {
-        $uri = new Uri('', '', 80, $path);
+        $basePath = trim((string) ($_ENV['APP_BASE_PATH'] ?? ''));
+        $normalizedBasePath = $basePath === '' || $basePath === '/'
+            ? ''
+            : '/' . trim($basePath, '/');
+        $normalizedPath = $path;
+
+        if (
+            $normalizedBasePath !== ''
+            && ($normalizedPath === $normalizedBasePath || str_starts_with($normalizedPath, $normalizedBasePath . '/'))
+        ) {
+            $normalizedPath = substr($normalizedPath, strlen($normalizedBasePath)) ?: '/';
+        }
+
+        $uri = new Uri('', '', 80, $normalizedPath);
         $handle = fopen('php://temp', 'w+');
         $stream = (new StreamFactory())->createStreamFromResource($handle);
 

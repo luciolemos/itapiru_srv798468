@@ -12,10 +12,12 @@ return function (ContainerBuilder $containerBuilder) {
     // Global Settings Object
     $containerBuilder->addDefinitions([
         SettingsInterface::class => function () {
+            $isProduction = strtolower((string) ($_ENV['APP_ENV'] ?? '')) === 'production';
+
             return new Settings([
-                'displayErrorDetails' => true, // Should be set to false in production
-                'logError'            => false,
-                'logErrorDetails'     => false,
+                'displayErrorDetails' => !$isProduction,
+                'logError'            => $isProduction,
+                'logErrorDetails'     => $isProduction,
                 'logger' => [
                     'name' => 'slim-app',
                     'path' => ($_ENV['APP_ENV'] ?? '') === 'test'

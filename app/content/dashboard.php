@@ -2,6 +2,11 @@
 
 declare(strict_types=1);
 
+$configuredBasePath = trim((string) ($_ENV['APP_BASE_PATH'] ?? ''));
+$appBasePath = $configuredBasePath === '' || $configuredBasePath === '/'
+    ? ''
+    : '/' . trim($configuredBasePath, '/');
+
 return [
     'title' => '16º BI Mtz',
     'subtitle' => 'Batalhão Itapiru',
@@ -9,34 +14,42 @@ return [
         'secao-1' => [
             'label' => '1ª Seção',
             'description' => 'Pessoal',
+            'group' => '1ª Seção',
         ],
         'secao-2' => [
             'label' => '2ª Seção',
             'description' => 'Inteligência',
+            'group' => '2ª Seção',
         ],
         'secao-3' => [
             'label' => '3ª Seção',
             'description' => 'Formação e Aperfeiçoamento',
+            'group' => '3ª Seção',
         ],
         'secao-4' => [
             'label' => '4ª Seção',
             'description' => 'Logística',
+            'group' => '4ª Seção',
         ],
         'secao-5' => [
             'label' => 'SFPC',
             'description' => 'Fiscalização de Produtos Controlados',
+            'group' => 'SFPC',
         ],        
         'fisc-adm' => [
             'label' => 'Fisc Adm',
             'description' => 'Administração patrimonial e Finanças',
+            'group' => 'Fisc Adm',
         ],
         'intranets' => [
             'label' => 'Intranets',
             'description' => 'Intranets das OM parceiras',
+            'group' => 'Intranets',
         ],
         'links-interesse' => [
             'label' => 'Links de interesse',
             'description' => 'Acessos externos institucionais de referência',
+            'group' => 'Links de interesse',
         ],
     ],
     'cardsBySection' => [
@@ -90,21 +103,21 @@ return [
         'secao-2' => [
             [
                 'title' => 'Demandas recebidas',
-                'href' => '/itapiru/subsistemas/secao-2/demandas-recebidas',
+                'href' => $appBasePath . '/subsistemas/secao-2/demandas-recebidas',
                 'status' => 'Interno',
                 'description' => 'Total de demandas registradas no período.',
                 'order' => 1,
             ],
             [
                 'title' => 'Backlog ativo',
-                'href' => '/itapiru/subsistemas/secao-2/backlog-ativo',
+                'href' => $appBasePath . '/subsistemas/secao-2/backlog-ativo',
                 'status' => 'Externo',
                 'description' => 'Chamados que aguardam execução.',
                 'order' => 2,
             ],
             [
                 'title' => 'SLA cumprido',
-                'href' => '/itapiru/subsistemas/secao-2/sla-cumprido',
+                'href' => $appBasePath . '/subsistemas/secao-2/sla-cumprido',
                 'status' => 'Interno',
                 'description' => 'Percentual de entregas dentro do prazo.',
                 'order' => 3,
@@ -113,21 +126,21 @@ return [
         'secao-3' => [
             [
                 'title' => 'Processos auditados',
-                'href' => '/itapiru/subsistemas/secao-3/processos-auditados',
+                'href' => $appBasePath . '/subsistemas/secao-3/processos-auditados',
                 'status' => 'Interno',
                 'description' => 'Processos revisados e concluídos no mês.',
                 'order' => 1,
             ],
             [
                 'title' => 'Conformidade documental',
-                'href' => '/itapiru/subsistemas/secao-3/conformidade-documental',
+                'href' => $appBasePath . '/subsistemas/secao-3/conformidade-documental',
                 'status' => 'Interno',
                 'description' => 'Documentos dentro do padrão exigido.',
                 'order' => 2,
             ],
             [
                 'title' => 'Pendências críticas',
-                'href' => '/itapiru/subsistemas/secao-3/pendencias-criticas',
+                'href' => $appBasePath . '/subsistemas/secao-3/pendencias-criticas',
                 'status' => 'Sistema',
                 'description' => 'Pendências classificadas como alta prioridade.',
                 'order' => 3,
@@ -136,21 +149,21 @@ return [
         'secao-4' => [
             [
                 'title' => 'Execução orçamentária',
-                'href' => '/itapiru/subsistemas/secao-4/execucao-orcamentaria',
+                'href' => $appBasePath . '/subsistemas/secao-4/execucao-orcamentaria',
                 'status' => 'Interno',
                 'description' => 'Percentual executado frente ao previsto anual.',
                 'order' => 1,
             ],
             [
                 'title' => 'Projetos em andamento',
-                'href' => '/itapiru/subsistemas/secao-4/projetos-andamento',
+                'href' => $appBasePath . '/subsistemas/secao-4/projetos-andamento',
                 'status' => 'Interno',
                 'description' => 'Projetos ativos com acompanhamento público.',
                 'order' => 2,
             ],
             [
                 'title' => 'Risco operacional',
-                'href' => '/itapiru/subsistemas/secao-4/risco-operacional',
+                'href' => $appBasePath . '/subsistemas/secao-4/risco-operacional',
                 'status' => 'Interno',
                 'description' => 'Classificação consolidada de risco da seção.',
                 'order' => 3,
@@ -159,21 +172,21 @@ return [
          'secao-5' => [
             [
                 'title' => 'Execução orçamentária',
-                'href' => '/itapiru/subsistemas/secao-5/execucao-orcamentaria',
+                'href' => $appBasePath . '/subsistemas/secao-5/execucao-orcamentaria',
                 'status' => 'Interno',
                 'description' => 'Percentual executado frente ao previsto anual.',
                 'order' => 1,
             ],
             [
                 'title' => 'Projetos em andamento',
-                'href' => '/itapiru/subsistemas/secao-4/projetos-andamento',
+                'href' => $appBasePath . '/subsistemas/secao-4/projetos-andamento',
                 'status' => 'Interno',
                 'description' => 'Projetos ativos com acompanhamento público.',
                 'order' => 2,
             ],
             [
                 'title' => 'Risco operacional',
-                'href' => '/itapiru/subsistemas/secao-4/risco-operacional',
+                'href' => $appBasePath . '/subsistemas/secao-4/risco-operacional',
                 'status' => 'Interno',
                 'description' => 'Classificação consolidada de risco da seção.',
                 'order' => 3,
@@ -182,21 +195,21 @@ return [
         'fisc-adm' => [
             [
                 'title' => 'Arrecadação realizada',
-                'href' => '/itapiru/subsistemas/fisc-adm/arrecadacao-realizada',
+                'href' => $appBasePath . '/subsistemas/fisc-adm/arrecadacao-realizada',
                 'status' => 'Interno',
                 'description' => 'Valor acumulado de arrecadação no período.',
                 'order' => 1,
             ],
             [
                 'title' => 'Despesas liquidadas',
-                'href' => '/itapiru/subsistemas/fisc-adm/despesas-liquidadas',
+                'href' => $appBasePath . '/subsistemas/fisc-adm/despesas-liquidadas',
                 'status' => 'Interno',
                 'description' => 'Total de despesas liquidadas até a data.',
                 'order' => 2,
             ],
             [
                 'title' => 'Transparência fiscal',
-                'href' => '/itapiru/subsistemas/fisc-adm/transparencia-fiscal',
+                'href' => $appBasePath . '/subsistemas/fisc-adm/transparencia-fiscal',
                 'status' => 'Interno',
                 'description' => 'Publicações e dados disponíveis no prazo legal.',
                 'order' => 3,

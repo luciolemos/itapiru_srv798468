@@ -45,6 +45,22 @@ $container = $containerBuilder->build();
 // Instantiate the app
 AppFactory::setContainer($container);
 $app = AppFactory::create();
+
+$configuredBasePath = trim((string) ($_ENV['APP_BASE_PATH'] ?? ''));
+if ($configuredBasePath === '' || $configuredBasePath === '/') {
+    $scriptName = (string) ($_SERVER['SCRIPT_NAME'] ?? '');
+    $scriptDir = trim(str_replace('\\', '/', dirname($scriptName)));
+    $configuredBasePath = ($scriptDir === '' || $scriptDir === '.' || $scriptDir === '/')
+        ? ''
+        : '/' . trim($scriptDir, '/');
+} else {
+    $configuredBasePath = '/' . trim($configuredBasePath, '/');
+}
+
+if ($configuredBasePath !== '') {
+    $app->setBasePath($configuredBasePath);
+}
+
 $callableResolver = $app->getCallableResolver();
 
 // Register middleware

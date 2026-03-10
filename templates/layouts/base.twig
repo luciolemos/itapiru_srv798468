@@ -23,7 +23,7 @@
   <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
   {% block head %}{% endblock %}
 </head>
-<body>
+<body data-app-base-path="{{ app_base_path }}">
   <div id="db-loading" class="db-loading" aria-hidden="true"></div>
   <div
     id="db-app"

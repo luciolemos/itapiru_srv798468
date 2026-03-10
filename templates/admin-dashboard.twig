@@ -16,7 +16,7 @@
     </div>
 
     <nav class="db-menu" aria-label="Navegação de seções">
-      <a href="/itapiru" hx-boost="false" class="db-menu-item{{ activeSection == 'home' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'home' ? 'page' : 'false' }}">
+      <a href="{{ app_url() }}" hx-boost="false" class="db-menu-item{{ activeSection == 'home' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'home' ? 'page' : 'false' }}">
         <i class="bi bi-speedometer2" aria-hidden="true"></i>
         <span>PAINEL DE CONTROLE</span>
       </a>
@@ -38,7 +38,7 @@
           </button>
           <div class="db-menu-group-items" data-menu-group-items {{ isGroupOpen ? '' : 'hidden' }}>
             {% for slug, section in group.items %}
-              <a href="/itapiru/{{ slug }}" hx-boost="false" class="db-menu-item" aria-current="false">
+              <a href="{{ app_base_path }}/{{ slug }}" hx-boost="false" class="db-menu-item" aria-current="false">
                 {{ section.label }}
               </a>
               {% if not loop.last %}
@@ -65,39 +65,39 @@
           <i class="bi bi-chevron-down" aria-hidden="true"></i>
         </button>
         <div class="db-menu-group-items" data-menu-group-items {{ isDocsMenuOpen ? '' : 'hidden' }}>
-          <a href="/itapiru/readme" hx-boost="false" class="db-menu-item{{ activeSection == 'readme' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'readme' ? 'page' : 'false' }}">
+          <a href="{{ app_base_path }}/readme" hx-boost="false" class="db-menu-item{{ activeSection == 'readme' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'readme' ? 'page' : 'false' }}">
             Guia do usuário
           </a>
           <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
-          <a href="/itapiru/readme-seed" hx-boost="false" class="db-menu-item{{ activeSection == 'readme-seed' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'readme-seed' ? 'page' : 'false' }}">
+          <a href="{{ app_base_path }}/readme-seed" hx-boost="false" class="db-menu-item{{ activeSection == 'readme-seed' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'readme-seed' ? 'page' : 'false' }}">
             Guia de Seed
           </a>
           <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
-          <a href="/itapiru/readme-sqlite" hx-boost="false" class="db-menu-item{{ activeSection == 'readme-sqlite' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'readme-sqlite' ? 'page' : 'false' }}">
+          <a href="{{ app_base_path }}/readme-sqlite" hx-boost="false" class="db-menu-item{{ activeSection == 'readme-sqlite' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'readme-sqlite' ? 'page' : 'false' }}">
             Guia do banco
           </a>
           <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
-          <a href="/itapiru/guardiao" hx-boost="false" class="db-menu-item{{ activeSection == 'guardiao' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'guardiao' ? 'page' : 'false' }}">
+          <a href="{{ app_base_path }}/guardiao" hx-boost="false" class="db-menu-item{{ activeSection == 'guardiao' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'guardiao' ? 'page' : 'false' }}">
             Guardião
           </a>
           <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
-          <a href="/itapiru/distintivo-om" hx-boost="false" class="db-menu-item{{ activeSection == 'distintivo-om' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'distintivo-om' ? 'page' : 'false' }}">
+          <a href="{{ app_base_path }}/distintivo-om" hx-boost="false" class="db-menu-item{{ activeSection == 'distintivo-om' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'distintivo-om' ? 'page' : 'false' }}">
             Distintivo da OM
           </a>
         </div>
       </section>
       <span class="db-menu-divider" aria-hidden="true"></span>
-      <a href="/itapiru/faq" hx-boost="false" class="db-menu-item{{ activeSection == 'faq' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'faq' ? 'page' : 'false' }}">
+      <a href="{{ app_base_path }}/faq" hx-boost="false" class="db-menu-item{{ activeSection == 'faq' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'faq' ? 'page' : 'false' }}">
         <i class="bi bi-question-circle" aria-hidden="true"></i>
         <span>FAQ DO GUARDIÃO</span>
       </a>
       <span class="db-menu-divider" aria-hidden="true"></span>
-      <a href="/itapiru/solicitar-card" hx-boost="false" class="db-menu-item{{ activeSection == 'solicitar-card' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'solicitar-card' ? 'page' : 'false' }}">
+      <a href="{{ app_base_path }}/solicitar-card" hx-boost="false" class="db-menu-item{{ activeSection == 'solicitar-card' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'solicitar-card' ? 'page' : 'false' }}">
         <i class="bi bi-person-vcard" aria-hidden="true"></i>
         <span>SOLICITAR CARD</span>
       </a>
       <span class="db-menu-divider" aria-hidden="true"></span>
-      <a href="/itapiru/contato" hx-boost="false" class="db-menu-item{{ activeSection == 'contato' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'contato' ? 'page' : 'false' }}">
+      <a href="{{ app_base_path }}/contato" hx-boost="false" class="db-menu-item{{ activeSection == 'contato' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'contato' ? 'page' : 'false' }}">
         <i class="bi bi-envelope" aria-hidden="true"></i>
         <span>CONTATO</span>
       </a>
@@ -115,24 +115,24 @@
           <i class="bi bi-chevron-down" aria-hidden="true"></i>
         </button>
         <div class="db-menu-group-items" data-menu-group-items {{ isAdminMenuOpen ? '' : 'hidden' }}>
-          <a href="/itapiru/admin?entity=groups" hx-boost="false" class="db-menu-item{{ activeSection == 'admin' and adminEntity == 'groups' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'admin' and adminEntity == 'groups' ? 'page' : 'false' }}">
+          <a href="{{ app_base_path }}/admin?entity=groups" hx-boost="false" class="db-menu-item{{ activeSection == 'admin' and adminEntity == 'groups' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'admin' and adminEntity == 'groups' ? 'page' : 'false' }}">
             Grupos
           </a>
           <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
-          <a href="/itapiru/admin?entity=subgroups" hx-boost="false" class="db-menu-item{{ activeSection == 'admin' and adminEntity == 'subgroups' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'admin' and adminEntity == 'subgroups' ? 'page' : 'false' }}">
+          <a href="{{ app_base_path }}/admin?entity=subgroups" hx-boost="false" class="db-menu-item{{ activeSection == 'admin' and adminEntity == 'subgroups' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'admin' and adminEntity == 'subgroups' ? 'page' : 'false' }}">
             Subgrupos
           </a>
           <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
-          <a href="/itapiru/admin?entity=cards" hx-boost="false" class="db-menu-item{{ activeSection == 'admin' and adminEntity == 'cards' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'admin' and adminEntity == 'cards' ? 'page' : 'false' }}">
+          <a href="{{ app_base_path }}/admin?entity=cards" hx-boost="false" class="db-menu-item{{ activeSection == 'admin' and adminEntity == 'cards' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'admin' and adminEntity == 'cards' ? 'page' : 'false' }}">
             Cards
           </a>
           <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
-          <a href="/itapiru/admin?entity=requests" hx-boost="false" class="db-menu-item{{ activeSection == 'admin' and adminEntity == 'requests' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'admin' and adminEntity == 'requests' ? 'page' : 'false' }}">
+          <a href="{{ app_base_path }}/admin?entity=requests" hx-boost="false" class="db-menu-item{{ activeSection == 'admin' and adminEntity == 'requests' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'admin' and adminEntity == 'requests' ? 'page' : 'false' }}">
             Solicitações
           </a>
         </div>
       </section>
-      <form method="post" action="/itapiru/logout" hx-boost="false" class="db-menu-form">
+      <form method="post" action="{{ app_base_path }}/logout" hx-boost="false" class="db-menu-form">
         <input type="hidden" name="csrf_token" value="{{ csrfToken|default('') }}">
         <button class="db-menu-item" type="submit"><i class="bi bi-box-arrow-right" aria-hidden="true"></i><span>SAIR</span></button>
       </form>
@@ -149,7 +149,7 @@
     {% include 'components/dashboard-topbar.twig' with {
       lastUpdated: lastUpdated,
       breadcrumbs: [
-        { label: 'Dashboard', url: '/itapiru' },
+        { label: 'Dashboard', url: '{{ app_base_path }}' },
         { label: 'Admin' },
         { label: adminLabel }
       ]
@@ -158,7 +158,7 @@
     <div id="db-content" class="db-main-body">
       {% include 'components/dashboard-content-header.twig' with {
         breadcrumbs: [
-          { label: 'Dashboard', url: '/itapiru' },
+          { label: 'Dashboard', url: '{{ app_base_path }}' },
           { label: 'Admin' },
           { label: adminLabel }
         ],
@@ -182,14 +182,14 @@
           <div class="db-admin-entity-head">
             <h3 class="db-admin-entity-title">Grupos</h3>
             {% if adminMode == 'new' %}
-              <a class="db-card-link db-card-link-secondary" href="/itapiru/admin?entity=groups">Voltar para lista</a>
+              <a class="db-card-link db-card-link-secondary" href="{{ app_base_path }}/admin?entity=groups">Voltar para lista</a>
             {% else %}
-              <a class="db-card-link" href="/itapiru/admin?entity=groups&mode=new">Novo grupo</a>
+              <a class="db-card-link" href="{{ app_base_path }}/admin?entity=groups&mode=new">Novo grupo</a>
             {% endif %}
           </div>
 
           {% if adminMode == 'new' %}
-            <form class="db-contact-form" method="post" action="/itapiru/admin/groups/create">
+            <form class="db-contact-form" method="post" action="{{ app_base_path }}/admin/groups/create">
               <input type="hidden" name="csrf_token" value="{{ csrfToken }}">
               <input type="hidden" name="_form" value="group_create">
               <div class="db-form-grid">
@@ -211,7 +211,7 @@
               </div>
             </form>
           {% elseif adminMode == 'edit' and editingGroup %}
-            <form class="db-contact-form" method="post" action="/itapiru/admin/groups/update" hx-boost="false">
+            <form class="db-contact-form" method="post" action="{{ app_base_path }}/admin/groups/update" hx-boost="false">
               <input type="hidden" name="csrf_token" value="{{ csrfToken }}">
               <input type="hidden" name="_form" value="group_update">
               <input type="hidden" name="original_slug" value="{{ editingGroup.slug }}">
@@ -230,13 +230,13 @@
                 <input class="db-form-input" name="label" value="{{ editingGroup.label }}" required>
               </label>
               <div class="db-admin-form-actions-inline">
-                <a class="db-card-link db-card-link-secondary" href="/itapiru/admin?entity=groups">Voltar para lista</a>
+                <a class="db-card-link db-card-link-secondary" href="{{ app_base_path }}/admin?entity=groups">Voltar para lista</a>
                 <button class="db-card-link" type="submit">Salvar grupo</button>
                 {% set editingGroupSubgroups = editingGroup.subgroups_count|default(0) %}
                 <button
                   class="db-card-link db-card-link-danger"
                   type="submit"
-                  formaction="/itapiru/admin/groups/delete"
+                  formaction="{{ app_base_path }}/admin/groups/delete"
                   {{ editingGroupSubgroups > 0 ? 'disabled' : '' }}
                   title="{{ editingGroupSubgroups > 0 ? 'Remova os subgrupos antes de excluir este grupo.' : 'Excluir grupo' }}"
                 >Excluir grupo</button>
@@ -263,10 +263,10 @@
                       <td>{{ group.order|default(loop.index) }}</td>
                       <td class="db-admin-td-actions">
                         <div class="db-admin-table-actions">
-                          <a class="db-card-link db-icon-action" href="/itapiru/admin?entity=groups&mode=edit&slug={{ group.slug }}" title="Editar grupo" aria-label="Editar grupo">
+                          <a class="db-card-link db-icon-action" href="{{ app_base_path }}/admin?entity=groups&mode=edit&slug={{ group.slug }}" title="Editar grupo" aria-label="Editar grupo">
                             <i class="bi bi-pencil-square" aria-hidden="true"></i>
                           </a>
-                          <form method="post" action="/itapiru/admin/groups/delete" class="db-inline-form">
+                          <form method="post" action="{{ app_base_path }}/admin/groups/delete" class="db-inline-form">
                             <input type="hidden" name="csrf_token" value="{{ csrfToken }}">
                             <input type="hidden" name="slug" value="{{ group.slug }}">
                             <button
@@ -293,7 +293,7 @@
 
             {% if groupsPagination.totalPages|default(1) > 1 %}
               <nav class="db-admin-pagination" aria-label="Paginação de grupos">
-                <form class="db-admin-pagination-size" method="get" action="/itapiru/admin">
+                <form class="db-admin-pagination-size" method="get" action="{{ app_base_path }}/admin">
                   <input type="hidden" name="entity" value="groups">
                   <input type="hidden" name="mode" value="list">
                   <label class="db-admin-pagination-size-label" for="groups-per-page">Itens:</label>
@@ -308,7 +308,7 @@
                 {% set nextPage = groupsPagination.page + 1 %}
 
                 {% if groupsPagination.page > 1 %}
-                  <a class="db-card-link db-card-link-secondary" href="/itapiru/admin?{{ groupsPaginationQuery|merge({'page': prevPage})|url_encode }}">Anterior</a>
+                  <a class="db-card-link db-card-link-secondary" href="{{ app_base_path }}/admin?{{ groupsPaginationQuery|merge({'page': prevPage})|url_encode }}">Anterior</a>
                 {% else %}
                   <span class="db-card-link db-card-link-secondary is-disabled" aria-disabled="true">Anterior</span>
                 {% endif %}
@@ -316,7 +316,7 @@
                 <span class="db-admin-pagination-info">Página {{ groupsPagination.page }} de {{ groupsPagination.totalPages }} • Registros {{ groupsPagination.startItem|default(0) }}{% if groupsPagination.endItem|default(0) > groupsPagination.startItem|default(0) %}–{{ groupsPagination.endItem|default(0) }}{% endif %} de {{ groupsPagination.totalItems|default(0) }}</span>
 
                 {% if groupsPagination.page < groupsPagination.totalPages %}
-                  <a class="db-card-link db-card-link-secondary" href="/itapiru/admin?{{ groupsPaginationQuery|merge({'page': nextPage})|url_encode }}">Próxima</a>
+                  <a class="db-card-link db-card-link-secondary" href="{{ app_base_path }}/admin?{{ groupsPaginationQuery|merge({'page': nextPage})|url_encode }}">Próxima</a>
                 {% else %}
                   <span class="db-card-link db-card-link-secondary is-disabled" aria-disabled="true">Próxima</span>
                 {% endif %}
@@ -330,14 +330,14 @@
           <div class="db-admin-entity-head">
             <h3 class="db-admin-entity-title">Subgrupos</h3>
             {% if adminMode == 'new' %}
-              <a class="db-card-link db-card-link-secondary" href="/itapiru/admin?entity=subgroups">Voltar para lista</a>
+              <a class="db-card-link db-card-link-secondary" href="{{ app_base_path }}/admin?entity=subgroups">Voltar para lista</a>
             {% else %}
-              <a class="db-card-link" href="/itapiru/admin?entity=subgroups&mode=new">Novo subgrupo</a>
+              <a class="db-card-link" href="{{ app_base_path }}/admin?entity=subgroups&mode=new">Novo subgrupo</a>
             {% endif %}
           </div>
 
           {% if adminMode == 'new' %}
-            <form class="db-contact-form" method="post" action="/itapiru/admin/sections/create">
+            <form class="db-contact-form" method="post" action="{{ app_base_path }}/admin/sections/create">
               <input type="hidden" name="csrf_token" value="{{ csrfToken }}">
               <input type="hidden" name="_form" value="subgroup_create">
               <div class="db-form-grid">
@@ -372,7 +372,7 @@
             </form>
 
           {% elseif adminMode == 'edit' and editingSection %}
-            <form class="db-contact-form" method="post" action="/itapiru/admin/sections/update" hx-boost="false">
+            <form class="db-contact-form" method="post" action="{{ app_base_path }}/admin/sections/update" hx-boost="false">
               <input type="hidden" name="csrf_token" value="{{ csrfToken }}">
               <input type="hidden" name="_form" value="subgroup_update">
               <input type="hidden" name="original_slug" value="{{ editingSection.slug }}">
@@ -403,13 +403,13 @@
                 </select>
               </label>
               <div class="db-admin-form-actions-inline">
-                <a class="db-card-link db-card-link-secondary" href="/itapiru/admin?entity=subgroups">Voltar para lista</a>
+                <a class="db-card-link db-card-link-secondary" href="{{ app_base_path }}/admin?entity=subgroups">Voltar para lista</a>
                 <button class="db-card-link" type="submit">Salvar subgrupo</button>
                 {% set editingSectionCards = sectionCardsCount[editingSection.slug]|default(0) %}
                 <button
                   class="db-card-link db-card-link-danger"
                   type="submit"
-                  formaction="/itapiru/admin/sections/delete"
+                  formaction="{{ app_base_path }}/admin/sections/delete"
                   {{ editingSectionCards > 0 ? 'disabled' : '' }}
                   title="{{ editingSectionCards > 0 ? 'Remova os cards antes de excluir este subgrupo.' : 'Excluir subgrupo' }}"
                 >Excluir subgrupo</button>
@@ -437,10 +437,10 @@
                       <td>{{ section.order|default(loop.index) }}</td>
                       <td class="db-admin-td-actions">
                         <div class="db-admin-table-actions">
-                          <a class="db-card-link db-icon-action" href="/itapiru/admin?entity=subgroups&mode=edit&slug={{ slug }}" title="Editar subgrupo" aria-label="Editar subgrupo">
+                          <a class="db-card-link db-icon-action" href="{{ app_base_path }}/admin?entity=subgroups&mode=edit&slug={{ slug }}" title="Editar subgrupo" aria-label="Editar subgrupo">
                             <i class="bi bi-pencil-square" aria-hidden="true"></i>
                           </a>
-                          <form method="post" action="/itapiru/admin/sections/delete" class="db-inline-form">
+                          <form method="post" action="{{ app_base_path }}/admin/sections/delete" class="db-inline-form">
                             <input type="hidden" name="csrf_token" value="{{ csrfToken }}">
                             <input type="hidden" name="slug" value="{{ slug }}">
                             <button
@@ -466,7 +466,7 @@
             </div>
             {% if sectionsPagination.totalPages|default(1) > 1 %}
               <nav class="db-admin-pagination" aria-label="Paginação de subgrupos">
-                <form class="db-admin-pagination-size" method="get" action="/itapiru/admin">
+                <form class="db-admin-pagination-size" method="get" action="{{ app_base_path }}/admin">
                   <input type="hidden" name="entity" value="subgroups">
                   <input type="hidden" name="mode" value="list">
                   <label class="db-admin-pagination-size-label" for="sections-per-page">Itens:</label>
@@ -481,7 +481,7 @@
                 {% set nextPage = sectionsPagination.page + 1 %}
 
                 {% if sectionsPagination.page > 1 %}
-                  <a class="db-card-link db-card-link-secondary" href="/itapiru/admin?{{ sectionsPaginationQuery|merge({'page': prevPage})|url_encode }}">Anterior</a>
+                  <a class="db-card-link db-card-link-secondary" href="{{ app_base_path }}/admin?{{ sectionsPaginationQuery|merge({'page': prevPage})|url_encode }}">Anterior</a>
                 {% else %}
                   <span class="db-card-link db-card-link-secondary is-disabled" aria-disabled="true">Anterior</span>
                 {% endif %}
@@ -489,7 +489,7 @@
                 <span class="db-admin-pagination-info">Página {{ sectionsPagination.page }} de {{ sectionsPagination.totalPages }} • Registros {{ sectionsPagination.startItem|default(0) }}{% if sectionsPagination.endItem|default(0) > sectionsPagination.startItem|default(0) %}–{{ sectionsPagination.endItem|default(0) }}{% endif %} de {{ sectionsPagination.totalItems|default(0) }}</span>
 
                 {% if sectionsPagination.page < sectionsPagination.totalPages %}
-                  <a class="db-card-link db-card-link-secondary" href="/itapiru/admin?{{ sectionsPaginationQuery|merge({'page': nextPage})|url_encode }}">Próxima</a>
+                  <a class="db-card-link db-card-link-secondary" href="{{ app_base_path }}/admin?{{ sectionsPaginationQuery|merge({'page': nextPage})|url_encode }}">Próxima</a>
                 {% else %}
                   <span class="db-card-link db-card-link-secondary is-disabled" aria-disabled="true">Próxima</span>
                 {% endif %}
@@ -503,14 +503,14 @@
           <div class="db-admin-entity-head">
             <h3 class="db-admin-entity-title">Cards</h3>
             {% if adminMode == 'new' %}
-              <a class="db-card-link db-card-link-secondary" href="/itapiru/admin?entity=cards">Voltar para lista</a>
+              <a class="db-card-link db-card-link-secondary" href="{{ app_base_path }}/admin?entity=cards">Voltar para lista</a>
             {% else %}
-              <a class="db-card-link" href="/itapiru/admin?entity=cards&mode=new">Novo card</a>
+              <a class="db-card-link" href="{{ app_base_path }}/admin?entity=cards&mode=new">Novo card</a>
             {% endif %}
           </div>
 
           {% if adminMode == 'new' %}
-            <form class="db-contact-form" method="post" action="/itapiru/admin/cards/create">
+            <form class="db-contact-form" method="post" action="{{ app_base_path }}/admin/cards/create">
               <input type="hidden" name="csrf_token" value="{{ csrfToken }}">
               <div class="db-form-grid">
                 <label class="db-form-field">
@@ -562,7 +562,7 @@
             </form>
 
           {% elseif adminMode == 'edit' and editingCard %}
-            <form class="db-contact-form" method="post" action="/itapiru/admin/cards/update">
+            <form class="db-contact-form" method="post" action="{{ app_base_path }}/admin/cards/update">
               <input type="hidden" name="csrf_token" value="{{ csrfToken }}">
               <input type="hidden" name="id" value="{{ editingCard.id }}">
               <div class="db-form-grid">
@@ -608,14 +608,14 @@
                 <select class="db-form-input" name="external"><option value="1" {{ editingCard.external ? 'selected' : '' }}>Sim</option><option value="0" {{ not editingCard.external ? 'selected' : '' }}>Não</option></select>
               </label>
               <div class="db-admin-form-actions-inline">
-                <a class="db-card-link db-card-link-secondary" href="/itapiru/admin?entity=cards">Voltar para lista</a>
+                <a class="db-card-link db-card-link-secondary" href="{{ app_base_path }}/admin?entity=cards">Voltar para lista</a>
                 <button class="db-card-link" type="submit">Salvar card</button>
-                <button class="db-card-link db-card-link-danger" type="submit" formaction="/itapiru/admin/cards/delete">Excluir card</button>
+                <button class="db-card-link db-card-link-danger" type="submit" formaction="{{ app_base_path }}/admin/cards/delete">Excluir card</button>
               </div>
             </form>
 
           {% else %}
-            <form class="db-contact-form db-admin-filters" method="get" action="/itapiru/admin">
+            <form class="db-contact-form db-admin-filters" method="get" action="{{ app_base_path }}/admin">
               <input type="hidden" name="entity" value="cards">
               <input type="hidden" name="mode" value="list">
               <input type="hidden" name="per_page" value="{{ currentPerPage|default(10) }}">
@@ -653,7 +653,7 @@
                 </label>
                 <div class="db-form-actions db-admin-filters-actions">
                   <button class="db-card-link" type="submit">Filtrar</button>
-                  <a class="db-card-link db-card-link-secondary" href="/itapiru/admin?entity=cards">Limpar</a>
+                  <a class="db-card-link db-card-link-secondary" href="{{ app_base_path }}/admin?entity=cards">Limpar</a>
                 </div>
               </div>
             </form>
@@ -687,10 +687,10 @@
                           <button class="db-card-link db-card-link-secondary db-icon-action" type="button" onclick="document.getElementById('card-preview-{{ card.id }}').showModal();" title="Visualizar card" aria-label="Visualizar card">
                             <i class="bi bi-eye" aria-hidden="true"></i>
                           </button>
-                          <a class="db-card-link db-icon-action" href="/itapiru/admin?entity=cards&mode=edit&id={{ card.id }}" title="Editar card" aria-label="Editar card">
+                          <a class="db-card-link db-icon-action" href="{{ app_base_path }}/admin?entity=cards&mode=edit&id={{ card.id }}" title="Editar card" aria-label="Editar card">
                             <i class="bi bi-pencil-square" aria-hidden="true"></i>
                           </a>
-                          <form method="post" action="/itapiru/admin/cards/delete" class="db-inline-form">
+                          <form method="post" action="{{ app_base_path }}/admin/cards/delete" class="db-inline-form">
                             <input type="hidden" name="csrf_token" value="{{ csrfToken }}">
                             <input type="hidden" name="id" value="{{ card.id }}">
                             <button class="db-card-link db-card-link-danger db-icon-action" type="submit" title="Excluir card" aria-label="Excluir card">
@@ -711,7 +711,7 @@
 
             {% if cardsPagination.totalPages|default(1) > 1 %}
               <nav class="db-admin-pagination" aria-label="Paginação de cards">
-                <form class="db-admin-pagination-size" method="get" action="/itapiru/admin">
+                <form class="db-admin-pagination-size" method="get" action="{{ app_base_path }}/admin">
                   <input type="hidden" name="entity" value="cards">
                   <input type="hidden" name="mode" value="list">
                   <input type="hidden" name="card_q" value="{{ cardFilters.q|default('') }}">
@@ -730,7 +730,7 @@
                 {% set nextPage = cardsPagination.page + 1 %}
 
                 {% if cardsPagination.page > 1 %}
-                  <a class="db-card-link db-card-link-secondary" href="/itapiru/admin?{{ cardsPaginationQuery|merge({'page': prevPage})|url_encode }}">Anterior</a>
+                  <a class="db-card-link db-card-link-secondary" href="{{ app_base_path }}/admin?{{ cardsPaginationQuery|merge({'page': prevPage})|url_encode }}">Anterior</a>
                 {% else %}
                   <span class="db-card-link db-card-link-secondary is-disabled" aria-disabled="true">Anterior</span>
                 {% endif %}
@@ -738,7 +738,7 @@
                 <span class="db-admin-pagination-info">Página {{ cardsPagination.page }} de {{ cardsPagination.totalPages }} • Registros {{ cardsPagination.startItem|default(0) }}{% if cardsPagination.endItem|default(0) > cardsPagination.startItem|default(0) %}–{{ cardsPagination.endItem|default(0) }}{% endif %} de {{ cardsPagination.totalItems|default(0) }}</span>
 
                 {% if cardsPagination.page < cardsPagination.totalPages %}
-                  <a class="db-card-link db-card-link-secondary" href="/itapiru/admin?{{ cardsPaginationQuery|merge({'page': nextPage})|url_encode }}">Próxima</a>
+                  <a class="db-card-link db-card-link-secondary" href="{{ app_base_path }}/admin?{{ cardsPaginationQuery|merge({'page': nextPage})|url_encode }}">Próxima</a>
                 {% else %}
                   <span class="db-card-link db-card-link-secondary is-disabled" aria-disabled="true">Próxima</span>
                 {% endif %}
@@ -752,7 +752,7 @@
             <h3 class="db-admin-entity-title">Solicitações de novos cards</h3>
           </div>
 
-          <form class="db-contact-form db-admin-filters" method="get" action="/itapiru/admin">
+          <form class="db-contact-form db-admin-filters" method="get" action="{{ app_base_path }}/admin">
             <input type="hidden" name="entity" value="requests">
             <input type="hidden" name="mode" value="list">
             <input type="hidden" name="per_page" value="{{ currentPerPage|default(10) }}">
@@ -772,7 +772,7 @@
               </label>
               <div class="db-form-actions db-admin-filters-actions">
                 <button class="db-card-link" type="submit">Filtrar</button>
-                <a class="db-card-link db-card-link-secondary" href="/itapiru/admin?entity=requests">Limpar</a>
+                <a class="db-card-link db-card-link-secondary" href="{{ app_base_path }}/admin?entity=requests">Limpar</a>
               </div>
             </div>
           </form>
@@ -821,14 +821,14 @@
                     <td class="db-admin-td-actions">
                       {% if request.status == 'pending' %}
                         <div class="db-admin-table-actions">
-                          <form method="post" action="/itapiru/admin/card-requests/approve" class="db-inline-form">
+                          <form method="post" action="{{ app_base_path }}/admin/card-requests/approve" class="db-inline-form">
                             <input type="hidden" name="csrf_token" value="{{ csrfToken }}">
                             <input type="hidden" name="id" value="{{ request.id }}">
                             <button class="db-card-link db-icon-action" type="submit" title="Aprovar e criar card" aria-label="Aprovar solicitação">
                               <i class="bi bi-check2-circle" aria-hidden="true"></i>
                             </button>
                           </form>
-                          <form method="post" action="/itapiru/admin/card-requests/reject" class="db-inline-form">
+                          <form method="post" action="{{ app_base_path }}/admin/card-requests/reject" class="db-inline-form">
                             <input type="hidden" name="csrf_token" value="{{ csrfToken }}">
                             <input type="hidden" name="id" value="{{ request.id }}">
                             <input type="hidden" name="admin_note" value="Solicitação rejeitada pelo administrador.">
@@ -853,7 +853,7 @@
 
           {% if requestsPagination.totalPages|default(1) > 1 %}
             <nav class="db-admin-pagination" aria-label="Paginação de solicitações">
-              <form class="db-admin-pagination-size" method="get" action="/itapiru/admin">
+              <form class="db-admin-pagination-size" method="get" action="{{ app_base_path }}/admin">
                 <input type="hidden" name="entity" value="requests">
                 <input type="hidden" name="mode" value="list">
                 <input type="hidden" name="request_q" value="{{ requestFilters.q|default('') }}">
@@ -870,7 +870,7 @@
               {% set nextPage = requestsPagination.page + 1 %}
 
               {% if requestsPagination.page > 1 %}
-                <a class="db-card-link db-card-link-secondary" href="/itapiru/admin?{{ requestsPaginationQuery|merge({'page': prevPage})|url_encode }}">Anterior</a>
+                <a class="db-card-link db-card-link-secondary" href="{{ app_base_path }}/admin?{{ requestsPaginationQuery|merge({'page': prevPage})|url_encode }}">Anterior</a>
               {% else %}
                 <span class="db-card-link db-card-link-secondary is-disabled" aria-disabled="true">Anterior</span>
               {% endif %}
@@ -878,7 +878,7 @@
               <span class="db-admin-pagination-info">Página {{ requestsPagination.page }} de {{ requestsPagination.totalPages }} • Registros {{ requestsPagination.startItem|default(0) }}{% if requestsPagination.endItem|default(0) > requestsPagination.startItem|default(0) %}–{{ requestsPagination.endItem|default(0) }}{% endif %} de {{ requestsPagination.totalItems|default(0) }}</span>
 
               {% if requestsPagination.page < requestsPagination.totalPages %}
-                <a class="db-card-link db-card-link-secondary" href="/itapiru/admin?{{ requestsPaginationQuery|merge({'page': nextPage})|url_encode }}">Próxima</a>
+                <a class="db-card-link db-card-link-secondary" href="{{ app_base_path }}/admin?{{ requestsPaginationQuery|merge({'page': nextPage})|url_encode }}">Próxima</a>
               {% else %}
                 <span class="db-card-link db-card-link-secondary is-disabled" aria-disabled="true">Próxima</span>
               {% endif %}
@@ -981,7 +981,7 @@
       }
 
       const action = String(form.getAttribute('action') || '');
-      if (action !== '/itapiru/admin/card-requests/approve' && action !== '/itapiru/admin/card-requests/reject') {
+      if (action !== '{{ app_base_path }}/admin/card-requests/approve' && action !== '{{ app_base_path }}/admin/card-requests/reject') {
         return;
       }
 

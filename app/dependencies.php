@@ -12,6 +12,7 @@ use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use Slim\Views\Twig;
 use Twig\TwigFilter;
+use Twig\TwigFunction;
 
 return function (ContainerBuilder $containerBuilder) {
     $containerBuilder->addDefinitions([
@@ -61,17 +62,27 @@ return function (ContainerBuilder $containerBuilder) {
                 return implode(' ', $parts);
             }));
 
-            $assetBasePath = trim((string) ($_ENV['APP_BASE_PATH'] ?? ''));
-            if ($assetBasePath === '' || $assetBasePath === '/') {
-                if (PHP_SAPI === 'cli-server') {
-                    $assetBasePath = '';
-                } else {
-                    $requestPath = (string) parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
-                    $assetBasePath = str_starts_with($requestPath, '/itapiru') ? '/itapiru' : '';
+            $resolveBasePath = static function (): string {
+                $configuredBasePath = trim((string) ($_ENV['APP_BASE_PATH'] ?? ''));
+                if ($configuredBasePath !== '' && $configuredBasePath !== '/') {
+                    return '/' . trim($configuredBasePath, '/');
                 }
-            } else {
-                $assetBasePath = '/' . trim($assetBasePath, '/');
-            }
+
+                if (PHP_SAPI === 'cli-server') {
+                    return '';
+                }
+
+                $scriptName = (string) ($_SERVER['SCRIPT_NAME'] ?? '');
+                $scriptDir = trim(str_replace('\\', '/', dirname($scriptName)));
+
+                if ($scriptDir === '' || $scriptDir === '.' || $scriptDir === '/') {
+                    return '';
+                }
+
+                return '/' . trim($scriptDir, '/');
+            };
+
+            $assetBasePath = $resolveBasePath();
 
             $allowedThemes = ['blue', 'red', 'green', 'violet', 'amber'];
             $allowedModes = ['light', 'dark'];
@@ -94,13 +105,33 @@ return function (ContainerBuilder $containerBuilder) {
             $twig->getEnvironment()->addGlobal('default_theme', $defaultTheme);
             $twig->getEnvironment()->addGlobal('default_mode', $defaultMode);
             $twig->getEnvironment()->addGlobal('default_dark_intensity', $defaultDarkIntensity);
+            $twig->getEnvironment()->addGlobal('app_base_path', $assetBasePath);
             $twig->getEnvironment()->addGlobal('asset_base_path', $assetBasePath);
+            $twig->getEnvironment()->addFunction(new TwigFunction('app_url', static function (string $path = '') use ($assetBasePath): string {
+                $normalizedPath = trim($path);
+                if ($normalizedPath === '' || $normalizedPath === '/') {
+                    return $assetBasePath !== '' ? $assetBasePath : '/';
+                }
+
+                return ($assetBasePath !== '' ? $assetBasePath : '') . '/' . ltrim($normalizedPath, '/');
+            }));
 
             return $twig;
         },
         DashboardRepository::class => function () {
+            $configuredBasePath = trim((string) ($_ENV['APP_BASE_PATH'] ?? ''));
+            $appSlug = trim($configuredBasePath, '/');
+            if ($appSlug === '') {
+                $appSlug = basename(dirname(__DIR__));
+            }
+
+            $dbPath = trim((string) ($_ENV['APP_DB_PATH'] ?? ''));
+            if ($dbPath === '') {
+                $dbPath = __DIR__ . '/../var/data/' . $appSlug . '.sqlite';
+            }
+
             return new DashboardRepository(
-                __DIR__ . '/../var/data/itapiru.sqlite',
+                $dbPath,
                 __DIR__ . '/content/dashboard.php'
             );
         },

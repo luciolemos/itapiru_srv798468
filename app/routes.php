@@ -12,6 +12,39 @@ use App\Infrastructure\Persistence\Dashboard\DashboardRepository;
 use Slim\App;
 use Slim\Views\Twig;
 
+if (!function_exists('app_base_path')) {
+    function app_base_path(): string
+    {
+        $configuredBasePath = trim((string) ($_ENV['APP_BASE_PATH'] ?? ''));
+        if ($configuredBasePath !== '' && $configuredBasePath !== '/') {
+            return '/' . trim($configuredBasePath, '/');
+        }
+
+        $scriptName = (string) ($_SERVER['SCRIPT_NAME'] ?? '');
+        $scriptDir = trim(str_replace('\\', '/', dirname($scriptName)));
+
+        if ($scriptDir === '' || $scriptDir === '.' || $scriptDir === '/') {
+            return '';
+        }
+
+        return '/' . trim($scriptDir, '/');
+    }
+}
+
+if (!function_exists('app_url')) {
+    function app_url(string $path = ''): string
+    {
+        $basePath = app_base_path();
+        $normalizedPath = trim($path);
+
+        if ($normalizedPath === '' || $normalizedPath === '/') {
+            return $basePath !== '' ? $basePath : '/';
+        }
+
+        return ($basePath !== '' ? $basePath : '') . '/' . ltrim($normalizedPath, '/');
+    }
+}
+
 return function (App $app) {
     $flashPull = static function (): ?string {
         $message = $_SESSION['admin_flash'] ?? null;
@@ -132,7 +165,7 @@ return function (App $app) {
         $stored = $resolveAdminAvatarStoredValue($username);
         $version = substr(sha1($stored), 0, 12);
 
-        return '/itapiru/admin/avatar?v=' . rawurlencode($version);
+        return app_url('/admin/avatar?v=' . rawurlencode($version));
     };
 
     $navbarAuthContext = static function () use ($app, $ensureCsrfToken, $resolveAdminAvatarUrl): array {
@@ -284,13 +317,13 @@ return function (App $app) {
         return $response;
     });
 
-    $app->get('/', function (Request $request, Response $response) use ($app) {
+    $app->get('/index.php', function (Request $request, Response $response) use ($app) {
         return $response
-            ->withHeader('Location', '/itapiru')
+            ->withHeader('Location', app_url(''))
             ->withStatus(302);
     });
 
-    $app->get('/itapiru', function (Request $request, Response $response) use ($app, $navbarAuthContext, $buildGroupedSections) {
+    $app->get('/', function (Request $request, Response $response) use ($app, $navbarAuthContext, $buildGroupedSections) {
         /** @var DashboardRepository $repo */
         $repo = $app->getContainer()->get(DashboardRepository::class);
         $twig = $app->getContainer()->get(Twig::class);
@@ -320,37 +353,13 @@ return function (App $app) {
         ], $navbarAuthContext()));
     });
 
-    $app->get('/itapiru/', function (Request $request, Response $response) use ($app, $navbarAuthContext, $buildGroupedSections) {
-        /** @var DashboardRepository $repo */
-        $repo = $app->getContainer()->get(DashboardRepository::class);
-        $twig = $app->getContainer()->get(Twig::class);
-        $meta = $repo->getMeta();
-        $sections = $repo->getSections();
-        $groups = $repo->getAllGroups();
-        $cardsBySection = $repo->getCardsBySection();
-        $lastUpdated = date('d/m/Y H:i');
-        $totalCards = 0;
-
-        foreach ($cardsBySection as $sectionCards) {
-            $totalCards += count($sectionCards);
-        }
-
-        return $twig->render($response, 'dashboard-home.twig', array_merge([
-            'sections' => $sections,
-            'groupedSections' => $buildGroupedSections($sections, $groups),
-            'activeSection' => 'home',
-            'dashboardTitle' => $meta['title'] ?? 'Dashboard Público',
-            'dashboardSubtitle' => $meta['subtitle'] ?? 'Painel público com cards dinâmicos por seção',
-            'lastUpdated' => $lastUpdated,
-            'summary' => [
-                'groups' => count($groups),
-                'cards' => $totalCards,
-                'lastUpdated' => $lastUpdated,
-            ],
-        ], $navbarAuthContext()));
+    $app->get('/legacy-home', function (Request $request, Response $response) {
+        return $response
+            ->withHeader('Location', app_url(''))
+            ->withStatus(302);
     });
 
-    $app->get('/itapiru/readme', function (Request $request, Response $response) use ($app, $navbarAuthContext, $buildGroupedSections) {
+    $app->get('/readme', function (Request $request, Response $response) use ($app, $navbarAuthContext, $buildGroupedSections) {
         /** @var DashboardRepository $repo */
         $repo = $app->getContainer()->get(DashboardRepository::class);
         $twig = $app->getContainer()->get(Twig::class);
@@ -382,7 +391,7 @@ return function (App $app) {
         ], $navbarAuthContext()));
     });
 
-    $app->get('/itapiru/readme-seed', function (Request $request, Response $response) use ($app, $navbarAuthContext, $buildGroupedSections) {
+    $app->get('/readme-seed', function (Request $request, Response $response) use ($app, $navbarAuthContext, $buildGroupedSections) {
         /** @var DashboardRepository $repo */
         $repo = $app->getContainer()->get(DashboardRepository::class);
         $twig = $app->getContainer()->get(Twig::class);
@@ -414,7 +423,7 @@ return function (App $app) {
         ], $navbarAuthContext()));
     });
 
-    $app->get('/itapiru/readme-sqlite', function (Request $request, Response $response) use ($app, $navbarAuthContext, $buildGroupedSections) {
+    $app->get('/readme-sqlite', function (Request $request, Response $response) use ($app, $navbarAuthContext, $buildGroupedSections) {
         /** @var DashboardRepository $repo */
         $repo = $app->getContainer()->get(DashboardRepository::class);
         $twig = $app->getContainer()->get(Twig::class);
@@ -446,7 +455,7 @@ return function (App $app) {
         ], $navbarAuthContext()));
     });
 
-    $app->get('/itapiru/guardiao', function (Request $request, Response $response) use ($app, $navbarAuthContext, $buildGroupedSections) {
+    $app->get('/guardiao', function (Request $request, Response $response) use ($app, $navbarAuthContext, $buildGroupedSections) {
         /** @var DashboardRepository $repo */
         $repo = $app->getContainer()->get(DashboardRepository::class);
         $twig = $app->getContainer()->get(Twig::class);
@@ -454,7 +463,7 @@ return function (App $app) {
         $meta = $repo->getMeta();
         $sections = $repo->getSections();
         $lastUpdated = date('d/m/Y H:i');
-        $guardiaoHtml = '<figure class="db-guardian-figure db-guardian-zoom" style="--guardian-zoom-scale: 2.1;"><img class="db-guardian-zoom-image" src="/itapiru/assets/img/guardiao16.png" alt="Guardião 16"></figure>';
+        $guardiaoHtml = '<figure class="db-guardian-figure db-guardian-zoom" style="--guardian-zoom-scale: 2.1;"><img class="db-guardian-zoom-image" src="' . app_url('/assets/img/guardiao16.png') . '" alt="Guardião 16"></figure>';
 
         return $twig->render($response, 'dashboard-readme.twig', array_merge([
             'sections' => $sections,
@@ -469,7 +478,7 @@ return function (App $app) {
         ], $navbarAuthContext()));
     });
 
-    $app->get('/itapiru/distintivo-om', function (Request $request, Response $response) use ($app, $navbarAuthContext, $buildGroupedSections) {
+    $app->get('/distintivo-om', function (Request $request, Response $response) use ($app, $navbarAuthContext, $buildGroupedSections) {
         /** @var DashboardRepository $repo */
         $repo = $app->getContainer()->get(DashboardRepository::class);
         $twig = $app->getContainer()->get(Twig::class);
@@ -477,7 +486,7 @@ return function (App $app) {
         $meta = $repo->getMeta();
         $sections = $repo->getSections();
         $lastUpdated = date('d/m/Y H:i');
-        $distintivoHtml = '<figure class="db-guardian-figure"><img src="/itapiru/assets/img/om3.png" alt="Distintivo da OM"></figure>';
+        $distintivoHtml = '<figure class="db-guardian-figure"><img src="' . app_url('/assets/img/om3.png') . '" alt="Distintivo da OM"></figure>';
 
         return $twig->render($response, 'dashboard-readme.twig', array_merge([
             'sections' => $sections,
@@ -492,7 +501,7 @@ return function (App $app) {
         ], $navbarAuthContext()));
     });
 
-        $app->get('/itapiru/faq', function (Request $request, Response $response) use ($app, $navbarAuthContext, $buildGroupedSections) {
+        $app->get('/faq', function (Request $request, Response $response) use ($app, $navbarAuthContext, $buildGroupedSections) {
                 /** @var DashboardRepository $repo */
                 $repo = $app->getContainer()->get(DashboardRepository::class);
                 $twig = $app->getContainer()->get(Twig::class);
@@ -573,7 +582,7 @@ HTML;
                 ], $navbarAuthContext()));
         });
 
-    $app->get('/itapiru/contato', function (Request $request, Response $response) use ($app, $navbarAuthContext, $buildGroupedSections) {
+    $app->get('/contato', function (Request $request, Response $response) use ($app, $navbarAuthContext, $buildGroupedSections) {
         /** @var DashboardRepository $repo */
         $repo = $app->getContainer()->get(DashboardRepository::class);
         $twig = $app->getContainer()->get(Twig::class);
@@ -601,7 +610,7 @@ HTML;
         ], $navbarAuthContext()));
     });
 
-    $app->get('/itapiru/solicitar-card', function (Request $request, Response $response) use ($app, $navbarAuthContext, $buildGroupedSections, $ensureCsrfToken, $requesterRanks) {
+    $app->get('/solicitar-card', function (Request $request, Response $response) use ($app, $navbarAuthContext, $buildGroupedSections, $ensureCsrfToken, $requesterRanks) {
         /** @var DashboardRepository $repo */
         $repo = $app->getContainer()->get(DashboardRepository::class);
         $twig = $app->getContainer()->get(Twig::class);
@@ -637,7 +646,7 @@ HTML;
         ], $navbarAuthContext()));
     });
 
-    $app->post('/itapiru/solicitar-card', function (Request $request, Response $response) use ($app, $navbarAuthContext, $buildGroupedSections, $ensureCsrfToken, $isValidCsrf, $requesterRanks, $requesterRanksMap) {
+    $app->post('/solicitar-card', function (Request $request, Response $response) use ($app, $navbarAuthContext, $buildGroupedSections, $ensureCsrfToken, $isValidCsrf, $requesterRanks, $requesterRanksMap) {
         /** @var DashboardRepository $repo */
         $repo = $app->getContainer()->get(DashboardRepository::class);
         $twig = $app->getContainer()->get(Twig::class);
@@ -784,7 +793,7 @@ HTML;
         ], $navbarAuthContext()));
     });
 
-    $app->post('/itapiru/contato', function (Request $request, Response $response) use ($app, $navbarAuthContext, $buildGroupedSections) {
+    $app->post('/contato', function (Request $request, Response $response) use ($app, $navbarAuthContext, $buildGroupedSections) {
         /** @var DashboardRepository $repo */
         $repo = $app->getContainer()->get(DashboardRepository::class);
         $twig = $app->getContainer()->get(Twig::class);
@@ -886,9 +895,9 @@ HTML;
         ], $navbarAuthContext()));
     });
 
-    $app->get('/itapiru/login', function (Request $request, Response $response) use ($app, $ensureCsrfToken, $buildAdminLoginViewData) {
+    $app->get('/login', function (Request $request, Response $response) use ($app, $ensureCsrfToken, $buildAdminLoginViewData) {
         if (!empty($_SESSION['is_admin'])) {
-            return $response->withHeader('Location', '/itapiru/admin')->withStatus(302);
+            return $response->withHeader('Location', app_url('/admin'))->withStatus(302);
         }
 
         /** @var DashboardRepository $repo */
@@ -902,7 +911,7 @@ HTML;
         );
     });
 
-    $app->post('/itapiru/login', function (Request $request, Response $response) use ($app, $isValidCsrf, $ensureCsrfToken, $buildAdminLoginViewData) {
+    $app->post('/login', function (Request $request, Response $response) use ($app, $isValidCsrf, $ensureCsrfToken, $buildAdminLoginViewData) {
         /** @var DashboardRepository $repo */
         $repo = $app->getContainer()->get(DashboardRepository::class);
         $twig = $app->getContainer()->get(Twig::class);
@@ -970,7 +979,7 @@ HTML;
                 'first' => $now,
                 'locked_until' => 0,
             ];
-            return $response->withHeader('Location', '/itapiru/admin')->withStatus(302);
+            return $response->withHeader('Location', app_url('/admin'))->withStatus(302);
         }
 
         $attempts['count'] = (int) ($attempts['count'] ?? 0) + 1;
@@ -1000,16 +1009,16 @@ HTML;
         );
     });
 
-    $app->post('/itapiru/logout', function (Request $request, Response $response) use ($isValidCsrf) {
+    $app->post('/logout', function (Request $request, Response $response) use ($isValidCsrf) {
         if (!$isValidCsrf($request)) {
-            return $response->withHeader('Location', '/itapiru/admin')->withStatus(302);
+            return $response->withHeader('Location', app_url('/admin'))->withStatus(302);
         }
 
         unset($_SESSION['is_admin'], $_SESSION['admin_user']);
-        return $response->withHeader('Location', '/itapiru/login')->withStatus(302);
+        return $response->withHeader('Location', app_url('/login'))->withStatus(302);
     });
 
-    $app->get('/itapiru/admin/avatar', function (Request $request, Response $response) use ($resolveAdminAvatarStoredValue, $normalizeAdminAvatarFile, $isValidUploadedAvatarPath) {
+    $app->get('/admin/avatar', function (Request $request, Response $response) use ($resolveAdminAvatarStoredValue, $normalizeAdminAvatarFile, $isValidUploadedAvatarPath) {
         $adminUsername = (string) ($_SESSION['admin_user'] ?? 'admin');
         $stored = $resolveAdminAvatarStoredValue($adminUsername);
 
@@ -1040,9 +1049,9 @@ HTML;
             ->withStatus(200);
     });
 
-    $app->get('/itapiru/admin', function (Request $request, Response $response) use ($app, $ensureCsrfToken, $flashPull, $navbarAuthContext, $buildGroupedSections) {
+    $app->get('/admin', function (Request $request, Response $response) use ($app, $ensureCsrfToken, $flashPull, $navbarAuthContext, $buildGroupedSections) {
         if (empty($_SESSION['is_admin'])) {
-            return $response->withHeader('Location', '/itapiru/login')->withStatus(302);
+            return $response->withHeader('Location', app_url('/login'))->withStatus(302);
         }
 
         /** @var DashboardRepository $repo */
@@ -1425,14 +1434,14 @@ HTML;
         ], $navbarAuthContext()));
     });
 
-    $app->post('/itapiru/admin/card-requests/approve', function (Request $request, Response $response) use ($app, $isValidCsrf, $normalizeHref) {
+    $app->post('/admin/card-requests/approve', function (Request $request, Response $response) use ($app, $isValidCsrf, $normalizeHref) {
         if (empty($_SESSION['is_admin'])) {
-            return $response->withHeader('Location', '/itapiru/login')->withStatus(302);
+            return $response->withHeader('Location', app_url('/login'))->withStatus(302);
         }
 
         if (!$isValidCsrf($request)) {
             $_SESSION['admin_flash'] = 'Falha ao aprovar solicitação: token CSRF inválido.';
-            return $response->withHeader('Location', '/itapiru/admin?entity=requests')->withStatus(302);
+            return $response->withHeader('Location', app_url('/admin?entity=requests'))->withStatus(302);
         }
 
         /** @var DashboardRepository $repo */
@@ -1443,7 +1452,7 @@ HTML;
         $requestRow = $repo->getCardRequestById($id);
         if (!$requestRow || (string) ($requestRow['status'] ?? '') !== 'pending') {
             $_SESSION['admin_flash'] = 'Solicitação inválida ou já processada.';
-            return $response->withHeader('Location', '/itapiru/admin?entity=requests')->withStatus(302);
+            return $response->withHeader('Location', app_url('/admin?entity=requests'))->withStatus(302);
         }
 
         $sectionSlug = strtolower(trim((string) ($requestRow['subgroup_slug'] ?? '')));
@@ -1453,7 +1462,7 @@ HTML;
 
         if ($sectionSlug === '' || $title === '' || preg_match('/^https:\/\//i', $href) !== 1) {
             $_SESSION['admin_flash'] = 'Falha ao aprovar: dados da solicitação estão incompletos.';
-            return $response->withHeader('Location', '/itapiru/admin?entity=requests')->withStatus(302);
+            return $response->withHeader('Location', app_url('/admin?entity=requests'))->withStatus(302);
         }
 
         try {
@@ -1474,17 +1483,17 @@ HTML;
             $_SESSION['admin_flash'] = 'Falha ao aprovar solicitação: ' . $throwable->getMessage();
         }
 
-        return $response->withHeader('Location', '/itapiru/admin?entity=requests')->withStatus(302);
+        return $response->withHeader('Location', app_url('/admin?entity=requests'))->withStatus(302);
     });
 
-    $app->post('/itapiru/admin/card-requests/reject', function (Request $request, Response $response) use ($app, $isValidCsrf) {
+    $app->post('/admin/card-requests/reject', function (Request $request, Response $response) use ($app, $isValidCsrf) {
         if (empty($_SESSION['is_admin'])) {
-            return $response->withHeader('Location', '/itapiru/login')->withStatus(302);
+            return $response->withHeader('Location', app_url('/login'))->withStatus(302);
         }
 
         if (!$isValidCsrf($request)) {
             $_SESSION['admin_flash'] = 'Falha ao rejeitar solicitação: token CSRF inválido.';
-            return $response->withHeader('Location', '/itapiru/admin?entity=requests')->withStatus(302);
+            return $response->withHeader('Location', app_url('/admin?entity=requests'))->withStatus(302);
         }
 
         /** @var DashboardRepository $repo */
@@ -1496,18 +1505,18 @@ HTML;
         $requestRow = $repo->getCardRequestById($id);
         if (!$requestRow || (string) ($requestRow['status'] ?? '') !== 'pending') {
             $_SESSION['admin_flash'] = 'Solicitação inválida ou já processada.';
-            return $response->withHeader('Location', '/itapiru/admin?entity=requests')->withStatus(302);
+            return $response->withHeader('Location', app_url('/admin?entity=requests'))->withStatus(302);
         }
 
         $repo->updateCardRequestStatus($id, 'rejected', (string) ($_SESSION['admin_user'] ?? 'admin'), null, $note);
         $_SESSION['admin_flash'] = 'Solicitação rejeitada.';
 
-        return $response->withHeader('Location', '/itapiru/admin?entity=requests')->withStatus(302);
+        return $response->withHeader('Location', app_url('/admin?entity=requests'))->withStatus(302);
     });
 
-    $app->get('/itapiru/admin/account', function (Request $request, Response $response) use ($app, $ensureCsrfToken, $flashPull, $navbarAuthContext, $buildGroupedSections, $allowedAdminAvatarFiles, $normalizeAdminAvatarFile, $adminAvatarConfigKey, $isValidUploadedAvatarPath) {
+    $app->get('/admin/account', function (Request $request, Response $response) use ($app, $ensureCsrfToken, $flashPull, $navbarAuthContext, $buildGroupedSections, $allowedAdminAvatarFiles, $normalizeAdminAvatarFile, $adminAvatarConfigKey, $isValidUploadedAvatarPath) {
         if (empty($_SESSION['is_admin'])) {
-            return $response->withHeader('Location', '/itapiru/login')->withStatus(302);
+            return $response->withHeader('Location', app_url('/login'))->withStatus(302);
         }
 
         /** @var DashboardRepository $repo */
@@ -1519,7 +1528,7 @@ HTML;
 
         $storedAvatar = trim($repo->getConfigValue($adminAvatarConfigKey($adminUsername), 'face6_620_620.png'));
         $selectedAvatar = $normalizeAdminAvatarFile($storedAvatar);
-        $currentAvatarUrl = '/itapiru/admin/avatar?v=' . rawurlencode(substr(sha1($storedAvatar), 0, 12));
+        $currentAvatarUrl = app_url('/admin/avatar?v=' . rawurlencode(substr(sha1($storedAvatar), 0, 12)));
         $isCustomAvatar = false;
 
         if ($isValidUploadedAvatarPath($storedAvatar)) {
@@ -1530,7 +1539,7 @@ HTML;
         $avatarOptions = array_map(
             static fn (string $filename): array => [
                 'filename' => $filename,
-                'url' => '/assets/img/avatar/' . $filename,
+                'url' => app_url('/assets/img/avatar/' . $filename),
                 'label' => strtoupper(str_replace(['face', '_620_620.png'], ['avatar ', ''], $filename)),
             ],
             $allowedAdminAvatarFiles
@@ -1558,14 +1567,14 @@ HTML;
         ], $navbarAuthContext()));
     });
 
-    $app->post('/itapiru/admin/account/update', function (Request $request, Response $response) use ($app, $isValidCsrf, $allowedAdminAvatarFiles, $normalizeAdminAvatarFile, $adminAvatarConfigKey, $normalizeAdminUsername) {
+    $app->post('/admin/account/update', function (Request $request, Response $response) use ($app, $isValidCsrf, $allowedAdminAvatarFiles, $normalizeAdminAvatarFile, $adminAvatarConfigKey, $normalizeAdminUsername) {
         if (empty($_SESSION['is_admin'])) {
-            return $response->withHeader('Location', '/itapiru/login')->withStatus(302);
+            return $response->withHeader('Location', app_url('/login'))->withStatus(302);
         }
 
         if (!$isValidCsrf($request)) {
             $_SESSION['admin_flash'] = 'Falha de validação CSRF. Atualize a página e tente novamente.';
-            return $response->withHeader('Location', '/itapiru/admin/account')->withStatus(302);
+            return $response->withHeader('Location', app_url('/admin/account'))->withStatus(302);
         }
 
         /** @var DashboardRepository $repo */
@@ -1585,7 +1594,7 @@ HTML;
 
         if ($newUsername === '' || preg_match('/^[a-zA-Z0-9._\-]{3,60}$/', $newUsername) !== 1) {
             $_SESSION['admin_flash'] = 'Informe um nome de usuário válido (3 a 60 caracteres: letras, números, ponto, underscore e hífen).';
-            return $response->withHeader('Location', '/itapiru/admin/account')->withStatus(302);
+            return $response->withHeader('Location', app_url('/admin/account'))->withStatus(302);
         }
 
         $hasUploadedAvatar = $avatarUpload instanceof UploadedFileInterface && $avatarUpload->getError() === UPLOAD_ERR_OK;
@@ -1603,12 +1612,12 @@ HTML;
 
         if (!$hasUploadedAvatar && !$hasSelectedDefaultAvatar && !$hasCurrentCustomAvatar) {
             $_SESSION['admin_flash'] = 'Avatar inválido. Selecione uma opção da lista.';
-            return $response->withHeader('Location', '/itapiru/admin/account')->withStatus(302);
+            return $response->withHeader('Location', app_url('/admin/account'))->withStatus(302);
         }
 
         if ($avatarUpload instanceof UploadedFileInterface && !in_array($avatarUpload->getError(), [UPLOAD_ERR_OK, UPLOAD_ERR_NO_FILE], true)) {
             $_SESSION['admin_flash'] = 'Falha no upload da foto. Tente novamente.';
-            return $response->withHeader('Location', '/itapiru/admin/account')->withStatus(302);
+            return $response->withHeader('Location', app_url('/admin/account'))->withStatus(302);
         }
 
         $wantsPasswordChange = ($newPassword !== '' || $confirmPassword !== '');
@@ -1617,22 +1626,22 @@ HTML;
         if ($wantsPasswordChange) {
             if ($currentPassword === '') {
                 $_SESSION['admin_flash'] = 'Informe a senha atual para redefinir a senha.';
-                return $response->withHeader('Location', '/itapiru/admin/account')->withStatus(302);
+                return $response->withHeader('Location', app_url('/admin/account'))->withStatus(302);
             }
 
             if (!$repo->verifyAdmin($currentUsername, $currentPassword)) {
                 $_SESSION['admin_flash'] = 'Senha atual inválida.';
-                return $response->withHeader('Location', '/itapiru/admin/account')->withStatus(302);
+                return $response->withHeader('Location', app_url('/admin/account'))->withStatus(302);
             }
 
             if ($newPassword === '' || mb_strlen($newPassword) < 8) {
                 $_SESSION['admin_flash'] = 'A nova senha deve ter pelo menos 8 caracteres.';
-                return $response->withHeader('Location', '/itapiru/admin/account')->withStatus(302);
+                return $response->withHeader('Location', app_url('/admin/account'))->withStatus(302);
             }
 
             if ($newPassword !== $confirmPassword) {
                 $_SESSION['admin_flash'] = 'A confirmação da nova senha não confere.';
-                return $response->withHeader('Location', '/itapiru/admin/account')->withStatus(302);
+                return $response->withHeader('Location', app_url('/admin/account'))->withStatus(302);
             }
 
             $newPasswordHash = password_hash($newPassword, PASSWORD_DEFAULT);
@@ -1642,7 +1651,7 @@ HTML;
             $maxSize = 2 * 1024 * 1024;
             if ($avatarUpload->getSize() > $maxSize) {
                 $_SESSION['admin_flash'] = 'A foto deve ter no máximo 2MB.';
-                return $response->withHeader('Location', '/itapiru/admin/account')->withStatus(302);
+                return $response->withHeader('Location', app_url('/admin/account'))->withStatus(302);
             }
 
             $clientFilename = strtolower((string) ($avatarUpload->getClientFilename() ?? ''));
@@ -1650,13 +1659,13 @@ HTML;
             $allowedExtensions = ['png', 'jpg', 'jpeg', 'webp'];
             if (!in_array($extension, $allowedExtensions, true)) {
                 $_SESSION['admin_flash'] = 'Formato de foto inválido. Use PNG, JPG, JPEG ou WEBP.';
-                return $response->withHeader('Location', '/itapiru/admin/account')->withStatus(302);
+                return $response->withHeader('Location', app_url('/admin/account'))->withStatus(302);
             }
 
             $uploadDir = dirname(__DIR__) . '/public/assets/img/avatar/uploads';
             if (!is_dir($uploadDir) && !mkdir($uploadDir, 0775, true) && !is_dir($uploadDir)) {
                 $_SESSION['admin_flash'] = 'Falha ao preparar diretório de upload da foto.';
-                return $response->withHeader('Location', '/itapiru/admin/account')->withStatus(302);
+                return $response->withHeader('Location', app_url('/admin/account'))->withStatus(302);
             }
 
             $fileSafeUser = strtolower(preg_replace('/[^a-z0-9._\-]/i', '-', $newUsername) ?? 'admin');
@@ -1672,7 +1681,7 @@ HTML;
                 $avatarUpload->moveTo($targetPath);
             } catch (\Throwable $throwable) {
                 $_SESSION['admin_flash'] = 'Falha ao salvar a foto enviada.';
-                return $response->withHeader('Location', '/itapiru/admin/account')->withStatus(302);
+                return $response->withHeader('Location', app_url('/admin/account'))->withStatus(302);
             }
 
             $normalizedAvatar = 'uploads/' . $targetFilename;
@@ -1688,7 +1697,7 @@ HTML;
                 $_SESSION['admin_flash'] = 'Falha ao atualizar conta administrativa.';
             }
 
-            return $response->withHeader('Location', '/itapiru/admin/account')->withStatus(302);
+            return $response->withHeader('Location', app_url('/admin/account'))->withStatus(302);
         }
 
         $currentAvatarKey = $adminAvatarConfigKey($currentUsername);
@@ -1704,25 +1713,25 @@ HTML;
             ? 'Conta atualizada com sucesso. Nome, senha e foto foram salvos.'
             : 'Conta atualizada com sucesso. Nome e foto foram salvos.';
 
-        return $response->withHeader('Location', '/itapiru/admin?entity=sections')->withStatus(302);
+        return $response->withHeader('Location', app_url('/admin?entity=sections'))->withStatus(302);
     });
 
-    $app->get('/itapiru/admin/preferences', function (Request $request, Response $response) {
-        return $response->withHeader('Location', '/itapiru/admin/account')->withStatus(302);
+    $app->get('/admin/preferences', function (Request $request, Response $response) {
+        return $response->withHeader('Location', app_url('/admin/account'))->withStatus(302);
     });
 
-    $app->post('/itapiru/admin/preferences/avatar', function (Request $request, Response $response) {
-        return $response->withHeader('Location', '/itapiru/admin/account')->withStatus(302);
+    $app->post('/admin/preferences/avatar', function (Request $request, Response $response) {
+        return $response->withHeader('Location', app_url('/admin/account'))->withStatus(302);
     });
 
-    $app->post('/itapiru/admin/groups/create', function (Request $request, Response $response) use ($app, $isValidCsrf, $resolveOriginalSlugFromReferer) {
+    $app->post('/admin/groups/create', function (Request $request, Response $response) use ($app, $isValidCsrf, $resolveOriginalSlugFromReferer) {
         if (empty($_SESSION['is_admin'])) {
-            return $response->withHeader('Location', '/itapiru/login')->withStatus(302);
+            return $response->withHeader('Location', app_url('/login'))->withStatus(302);
         }
 
         if (!$isValidCsrf($request)) {
             $_SESSION['admin_flash'] = 'Falha de validação CSRF. Atualize a página e tente novamente.';
-            return $response->withHeader('Location', '/itapiru/admin?entity=groups')->withStatus(302);
+            return $response->withHeader('Location', app_url('/admin?entity=groups'))->withStatus(302);
         }
 
         /** @var DashboardRepository $repo */
@@ -1732,7 +1741,7 @@ HTML;
 
         if ((string) ($data['_form'] ?? '') !== 'group_create') {
             $_SESSION['admin_flash'] = 'Formulário inválido para criação de grupo. Recarregue a página e tente novamente.';
-            return $response->withHeader('Location', '/itapiru/admin?entity=groups&mode=new')->withStatus(302);
+            return $response->withHeader('Location', app_url('/admin?entity=groups&mode=new'))->withStatus(302);
         }
 
         $originalSlug = strtolower(trim((string) ($data['original_slug'] ?? '')));
@@ -1746,7 +1755,7 @@ HTML;
 
         if ($slug === '') {
             $_SESSION['admin_flash'] = 'Informe um slug válido para criar o grupo.';
-            return $response->withHeader('Location', '/itapiru/admin?entity=groups&mode=new')->withStatus(302);
+            return $response->withHeader('Location', app_url('/admin?entity=groups&mode=new'))->withStatus(302);
         }
 
         $label = trim((string) ($data['label'] ?? ''));
@@ -1768,7 +1777,7 @@ HTML;
         $refererMode = strtolower(trim((string) ($refererParams['mode'] ?? '')));
         if ($originalSlug === '' && $refererEntity === 'groups' && $refererMode === 'edit') {
             $_SESSION['admin_flash'] = 'Ação de edição detectada em rota de criação. Reabra a tela de edição e tente novamente.';
-            return $response->withHeader('Location', '/itapiru/admin?entity=groups')->withStatus(302);
+            return $response->withHeader('Location', app_url('/admin?entity=groups'))->withStatus(302);
         }
 
         $normalizedLabel = function_exists('mb_strtolower')
@@ -1786,33 +1795,33 @@ HTML;
             $repo->updateGroup($originalSlug, $slug, $label, max(1, (int) ($data['order'] ?? 99)));
             $_SESSION['admin_flash'] = 'Grupo atualizado com sucesso.';
 
-            return $response->withHeader('Location', '/itapiru/admin?entity=groups')->withStatus(302);
+            return $response->withHeader('Location', app_url('/admin?entity=groups'))->withStatus(302);
         }
 
         if ($originalSlug === '' && count($sameLabelGroups) > 0) {
             $_SESSION['admin_flash'] = 'Já existe um grupo com esse nome. Use editar no grupo existente para renomear o slug.';
-            return $response->withHeader('Location', '/itapiru/admin?entity=groups')->withStatus(302);
+            return $response->withHeader('Location', app_url('/admin?entity=groups'))->withStatus(302);
         }
 
         if (isset($existing[$slug])) {
             $_SESSION['admin_flash'] = sprintf('Já existe um grupo com slug "%s".', $slug);
-            return $response->withHeader('Location', '/itapiru/admin?entity=groups&mode=new')->withStatus(302);
+            return $response->withHeader('Location', app_url('/admin?entity=groups&mode=new'))->withStatus(302);
         }
 
         $repo->createGroup($slug, $label, max(1, (int) ($data['order'] ?? 99)));
         $_SESSION['admin_flash'] = 'Grupo criado com sucesso.';
 
-        return $response->withHeader('Location', '/itapiru/admin?entity=groups')->withStatus(302);
+        return $response->withHeader('Location', app_url('/admin?entity=groups'))->withStatus(302);
     });
 
-    $app->post('/itapiru/admin/groups/update', function (Request $request, Response $response) use ($app, $isValidCsrf) {
+    $app->post('/admin/groups/update', function (Request $request, Response $response) use ($app, $isValidCsrf) {
         if (empty($_SESSION['is_admin'])) {
-            return $response->withHeader('Location', '/itapiru/login')->withStatus(302);
+            return $response->withHeader('Location', app_url('/login'))->withStatus(302);
         }
 
         if (!$isValidCsrf($request)) {
             $_SESSION['admin_flash'] = 'Falha de validação CSRF. Atualize a página e tente novamente.';
-            return $response->withHeader('Location', '/itapiru/admin?entity=groups')->withStatus(302);
+            return $response->withHeader('Location', app_url('/admin?entity=groups'))->withStatus(302);
         }
 
         /** @var DashboardRepository $repo */
@@ -1822,7 +1831,7 @@ HTML;
 
         if ((string) ($data['_form'] ?? '') !== 'group_update') {
             $_SESSION['admin_flash'] = 'Formulário inválido para atualização de grupo. Recarregue a página e tente novamente.';
-            return $response->withHeader('Location', '/itapiru/admin?entity=groups')->withStatus(302);
+            return $response->withHeader('Location', app_url('/admin?entity=groups'))->withStatus(302);
         }
 
         $originalSlug = strtolower(trim((string) ($data['original_slug'] ?? '')));
@@ -1832,13 +1841,13 @@ HTML;
 
         if ($originalSlug === '' || $slug === '') {
             $_SESSION['admin_flash'] = 'Informe um slug válido para atualizar o grupo.';
-            return $response->withHeader('Location', '/itapiru/admin?entity=groups')->withStatus(302);
+            return $response->withHeader('Location', app_url('/admin?entity=groups'))->withStatus(302);
         }
 
         $groups = $repo->getGroupsBySlug();
         if (!isset($groups[$originalSlug])) {
             $_SESSION['admin_flash'] = 'Grupo original não encontrado.';
-            return $response->withHeader('Location', '/itapiru/admin?entity=groups')->withStatus(302);
+            return $response->withHeader('Location', app_url('/admin?entity=groups'))->withStatus(302);
         }
 
         $label = trim((string) ($data['label'] ?? ''));
@@ -1849,17 +1858,17 @@ HTML;
         $repo->updateGroup($originalSlug, $slug, $label, max(1, (int) ($data['order'] ?? 99)));
         $_SESSION['admin_flash'] = 'Grupo atualizado com sucesso.';
 
-        return $response->withHeader('Location', '/itapiru/admin?entity=groups')->withStatus(302);
+        return $response->withHeader('Location', app_url('/admin?entity=groups'))->withStatus(302);
     });
 
-    $app->post('/itapiru/admin/groups/delete', function (Request $request, Response $response) use ($app, $isValidCsrf) {
+    $app->post('/admin/groups/delete', function (Request $request, Response $response) use ($app, $isValidCsrf) {
         if (empty($_SESSION['is_admin'])) {
-            return $response->withHeader('Location', '/itapiru/login')->withStatus(302);
+            return $response->withHeader('Location', app_url('/login'))->withStatus(302);
         }
 
         if (!$isValidCsrf($request)) {
             $_SESSION['admin_flash'] = 'Falha de validação CSRF. Atualize a página e tente novamente.';
-            return $response->withHeader('Location', '/itapiru/admin?entity=groups')->withStatus(302);
+            return $response->withHeader('Location', app_url('/admin?entity=groups'))->withStatus(302);
         }
 
         /** @var DashboardRepository $repo */
@@ -1872,24 +1881,24 @@ HTML;
             $subgroupsCount = $repo->countSubgroupsByGroupSlug($slug);
             if ($subgroupsCount > 0) {
                 $_SESSION['admin_flash'] = sprintf('Não é possível excluir o grupo. Existem %d subgrupo(s) vinculado(s).', $subgroupsCount);
-                return $response->withHeader('Location', '/itapiru/admin?entity=groups')->withStatus(302);
+                return $response->withHeader('Location', app_url('/admin?entity=groups'))->withStatus(302);
             }
 
             $repo->deleteGroup($slug);
             $_SESSION['admin_flash'] = 'Grupo removido com sucesso.';
         }
 
-        return $response->withHeader('Location', '/itapiru/admin?entity=groups')->withStatus(302);
+        return $response->withHeader('Location', app_url('/admin?entity=groups'))->withStatus(302);
     });
 
-    $app->post('/itapiru/admin/sections/create', function (Request $request, Response $response) use ($app, $isValidCsrf, $resolveOriginalSlugFromReferer) {
+    $app->post('/admin/sections/create', function (Request $request, Response $response) use ($app, $isValidCsrf, $resolveOriginalSlugFromReferer) {
         if (empty($_SESSION['is_admin'])) {
-            return $response->withHeader('Location', '/itapiru/login')->withStatus(302);
+            return $response->withHeader('Location', app_url('/login'))->withStatus(302);
         }
 
         if (!$isValidCsrf($request)) {
             $_SESSION['admin_flash'] = 'Falha de validação CSRF. Atualize a página e tente novamente.';
-            return $response->withHeader('Location', '/itapiru/admin?entity=subgroups')->withStatus(302);
+            return $response->withHeader('Location', app_url('/admin?entity=subgroups'))->withStatus(302);
         }
 
         /** @var DashboardRepository $repo */
@@ -1899,7 +1908,7 @@ HTML;
 
         if ((string) ($data['_form'] ?? '') !== 'subgroup_create') {
             $_SESSION['admin_flash'] = 'Formulário inválido para criação de subgrupo. Recarregue a página e tente novamente.';
-            return $response->withHeader('Location', '/itapiru/admin?entity=subgroups&mode=new')->withStatus(302);
+            return $response->withHeader('Location', app_url('/admin?entity=subgroups&mode=new'))->withStatus(302);
         }
 
         $rawSlug = trim((string) ($data['slug'] ?? ''));
@@ -1913,7 +1922,7 @@ HTML;
 
         if ($slug === '') {
             $_SESSION['admin_flash'] = 'Informe um slug válido para criar a seção.';
-            return $response->withHeader('Location', '/itapiru/admin?entity=subgroups&mode=new')->withStatus(302);
+            return $response->withHeader('Location', app_url('/admin?entity=subgroups&mode=new'))->withStatus(302);
         }
 
         $groupSlug = strtolower(trim((string) ($data['group_slug'] ?? '')));
@@ -1921,20 +1930,20 @@ HTML;
         $groupSlug = trim((string) preg_replace('/-+/', '-', $groupSlug), '-');
         if ($groupSlug === '') {
             $_SESSION['admin_flash'] = 'Selecione um grupo válido para o subgrupo.';
-            return $response->withHeader('Location', '/itapiru/admin?entity=subgroups&mode=new')->withStatus(302);
+            return $response->withHeader('Location', app_url('/admin?entity=subgroups&mode=new'))->withStatus(302);
         }
 
         $groups = $repo->getGroupsBySlug();
         if (!isset($groups[$groupSlug])) {
             $_SESSION['admin_flash'] = 'Grupo selecionado não existe mais. Atualize a página e tente novamente.';
-            return $response->withHeader('Location', '/itapiru/admin?entity=subgroups&mode=new')->withStatus(302);
+            return $response->withHeader('Location', app_url('/admin?entity=subgroups&mode=new'))->withStatus(302);
         }
 
         $sections = $repo->getSections();
         if ($originalSlug !== '' && isset($sections[$originalSlug])) {
             if ($slug !== $originalSlug && isset($sections[$slug])) {
                 $_SESSION['admin_flash'] = sprintf('Já existe uma seção com slug "%s".', $slug);
-                return $response->withHeader('Location', '/itapiru/admin?entity=subgroups&mode=edit&slug=' . rawurlencode($originalSlug))->withStatus(302);
+                return $response->withHeader('Location', app_url('/admin?entity=subgroups&mode=edit&slug=' . rawurlencode($originalSlug)))->withStatus(302);
             }
 
             $repo->renameSection(
@@ -1947,12 +1956,12 @@ HTML;
             );
             $_SESSION['admin_flash'] = 'Subgrupo atualizado com sucesso.';
 
-            return $response->withHeader('Location', '/itapiru/admin?entity=subgroups')->withStatus(302);
+            return $response->withHeader('Location', app_url('/admin?entity=subgroups'))->withStatus(302);
         }
 
         if (isset($sections[$slug])) {
             $_SESSION['admin_flash'] = sprintf('Já existe uma seção com slug "%s".', $slug);
-            return $response->withHeader('Location', '/itapiru/admin?entity=subgroups&mode=new')->withStatus(302);
+            return $response->withHeader('Location', app_url('/admin?entity=subgroups&mode=new'))->withStatus(302);
         }
 
         $repo->upsertSection(
@@ -1964,17 +1973,17 @@ HTML;
         );
         $_SESSION['admin_flash'] = 'Subgrupo criado com sucesso.';
 
-        return $response->withHeader('Location', '/itapiru/admin?entity=subgroups')->withStatus(302);
+        return $response->withHeader('Location', app_url('/admin?entity=subgroups'))->withStatus(302);
     });
 
-    $app->post('/itapiru/admin/sections/update', function (Request $request, Response $response) use ($app, $isValidCsrf) {
+    $app->post('/admin/sections/update', function (Request $request, Response $response) use ($app, $isValidCsrf) {
         if (empty($_SESSION['is_admin'])) {
-            return $response->withHeader('Location', '/itapiru/login')->withStatus(302);
+            return $response->withHeader('Location', app_url('/login'))->withStatus(302);
         }
 
         if (!$isValidCsrf($request)) {
             $_SESSION['admin_flash'] = 'Falha de validação CSRF. Atualize a página e tente novamente.';
-            return $response->withHeader('Location', '/itapiru/admin?entity=subgroups')->withStatus(302);
+            return $response->withHeader('Location', app_url('/admin?entity=subgroups'))->withStatus(302);
         }
 
         /** @var DashboardRepository $repo */
@@ -1989,18 +1998,18 @@ HTML;
 
         if ($originalSlug === '' || $slug === '') {
             $_SESSION['admin_flash'] = 'Informe um slug válido para atualizar a seção.';
-            return $response->withHeader('Location', '/itapiru/admin?entity=subgroups')->withStatus(302);
+            return $response->withHeader('Location', app_url('/admin?entity=subgroups'))->withStatus(302);
         }
 
         $sections = $repo->getSections();
         if (!isset($sections[$originalSlug])) {
             $_SESSION['admin_flash'] = 'Seção original não encontrada.';
-            return $response->withHeader('Location', '/itapiru/admin?entity=subgroups')->withStatus(302);
+            return $response->withHeader('Location', app_url('/admin?entity=subgroups'))->withStatus(302);
         }
 
         if ($slug !== $originalSlug && isset($sections[$slug])) {
             $_SESSION['admin_flash'] = sprintf('Já existe uma seção com slug "%s".', $slug);
-            return $response->withHeader('Location', '/itapiru/admin?entity=subgroups&mode=edit&slug=' . rawurlencode($originalSlug))->withStatus(302);
+            return $response->withHeader('Location', app_url('/admin?entity=subgroups&mode=edit&slug=' . rawurlencode($originalSlug)))->withStatus(302);
         }
 
         $groupSlug = strtolower(trim((string) ($data['group_slug'] ?? '')));
@@ -2008,13 +2017,13 @@ HTML;
         $groupSlug = trim((string) preg_replace('/-+/', '-', $groupSlug), '-');
         if ($groupSlug === '') {
             $_SESSION['admin_flash'] = 'Selecione um grupo válido para o subgrupo.';
-            return $response->withHeader('Location', '/itapiru/admin?entity=subgroups&mode=edit&slug=' . rawurlencode($originalSlug))->withStatus(302);
+            return $response->withHeader('Location', app_url('/admin?entity=subgroups&mode=edit&slug=' . rawurlencode($originalSlug)))->withStatus(302);
         }
 
         $groups = $repo->getGroupsBySlug();
         if (!isset($groups[$groupSlug])) {
             $_SESSION['admin_flash'] = 'Grupo selecionado não existe mais. Atualize a página e tente novamente.';
-            return $response->withHeader('Location', '/itapiru/admin?entity=subgroups&mode=edit&slug=' . rawurlencode($originalSlug))->withStatus(302);
+            return $response->withHeader('Location', app_url('/admin?entity=subgroups&mode=edit&slug=' . rawurlencode($originalSlug)))->withStatus(302);
         }
 
         $repo->renameSection(
@@ -2027,31 +2036,31 @@ HTML;
         );
         $_SESSION['admin_flash'] = 'Subgrupo atualizado com sucesso.';
 
-        return $response->withHeader('Location', '/itapiru/admin?entity=subgroups')->withStatus(302);
+        return $response->withHeader('Location', app_url('/admin?entity=subgroups'))->withStatus(302);
     });
 
-    $app->post('/itapiru/admin/sections/rename-group', function (Request $request, Response $response) use ($isValidCsrf) {
+    $app->post('/admin/sections/rename-group', function (Request $request, Response $response) use ($isValidCsrf) {
         if (empty($_SESSION['is_admin'])) {
-            return $response->withHeader('Location', '/itapiru/login')->withStatus(302);
+            return $response->withHeader('Location', app_url('/login'))->withStatus(302);
         }
 
         if (!$isValidCsrf($request)) {
             $_SESSION['admin_flash'] = 'Falha de validação CSRF. Atualize a página e tente novamente.';
-            return $response->withHeader('Location', '/itapiru/admin?entity=groups')->withStatus(302);
+            return $response->withHeader('Location', app_url('/admin?entity=groups'))->withStatus(302);
         }
 
         $_SESSION['admin_flash'] = 'Fluxo antigo de renomear grupo foi desativado. Use editar grupo em Admin > Grupos.';
-        return $response->withHeader('Location', '/itapiru/admin?entity=groups')->withStatus(302);
+        return $response->withHeader('Location', app_url('/admin?entity=groups'))->withStatus(302);
     });
 
-    $app->post('/itapiru/admin/sections/delete', function (Request $request, Response $response) use ($app, $isValidCsrf) {
+    $app->post('/admin/sections/delete', function (Request $request, Response $response) use ($app, $isValidCsrf) {
         if (empty($_SESSION['is_admin'])) {
-            return $response->withHeader('Location', '/itapiru/login')->withStatus(302);
+            return $response->withHeader('Location', app_url('/login'))->withStatus(302);
         }
 
         if (!$isValidCsrf($request)) {
             $_SESSION['admin_flash'] = 'Falha de validação CSRF. Atualize a página e tente novamente.';
-            return $response->withHeader('Location', '/itapiru/admin?entity=subgroups')->withStatus(302);
+            return $response->withHeader('Location', app_url('/admin?entity=subgroups'))->withStatus(302);
         }
 
         /** @var DashboardRepository $repo */
@@ -2064,24 +2073,24 @@ HTML;
             $cardsCount = $repo->countCardsBySectionSlug($slug);
             if ($cardsCount > 0) {
                 $_SESSION['admin_flash'] = sprintf('Não é possível excluir o subgrupo. Existem %d card(s) vinculado(s).', $cardsCount);
-                return $response->withHeader('Location', '/itapiru/admin?entity=subgroups')->withStatus(302);
+                return $response->withHeader('Location', app_url('/admin?entity=subgroups'))->withStatus(302);
             }
 
             $repo->deleteSection($slug);
             $_SESSION['admin_flash'] = 'Subgrupo removido com sucesso.';
         }
 
-        return $response->withHeader('Location', '/itapiru/admin?entity=subgroups')->withStatus(302);
+        return $response->withHeader('Location', app_url('/admin?entity=subgroups'))->withStatus(302);
     });
 
-    $app->post('/itapiru/admin/cards/create', function (Request $request, Response $response) use ($app, $isValidCsrf, $normalizeHref) {
+    $app->post('/admin/cards/create', function (Request $request, Response $response) use ($app, $isValidCsrf, $normalizeHref) {
         if (empty($_SESSION['is_admin'])) {
-            return $response->withHeader('Location', '/itapiru/login')->withStatus(302);
+            return $response->withHeader('Location', app_url('/login'))->withStatus(302);
         }
 
         if (!$isValidCsrf($request)) {
             $_SESSION['admin_flash'] = 'Falha de validação CSRF. Atualize a página e tente novamente.';
-            return $response->withHeader('Location', '/itapiru/admin?entity=cards')->withStatus(302);
+            return $response->withHeader('Location', app_url('/admin?entity=cards'))->withStatus(302);
         }
 
         /** @var DashboardRepository $repo */
@@ -2095,13 +2104,13 @@ HTML;
         $sections = $repo->getSections();
         if ($subgroupSlug === '' || !isset($sections[$subgroupSlug])) {
             $_SESSION['admin_flash'] = 'Subgrupo inválido. Selecione um subgrupo existente.';
-            return $response->withHeader('Location', '/itapiru/admin?entity=cards&mode=new')->withStatus(302);
+            return $response->withHeader('Location', app_url('/admin?entity=cards&mode=new'))->withStatus(302);
         }
 
         $subgroupGroupSlug = strtolower(trim((string) ($sections[$subgroupSlug]['group_slug'] ?? '')));
         if ($groupSlug !== '' && $groupSlug !== $subgroupGroupSlug) {
             $_SESSION['admin_flash'] = 'O subgrupo selecionado não pertence ao grupo informado.';
-            return $response->withHeader('Location', '/itapiru/admin?entity=cards&mode=new')->withStatus(302);
+            return $response->withHeader('Location', app_url('/admin?entity=cards&mode=new'))->withStatus(302);
         }
 
         $repo->createCard([
@@ -2118,17 +2127,17 @@ HTML;
         ]);
 
         $_SESSION['admin_flash'] = 'Card criado com sucesso.';
-        return $response->withHeader('Location', '/itapiru/admin?entity=cards')->withStatus(302);
+        return $response->withHeader('Location', app_url('/admin?entity=cards'))->withStatus(302);
     });
 
-    $app->post('/itapiru/admin/cards/update', function (Request $request, Response $response) use ($app, $isValidCsrf, $normalizeHref) {
+    $app->post('/admin/cards/update', function (Request $request, Response $response) use ($app, $isValidCsrf, $normalizeHref) {
         if (empty($_SESSION['is_admin'])) {
-            return $response->withHeader('Location', '/itapiru/login')->withStatus(302);
+            return $response->withHeader('Location', app_url('/login'))->withStatus(302);
         }
 
         if (!$isValidCsrf($request)) {
             $_SESSION['admin_flash'] = 'Falha de validação CSRF. Atualize a página e tente novamente.';
-            return $response->withHeader('Location', '/itapiru/admin?entity=cards')->withStatus(302);
+            return $response->withHeader('Location', app_url('/admin?entity=cards'))->withStatus(302);
         }
 
         /** @var DashboardRepository $repo */
@@ -2144,8 +2153,8 @@ HTML;
         if ($subgroupSlug === '' || !isset($sections[$subgroupSlug])) {
             $_SESSION['admin_flash'] = 'Subgrupo inválido. Selecione um subgrupo existente.';
             $redirect = $id > 0
-                ? '/itapiru/admin?entity=cards&mode=edit&id=' . $id
-                : '/itapiru/admin?entity=cards';
+                ? app_url('/admin?entity=cards&mode=edit&id=' . $id)
+                : app_url('/admin?entity=cards');
             return $response->withHeader('Location', $redirect)->withStatus(302);
         }
 
@@ -2153,8 +2162,8 @@ HTML;
         if ($groupSlug !== '' && $groupSlug !== $subgroupGroupSlug) {
             $_SESSION['admin_flash'] = 'O subgrupo selecionado não pertence ao grupo informado.';
             $redirect = $id > 0
-                ? '/itapiru/admin?entity=cards&mode=edit&id=' . $id
-                : '/itapiru/admin?entity=cards';
+                ? app_url('/admin?entity=cards&mode=edit&id=' . $id)
+                : app_url('/admin?entity=cards');
             return $response->withHeader('Location', $redirect)->withStatus(302);
         }
 
@@ -2174,17 +2183,17 @@ HTML;
             $_SESSION['admin_flash'] = 'Card atualizado com sucesso.';
         }
 
-        return $response->withHeader('Location', '/itapiru/admin?entity=cards')->withStatus(302);
+        return $response->withHeader('Location', app_url('/admin?entity=cards'))->withStatus(302);
     });
 
-    $app->post('/itapiru/admin/cards/delete', function (Request $request, Response $response) use ($app, $isValidCsrf) {
+    $app->post('/admin/cards/delete', function (Request $request, Response $response) use ($app, $isValidCsrf) {
         if (empty($_SESSION['is_admin'])) {
-            return $response->withHeader('Location', '/itapiru/login')->withStatus(302);
+            return $response->withHeader('Location', app_url('/login'))->withStatus(302);
         }
 
         if (!$isValidCsrf($request)) {
             $_SESSION['admin_flash'] = 'Falha de validação CSRF. Atualize a página e tente novamente.';
-            return $response->withHeader('Location', '/itapiru/admin?entity=cards')->withStatus(302);
+            return $response->withHeader('Location', app_url('/admin?entity=cards'))->withStatus(302);
         }
 
         /** @var DashboardRepository $repo */
@@ -2198,18 +2207,14 @@ HTML;
             $_SESSION['admin_flash'] = 'Card removido com sucesso.';
         }
 
-        return $response->withHeader('Location', '/itapiru/admin?entity=cards')->withStatus(302);
+        return $response->withHeader('Location', app_url('/admin?entity=cards'))->withStatus(302);
     });
 
     $app->get('/admin/login', function (Request $request, Response $response) {
-        return $response->withHeader('Location', '/itapiru/login')->withStatus(302);
+        return $response->withHeader('Location', app_url('/login'))->withStatus(302);
     });
 
-    $app->get('/admin', function (Request $request, Response $response) {
-        return $response->withHeader('Location', '/itapiru/admin')->withStatus(302);
-    });
-
-    $app->get('/itapiru/{section}', function (Request $request, Response $response, array $args) use ($app, $navbarAuthContext, $buildGroupedSections) {
+    $app->get('/{section}', function (Request $request, Response $response, array $args) use ($app, $navbarAuthContext, $buildGroupedSections) {
         /** @var DashboardRepository $repo */
         $repo = $app->getContainer()->get(DashboardRepository::class);
         $twig = $app->getContainer()->get(Twig::class);
@@ -2220,7 +2225,7 @@ HTML;
 
         if (!isset($sections[$activeSection])) {
             return $response
-                ->withHeader('Location', '/itapiru')
+                ->withHeader('Location', app_url(''))
                 ->withStatus(302);
         }
 

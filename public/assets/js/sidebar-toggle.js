@@ -6,6 +6,14 @@
   const assistantPositionStorageKey = 'dashboard_guardian_position';
   const groupAnimationTimers = new WeakMap();
   let lastGroupNonClickToggleAt = 0;
+  const appBasePath = (() => {
+    const raw = document.body?.dataset?.appBasePath || '';
+    if (!raw || raw === '/') {
+      return '';
+    }
+
+    return raw.replace(/\/+$/, '');
+  })();
 
   const getShell = () => document.querySelector('.db-shell');
 
@@ -245,9 +253,11 @@
       const path = String(value || '').replace(/\/+$/, '');
       return path === '' ? '/' : path;
     };
-    const homeLink = document.querySelector('.db-menu > a.db-menu-item[href="/itapiru"]');
+    const homeHref = appBasePath || '/';
+    const homeLink = document.querySelector(`.db-menu > a.db-menu-item[href="${homeHref}"]`);
     const currentPath = normalizePath(window.location.pathname);
-    let isHomeRoute = currentPath === '/itapiru';
+    const expectedHomePath = normalizePath(homeHref);
+    let isHomeRoute = currentPath === expectedHomePath;
 
     if (!isHomeRoute && homeLink) {
       const href = homeLink.getAttribute('href') || '';
@@ -256,7 +266,7 @@
     }
 
     const isHomeLinkActive = Boolean(
-      document.querySelector('.db-menu > a.db-menu-item.is-active[href="/itapiru"]')
+      document.querySelector(`.db-menu > a.db-menu-item.is-active[href="${homeHref}"]`)
     );
     const isHomeActive = isHomeRoute || isHomeLinkActive;
 
