@@ -15,6 +15,6 @@
     "test:visual:update": "npm run test:itapiru:visual:update"
   },
   "devDependencies": {
-    "@playwright/test": "^1.52.0"
+    "@playwright/test": "^1.59.0"
   }
 }
