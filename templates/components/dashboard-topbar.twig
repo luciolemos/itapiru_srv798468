@@ -74,15 +74,38 @@
                 onerror="this.parentElement.classList.add('is-fallback'); this.remove();"
               >
             </span>
-            <span class="db-user-name">{{ userDisplayName }}</span>
+            <span class="db-user-identity">
+              <span class="db-user-name">{{ userDisplayName }}</span>
+              <span class="db-user-role">Administrador</span>
+            </span>
             <i class="bi bi-chevron-down" aria-hidden="true"></i>
           </summary>
 
           <div class="db-user-menu-panel" role="menu" aria-label="Menu do usuário">
-            <a class="db-user-menu-item" role="menuitem" href="{{ app_base_path }}/admin/account">Conta</a>
+            <div class="db-user-menu-header">
+              <span class="db-user-menu-header-avatar" data-initial="{{ userDisplayName|slice(0, 1)|upper }}" aria-hidden="true">
+                <img
+                  src="{{ adminAvatarUrl|default(asset_base_path ~ '/assets/img/avatar/face6_620_620.png') }}"
+                  alt=""
+                  loading="lazy"
+                  onerror="this.parentElement.classList.add('is-fallback'); this.remove();"
+                >
+              </span>
+              <div class="db-user-menu-header-copy">
+                <strong>{{ userDisplayName }}</strong>
+                <span>Administrador do painel</span>
+              </div>
+            </div>
+            <a class="db-user-menu-item" role="menuitem" href="{{ app_base_path }}/admin/account">
+              <i class="bi bi-person-gear" aria-hidden="true"></i>
+              <span>Minha conta</span>
+            </a>
             <form method="post" action="{{ app_base_path }}/logout" hx-boost="false" class="db-user-menu-form">
               <input type="hidden" name="csrf_token" value="{{ csrfToken|default('') }}">
-              <button class="db-user-menu-item is-danger" type="submit">Sair</button>
+              <button class="db-user-menu-item is-danger" type="submit">
+                <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+                <span>Sair</span>
+              </button>
             </form>
           </div>
         </details>

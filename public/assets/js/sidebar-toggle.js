@@ -106,6 +106,38 @@
     applyPersistedState();
   };
 
+  const closeDetailsMenus = (except = null) => {
+    document.querySelectorAll('[data-user-menu], [data-notification-menu]').forEach((menu) => {
+      if (menu !== except) {
+        menu.removeAttribute('open');
+      }
+    });
+  };
+
+  document.addEventListener('click', (event) => {
+    const target = event.target;
+    if (!(target instanceof Element)) {
+      return;
+    }
+
+    const currentMenu = target.closest('[data-user-menu], [data-notification-menu]');
+    closeDetailsMenus(currentMenu);
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      closeDetailsMenus();
+    }
+  });
+
+  document.querySelectorAll('[data-user-menu], [data-notification-menu]').forEach((menu) => {
+    menu.addEventListener('toggle', () => {
+      if (menu.open) {
+        closeDetailsMenus(menu);
+      }
+    });
+  });
+
   const applyPersistedState = () => {
     const shell = getShell();
     if (!shell) {
@@ -281,6 +313,30 @@
         setGroupOpen(toggle, items, false);
       });
       writeGroupsState({});
+      return;
+    }
+
+    const currentGroup = document.querySelector('[data-menu-group][data-group-current="true"]');
+    if (currentGroup) {
+      let openKey = null;
+
+      document.querySelectorAll('[data-menu-group]').forEach((groupBlock, index) => {
+        const toggle = groupBlock.querySelector('[data-menu-group-toggle]');
+        const items = groupBlock.querySelector('[data-menu-group-items]');
+        if (!toggle || !items) {
+          return;
+        }
+
+        const groupKey = toggle.getAttribute('data-group-key') || `group-${index}`;
+        const shouldOpen = groupBlock === currentGroup;
+        if (shouldOpen) {
+          openKey = groupKey;
+        }
+
+        setGroupOpen(toggle, items, shouldOpen);
+      });
+
+      writeGroupsState(openKey ? { openKey } : {});
       return;
     }
 
@@ -611,6 +667,7 @@
     const bootstrapPosition = () => {
       let initialX = 0;
       let initialY = 0;
+      let hasSavedPosition = false;
 
       try {
         const raw = localStorage.getItem(assistantPositionStorageKey);
@@ -619,13 +676,14 @@
           if (parsed && typeof parsed.x === 'number' && typeof parsed.y === 'number') {
             initialX = parsed.x;
             initialY = parsed.y;
+            hasSavedPosition = true;
           }
         }
       } catch (error) {
         // no-op
       }
 
-      if (initialX === 0 && initialY === 0) {
+      if (!hasSavedPosition) {
         const rect = assistant.getBoundingClientRect();
         initialX = rect.left;
         initialY = rect.top;
@@ -769,7 +827,22 @@
 
       const showPassword = input.type === 'password';
       input.type = showPassword ? 'text' : 'password';
-      passwordToggle.textContent = showPassword ? 'Ocultar' : 'Mostrar';
+
+      if (passwordToggle.dataset.passwordToggleIcon !== undefined) {
+        const icon = passwordToggle.querySelector('.bi');
+        if (icon) {
+          icon.classList.toggle('bi-eye', !showPassword);
+          icon.classList.toggle('bi-eye-slash', showPassword);
+        }
+
+        const label = showPassword ? 'Ocultar senha' : 'Mostrar senha';
+        passwordToggle.setAttribute('aria-label', label);
+        passwordToggle.setAttribute('aria-pressed', String(showPassword));
+        passwordToggle.title = label;
+      } else {
+        passwordToggle.textContent = showPassword ? 'Ocultar' : 'Mostrar';
+      }
+
       return;
     }
 
@@ -821,7 +894,7 @@
     mobileQuery.addListener(handleResponsiveReset);
   }
 
-  document.body.addEventListener('htmx:afterSwap', () => {
+  document.body.addEventListener('htmx:afterSwap', (event) => {
     applyPersistedState();
     applyGroupState();
     initAccountAvatarPreview();

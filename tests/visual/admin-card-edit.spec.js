@@ -11,11 +11,26 @@ async function closeAssistantBubbleIfVisible(page)
 }
 
 test.describe('Admin card edit persistence', () => {
+    test('cancels card editing and returns to the dashboard', async({ page }) => {
+        await loginAsAdmin(page);
+        await closeAssistantBubbleIfVisible(page);
+
+        await page.goto('/admin?entity=cards');
+        await closeAssistantBubbleIfVisible(page);
+
+        await page.getByRole('link', { name: 'Editar card' }).first().click();
+        const cancelLink = page.getByRole('link', { name: 'Cancelar' });
+        await expect(cancelLink).toHaveAttribute('href', '/');
+
+        await cancelLink.click();
+        await expect(page).toHaveURL(/\/$/);
+    });
+
     test('updates card URL and persists after save', async({ page }) => {
         await loginAsAdmin(page);
         await closeAssistantBubbleIfVisible(page);
 
-        await page.goto('/itapiru/admin?entity=cards');
+        await page.goto('/admin?entity=cards');
         await expect(page).toHaveURL(/entity=cards/);
         await closeAssistantBubbleIfVisible(page);
 
@@ -48,7 +63,7 @@ test.describe('Admin card edit persistence', () => {
             await page.getByRole('button', { name: 'Salvar card' }).click();
             await expect(page).toHaveURL(/entity=cards$/);
 
-            await page.goto(`/itapiru/admin?entity=cards&mode=edit&id=${cardId}`);
+            await page.goto(`/admin?entity=cards&mode=edit&id=${cardId}`);
             await closeAssistantBubbleIfVisible(page);
             await expect(page.locator('input[name="href"]')).toHaveValue(updatedHref);
         } finally {
@@ -56,7 +71,7 @@ test.describe('Admin card edit persistence', () => {
                 return;
             }
 
-            await page.goto(`/itapiru/admin?entity=cards&mode=edit&id=${cardId}`);
+            await page.goto(`/admin?entity=cards&mode=edit&id=${cardId}`);
             await closeAssistantBubbleIfVisible(page);
 
             const originalHrefInput = page.locator('input[name="href"]');

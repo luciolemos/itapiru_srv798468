@@ -22,6 +22,8 @@ Depois que grupos e subgrupos são criados no admin, o próprio admin cria e man
 10. [Operação do banco](#operação-do-banco)
 11. [Troubleshooting rápido](#troubleshooting-rápido)
 12. [Solicitações e notificações](#solicitações-e-notificações)
+13. [Execução e testes](#execução-e-testes)
+14. [Planejamento do Deskhelper](#planejamento-do-deskhelper)
 
 ## O que a aplicação faz
 
@@ -134,11 +136,96 @@ Regras importantes:
 
 ```bash
 cd /var/www/itapiru
+cp .env.example .env
 composer install
-php -S 0.0.0.0:8081 -t public
+composer start
 ```
 
-Acesso local: `http://127.0.0.1:8081/itapiru`
+Acesso local: `http://127.0.0.1:8080`.
+
+No servidor local, as rotas são atendidas na raiz: `/`, `/login` e `/admin`.
+Em produção, quando publicado no subdiretório, elas são `/itapiru`,
+`/itapiru/login` e `/itapiru/admin`.
+
+## Rodar com Docker
+
+O Docker de desenvolvimento usa PHP 8.4, `mbstring` e `pdo_sqlite`.
+
+```bash
+cd /var/www/itapiru
+docker compose run --rm slim composer install
+docker compose up --build
+```
+
+A aplicação ficará disponível em `http://127.0.0.1:8080`. O diretório do
+projeto, incluindo `var/data/`, é montado no container; os dados SQLite locais
+permanecem no host. Para encerrar, use `docker compose down`.
+
+## Configuracao de ambiente
+
+Copie `.env.example` para `.env` e ajuste somente o necessario.
+
+- `APP_ENV=development` e apropriado para desenvolvimento local; no servidor publicado use `APP_ENV=production`, que desabilita a exibicao de detalhes de erro ao usuario.
+- `APP_BASE_PATH` pode ficar vazio: a aplicacao detecta `/itapiru` quando esta publicada nesse subdiretorio. Defina-o apenas quando a deteccao nao for aplicavel.
+- `APP_DB_PATH` e opcional. Vazio usa `var/data/itapiru.sqlite`; informe um caminho absoluto apenas quando o banco estiver em outro local.
+- `ADMIN_USER` e `ADMIN_PASS` definem somente o administrador criado no primeiro bootstrap de um banco novo. Em producao, ambos sao obrigatorios nesse momento e `ADMIN_PASS` deve ter pelo menos 12 caracteres; nao alteram uma conta ja existente.
+
+### Deploy seguro
+
+`.env` nao faz parte do Git. No servidor publicado, a fonte protegida fica em
+`/var/www/.itapiru-config/itapiru.env`, fora do diretorio de checkout. Apos cada
+deploy que atualize o repositorio, execute:
+
+```bash
+cd /var/www/itapiru
+./scripts/restore-env.sh
+```
+
+Configure esse comando como etapa posterior ao checkout no mecanismo de deploy.
+Ele recria `.env` com permissao `640` e propriedade `luciolemos:www-data`, sem
+exibir os valores. Antes do primeiro deploy, confirme que a fonte externa existe;
+o script interrompe a operacao se ela estiver ausente em vez de iniciar o sistema
+sem configuracao.
+
+## Execução e testes
+
+Instale as dependências PHP e JavaScript antes dos testes:
+
+```bash
+composer install
+npm ci
+```
+
+Validações estáticas:
+
+```bash
+composer validate --no-check-publish
+php vendor/phpstan/phpstan/phpstan analyse --configuration phpstan.neon.dist --no-progress
+php vendor/squizlabs/php_codesniffer/bin/phpcs --standard=phpcs.xml --extensions=php -n src app tests
+```
+
+Testes PHP:
+
+```bash
+php vendor/phpunit/phpunit/phpunit --configuration phpunit.xml
+```
+
+Os testes PHP usam `APP_BASE_PATH=/itapiru` para validar as URLs publicadas e
+criam um SQLite temporário exclusivo em `/tmp`. O banco em `var/data/` não é
+aberto nem alterado pela suíte.
+
+Testes visuais:
+
+```bash
+npx playwright install chromium
+npm run test:visual
+```
+
+As specs visuais atualmente usam URLs com o prefixo `/itapiru`, mas
+`composer start` atende na raiz. Por isso, a suíte visual completa não é uma
+validação local confiável até que a configuração e as specs usem o mesmo
+prefixo. Para verificações locais focadas, inicie o servidor e execute uma
+spec adaptada à rota local.
 
 ## Operação do banco
 
@@ -157,3 +244,12 @@ Acesso local: `http://127.0.0.1:8081/itapiru`
 - O histórico de solicitações é cumulativo: registros com status `pending`, `approved` e `rejected` permanecem salvos e não são apagados ao aprovar/rejeitar.
 - O sino da topbar do admin exibe apenas as pendências mais recentes, com `LIMIT 5`.
 - O contador do sino reflete o total real de solicitações pendentes no banco.
+
+## Planejamento do Deskhelper
+
+Os artefatos iniciais do `deskhelper` foram registrados em:
+
+- [docs/deskhelper-mvp.md](/var/www/itapiru/docs/deskhelper-mvp.md)
+- [docs/deskhelper-schema.sql](/var/www/itapiru/docs/deskhelper-schema.sql)
+- [docs/deskhelper-backlog.md](/var/www/itapiru/docs/deskhelper-backlog.md)
+- [docs/deskhelper-telas.md](/var/www/itapiru/docs/deskhelper-telas.md)

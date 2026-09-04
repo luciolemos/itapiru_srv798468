@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Application\Actions\User;
 
+use App\Infrastructure\Persistence\Dashboard\DashboardRepository;
 use Tests\TestCase;
 
 class AdminSecurityTest extends TestCase
@@ -201,6 +202,35 @@ class AdminSecurityTest extends TestCase
         $this->assertEquals('/itapiru/login', $response->getHeaderLine('Location'));
         $this->assertArrayNotHasKey('is_admin', $_SESSION);
         $this->assertArrayNotHasKey('admin_user', $_SESSION);
+    }
+
+    public function testAdminCanToggleGroupVisibilityWithValidCsrf(): void
+    {
+        $app = $this->getAppInstance();
+        /** @var DashboardRepository $repo */
+        $repo = $app->getContainer()->get(DashboardRepository::class);
+        $group = $repo->getAllGroups()[0] ?? null;
+
+        $this->assertIsArray($group);
+        $slug = (string) $group['slug'];
+        $repo->setGroupVisibility($slug, 'public');
+        $_SESSION['is_admin'] = true;
+        $_SESSION['admin_user'] = $this->adminUsername();
+        $_SESSION['csrf_token'] = 'token-valido';
+
+        try {
+            $request = $this->createRequest('POST', '/itapiru/admin/groups/visibility')->withParsedBody([
+                'csrf_token' => 'token-valido',
+                'slug' => $slug,
+            ]);
+            $response = $app->handle($request);
+
+            $this->assertEquals(302, $response->getStatusCode());
+            $this->assertEquals('/itapiru/admin?entity=groups', $response->getHeaderLine('Location'));
+            $this->assertSame('admin', $repo->getGroupsBySlug()[$slug]['visibility']);
+        } finally {
+            $repo->setGroupVisibility($slug, 'public');
+        }
     }
 
     private function fetchCsrfToken($app): string

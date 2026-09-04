@@ -35,7 +35,7 @@ return [
             'label' => 'SFPC',
             'description' => 'Fiscalização de Produtos Controlados',
             'group' => 'SFPC',
-        ],        
+        ],
         'fisc-adm' => [
             'label' => 'Fisc Adm',
             'description' => 'Administração patrimonial e Finanças',
@@ -218,7 +218,7 @@ return [
          'intranets' => [
             [
                 'title' => '7ª Bda Inf Mtz',
-                'href' => 'http://10.57.40.55/',               
+                'href' => 'http://10.57.40.55/',
                  'external' => true,
                 'icon' => 'bi-globe2',
                 'status' => 'Externo',
@@ -227,7 +227,7 @@ return [
             ],
             [
                 'title' => 'HGuN',
-                'href' => 'http://10.57.40.55/',               
+                'href' => 'http://10.57.40.55/',
                  'external' => true,
                 'icon' => 'bi-globe2',
                 'status' => 'Externo',
@@ -236,7 +236,7 @@ return [
             ],
             [
                 'title' => '24ª Base Adm Guarnção',
-                'href' => 'http://10.57.40.55/',                
+                'href' => 'http://10.57.40.55/',
                 'external' => true,
                 'icon' => 'bi-globe2',
                 'status' => 'Externo',

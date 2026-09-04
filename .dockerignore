@@ -1,0 +1,8 @@
+.env
+.git
+node_modules
+vendor
+var/data
+logs
+playwright-report
+test-results

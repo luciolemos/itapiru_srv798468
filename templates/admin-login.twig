@@ -1,200 +1,105 @@
 {% extends 'layouts/base.twig' %}
 
-{% block title %}Login Admin | 16º BI Mtz{% endblock %}
+{% block title %}Login | {{ dashboardTitle|default('16º BI Mtz') }}{% endblock %}
+{% block global_topnav %}{% endblock %}
+
+{% block head %}
+  <style>
+    .itapiru-auth-shell {
+      min-height: 100vh;
+      padding: 56px 24px 40px;
+      position: relative;
+      display: grid;
+      place-items: center;
+      background: radial-gradient(circle at top left, rgba(165,111,17,.12), transparent 32%), linear-gradient(180deg, rgba(250,247,239,.98), rgba(243,246,239,.98));
+    }
+    .itapiru-auth-brand { position: absolute; top: 28px; left: 28px; width: 68px; display: grid; justify-items: center; gap: 6px; margin: 0; text-align: center; }
+    .itapiru-auth-brand .db-om-logo { width: 68px; height: 68px; margin-left: 0; margin-right: 0; }
+    .itapiru-auth-brand .db-brand, .itapiru-auth-brand .db-caption { margin: 0; white-space: nowrap; }
+    .itapiru-auth-brand .db-caption { opacity: .82; }
+    .itapiru-auth-content { width: min(520px, 100%); display: grid; gap: 20px; justify-items: center; text-align: center; }
+    .itapiru-auth-copy .db-section-badge { margin-bottom: 14px; }
+    .itapiru-auth-copy h1 { margin: 0 0 14px; color: #1f2e18; font-size: clamp(2rem, 4vw, 3.3rem); line-height: .96; letter-spacing: -.05em; white-space: nowrap; }
+    .itapiru-auth-copy p { max-width: 52ch; margin: 0 0 14px; color: rgba(27,38,24,.78); font-size: 1rem; line-height: 1.6; }
+    .itapiru-auth-card { width: 100%; padding: 22px 24px 24px; border: 1px solid rgba(0,0,0,.07); border-radius: 22px; background: linear-gradient(180deg, rgba(255,255,255,.95), rgba(247,248,243,.96)); box-shadow: 0 16px 34px rgba(19,31,14,.08); text-align: left; }
+    .itapiru-auth-form { display: grid; gap: 1.15rem; }
+    .itapiru-auth-form label { display: grid; gap: .48rem; }
+    .itapiru-auth-form label > span { color: var(--muted); font-size: .75rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+    .itapiru-auth-field-wrap { position: relative; }
+    .itapiru-auth-field-wrap > i { position: absolute; top: 50%; left: .95rem; transform: translateY(-50%); color: color-mix(in srgb, var(--accent) 70%, var(--muted)); pointer-events: none; }
+    .itapiru-auth-field-wrap input { width: 100%; min-height: 42px; padding: 0 2.55rem; border: 1px solid color-mix(in srgb, var(--accent) 14%, var(--border)); border-radius: 12px; background: rgba(255,255,255,.92); color: var(--text); font: inherit; }
+    .itapiru-auth-field-wrap input:focus { outline: none; border-color: color-mix(in srgb, var(--accent) 44%, var(--border)); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 12%, transparent); background: #fff; }
+    .itapiru-auth-field-wrap .db-password-toggle { right: .55rem; left: auto; padding: 0; transform: translateY(-50%); color: var(--accent); pointer-events: auto; }
+    .itapiru-auth-field-wrap .db-password-toggle i { position: static; transform: none; color: inherit; }
+    .itapiru-auth-card .db-card-link { min-height: 42px; border-radius: 12px; padding: 0 .9rem; font-size: .86rem; white-space: nowrap; }
+    .itapiru-auth-card .db-form-actions { justify-content: flex-start; }
+    .itapiru-auth-card .db-form-actions { gap: 10px; flex-wrap: wrap; }
+    .itapiru-auth-error { margin-bottom: 1rem; }
+    @media (max-width: 980px) {
+      .itapiru-auth-shell { padding-top: 40px; }
+      .itapiru-auth-brand { position: static; width: max-content; justify-items: center; text-align: center; margin: 0 auto 10px; }
+      .itapiru-auth-content { gap: 18px; }
+    }
+    @media (min-width: 641px) and (max-width: 980px) {
+      .itapiru-auth-shell {
+        grid-template-rows: auto minmax(0, 1fr);
+        align-items: stretch;
+      }
+      .itapiru-auth-content {
+        min-height: 100%;
+        align-content: center;
+        padding-block: 24px;
+      }
+    }
+    @media (max-width: 640px) {
+      .itapiru-auth-shell { padding: 24px 16px 28px; }
+      .itapiru-auth-copy h1 { font-size: clamp(1.65rem, 6vw, 3.3rem); }
+      .itapiru-auth-card { padding: 18px 16px 18px; }
+      .itapiru-auth-card .db-card-link { width: 100%; }
+      .itapiru-auth-card .db-form-actions { display: grid; grid-template-columns: 1fr; }
+      .itapiru-auth-copy p { display: none; }
+    }
+  </style>
+{% endblock %}
 
 {% block content %}
-<div class="db-shell">
-  <aside id="db-sidebar" class="db-sidebar" data-sidebar aria-label="Menu de seções">
-    <div class="db-sidebar-header">
-      <img
-        class="db-om-logo"
-        src="{{ asset_base_path }}/assets/img/om.png"
-        alt="Imagem institucional"
-      >
-      <h1 class="db-brand">{{ dashboardTitle }}</h1>
-      <p class="db-caption">{{ dashboardSubtitle }}</p>
+  <main class="itapiru-auth-shell">
+    <div class="itapiru-auth-brand" aria-label="Identidade institucional">
+      <img class="db-om-logo" src="{{ asset_base_path }}/assets/img/om.png" alt="16º BI Mtz">
+      <h2 class="db-brand">{{ dashboardTitle|default('16º BI Mtz') }}</h2>
+      <p class="db-caption">Painel institucional</p>
     </div>
-
-    <nav class="db-menu" aria-label="Navegação de seções">
-      <a href="{{ app_url() }}" hx-boost="false" class="db-menu-item{{ activeSection == 'home' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'home' ? 'page' : 'false' }}">
-        <i class="bi bi-speedometer2" aria-hidden="true"></i>
-        <span>PAINEL DE CONTROLE</span>
-      </a>
-      <span class="db-menu-divider" aria-hidden="true"></span>
-      {% set sidebarGroups = groupedSections|default([]) %}
-      {% for group in sidebarGroups %}
-        {% set groupSlugs = group.items|keys %}
-        {% set isGroupOpen = activeSection is defined and activeSection in groupSlugs %}
-        <section class="db-menu-group-block" data-menu-group>
-          <button
-            type="button"
-            class="db-menu-group-toggle"
-            data-menu-group-toggle
-            data-group-key="group-{{ loop.index0 }}-{{ group.label|lower|trim|replace({' ': '-'}) }}"
-            aria-expanded="{{ isGroupOpen ? 'true' : 'false' }}"
-          >
-            <span class="db-menu-group">{{ group.label }}</span>
-            <i class="bi bi-chevron-down" aria-hidden="true"></i>
-          </button>
-          <div class="db-menu-group-items" data-menu-group-items {{ isGroupOpen ? '' : 'hidden' }}>
-            {% for slug, section in group.items %}
-                <a
-                  href="{{ app_base_path }}/{{ slug }}"
-                  hx-boost="false"
-                class="db-menu-item"
-                aria-current="false"
-              >
-                {{ section.label }}
-              </a>
-              {% if not loop.last %}
-                <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
-              {% endif %}
-            {% endfor %}
-          </div>
-        </section>
-        {% if not loop.last %}
-          <span class="db-menu-divider" aria-hidden="true"></span>
-        {% endif %}
-      {% endfor %}
-      <span class="db-menu-divider" aria-hidden="true"></span>
-      {% set isDocsMenuOpen = activeSection in ['readme', 'readme-seed', 'readme-sqlite', 'guardiao', 'distintivo-om'] %}
-      <section class="db-menu-group-block" data-menu-group>
-        <button
-          type="button"
-          class="db-menu-group-toggle"
-          data-menu-group-toggle
-          data-group-key="docs-menu"
-          aria-expanded="{{ isDocsMenuOpen ? 'true' : 'false' }}"
-        >
-          <span class="db-menu-group"><i class="bi bi-journal-text" aria-hidden="true"></i>Documentação</span>
-          <i class="bi bi-chevron-down" aria-hidden="true"></i>
-        </button>
-        <div class="db-menu-group-items" data-menu-group-items {{ isDocsMenuOpen ? '' : 'hidden' }}>
-          <a href="{{ app_base_path }}/readme" hx-boost="false" class="db-menu-item{{ activeSection == 'readme' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'readme' ? 'page' : 'false' }}">
-            Guia do usuário
-          </a>
-          <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
-          <a href="{{ app_base_path }}/readme-seed" hx-boost="false" class="db-menu-item{{ activeSection == 'readme-seed' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'readme-seed' ? 'page' : 'false' }}">
-            Guia de Seed
-          </a>
-          <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
-          <a href="{{ app_base_path }}/readme-sqlite" hx-boost="false" class="db-menu-item{{ activeSection == 'readme-sqlite' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'readme-sqlite' ? 'page' : 'false' }}">
-            Guia do banco
-          </a>
-          <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
-          <a href="{{ app_base_path }}/guardiao" hx-boost="false" class="db-menu-item{{ activeSection == 'guardiao' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'guardiao' ? 'page' : 'false' }}">
-            Guardião
-          </a>
-          <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
-          <a href="{{ app_base_path }}/distintivo-om" hx-boost="false" class="db-menu-item{{ activeSection == 'distintivo-om' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'distintivo-om' ? 'page' : 'false' }}">
-            Distintivo da OM
-          </a>
-        </div>
+    <div class="itapiru-auth-content">
+      <section class="itapiru-auth-copy" aria-label="Acesso administrativo">
+        <span class="db-section-badge">Área restrita</span>
+        <h1>Acesso administrativo</h1>
+        <p>Entre para gerenciar seções e cards do dashboard.</p>
       </section>
-      <span class="db-menu-divider" aria-hidden="true"></span>
-      <a href="{{ app_base_path }}/faq" hx-boost="false" class="db-menu-item{{ activeSection == 'faq' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'faq' ? 'page' : 'false' }}">
-        <i class="bi bi-question-circle" aria-hidden="true"></i>
-        <span>FAQ DO GUARDIÃO</span>
-      </a>
-      <span class="db-menu-divider" aria-hidden="true"></span>
-      <a href="{{ app_base_path }}/solicitar-card" hx-boost="false" class="db-menu-item{{ activeSection == 'solicitar-card' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'solicitar-card' ? 'page' : 'false' }}">
-        <i class="bi bi-person-vcard" aria-hidden="true"></i>
-        <span>SOLICITAR CARD</span>
-      </a>
-      <span class="db-menu-divider" aria-hidden="true"></span>
-      <a href="{{ app_base_path }}/contato" hx-boost="false" class="db-menu-item{{ activeSection == 'contato' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'contato' ? 'page' : 'false' }}">
-        <i class="bi bi-envelope" aria-hidden="true"></i>
-        <span>CONTATO</span>
-      </a>
-      {% if isAdminLogged|default(false) %}
-        <span class="db-menu-divider" aria-hidden="true"></span>
-        {% set isAdminMenuOpen = activeSection == 'admin' %}
-        <section class="db-menu-group-block" data-menu-group>
-          <button
-            type="button"
-            class="db-menu-group-toggle"
-            data-menu-group-toggle
-            data-group-key="admin-menu"
-            aria-expanded="{{ isAdminMenuOpen ? 'true' : 'false' }}"
-          >
-            <span class="db-menu-group"><i class="bi bi-shield-lock" aria-hidden="true"></i>Admin</span>
-            <i class="bi bi-chevron-down" aria-hidden="true"></i>
-          </button>
-          <div class="db-menu-group-items" data-menu-group-items {{ isAdminMenuOpen ? '' : 'hidden' }}>
-            <a href="{{ app_base_path }}/admin?entity=groups" hx-boost="false" class="db-menu-item{{ activeSection == 'admin' and adminEntity|default('groups') == 'groups' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'admin' and adminEntity|default('groups') == 'groups' ? 'page' : 'false' }}">
-              Grupos
-            </a>
-            <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
-            <a href="{{ app_base_path }}/admin?entity=subgroups" hx-boost="false" class="db-menu-item{{ activeSection == 'admin' and adminEntity|default('') == 'subgroups' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'admin' and adminEntity|default('') == 'subgroups' ? 'page' : 'false' }}">
-              Subgrupos
-            </a>
-            <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
-            <a href="{{ app_base_path }}/admin?entity=cards" hx-boost="false" class="db-menu-item{{ activeSection == 'admin' and adminEntity|default('') == 'cards' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'admin' and adminEntity|default('') == 'cards' ? 'page' : 'false' }}">
-              Cards
-            </a>
-          </div>
-        </section>
-        <form method="post" action="{{ app_base_path }}/logout" hx-boost="false" class="db-menu-form">
-          <input type="hidden" name="csrf_token" value="{{ csrfToken|default('') }}">
-          <button class="db-menu-item" type="submit"><i class="bi bi-box-arrow-right" aria-hidden="true"></i><span>SAIR</span></button>
-        </form>
-      {% else %}
-        <span class="db-menu-divider" aria-hidden="true"></span>
-        <a href="{{ app_base_path }}/login" hx-boost="false" class="db-menu-item{{ activeSection == 'login' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'login' ? 'page' : 'false' }}">
-          <i class="bi bi-box-arrow-in-right" aria-hidden="true"></i>
-          <span>LOGIN</span>
-        </a>
-      {% endif %}
-    </nav>
-  </aside>
-  <div class="db-sidebar-backdrop" data-sidebar-backdrop aria-hidden="true"></div>
-
-  <main class="db-main" aria-label="Login administrativo">
-    {% include 'components/dashboard-topbar.twig' with {
-      lastUpdated: lastUpdated,
-      breadcrumbs: [
-        { label: 'Dashboard', url: '{{ app_base_path }}' },
-        { label: 'Login' }
-      ]
-    } %}
-
-    <div id="db-content" class="db-main-body">
-      {% include 'components/dashboard-content-header.twig' with {
-        breadcrumbs: [
-          { label: 'Dashboard', url: '{{ app_base_path }}' },
-          { label: 'Login' }
-        ],
-        title: 'Acesso administrativo',
-        subtitle: 'Entre para gerenciar seções e cards do dashboard'
-      } %}
-
-      {% if loginError %}
-        <div class="db-form-alert is-error" role="alert">{{ loginError }}</div>
-      {% endif %}
-
-      <article class="db-card db-card--standard db-readme-card db-login-card">
-        <form class="db-contact-form" method="post" action="{{ app_base_path }}/login" hx-boost="false" novalidate>
+      <section class="itapiru-auth-card" aria-label="Formulário de login">
+        {% if loginError %}<div class="db-form-alert is-error itapiru-auth-error" role="alert">{{ loginError }}</div>{% endif %}
+        <form class="itapiru-auth-form" method="post" action="{{ app_base_path }}/login" hx-boost="false" novalidate>
           <input type="hidden" name="csrf_token" value="{{ csrfToken }}">
-          <label class="db-form-field">
-            <span class="db-form-label">Usuário</span>
-            <input class="db-form-input" type="text" name="username" autocomplete="username" required>
+          <label>
+            <span>Usuário</span>
+            <div class="itapiru-auth-field-wrap">
+              <i class="bi bi-person" aria-hidden="true"></i>
+              <input type="text" name="username" autocomplete="username" required autofocus>
+            </div>
           </label>
-
-          <label class="db-form-field">
-            <span class="db-form-label">Senha</span>
-            <input class="db-form-input" type="password" name="password" autocomplete="current-password" required>
+          <label>
+            <span>Senha</span>
+            <div class="itapiru-auth-field-wrap db-password-wrap">
+              <i class="bi bi-lock" aria-hidden="true"></i>
+              <input type="password" name="password" autocomplete="current-password" required data-password-input>
+              <button type="button" class="db-password-toggle db-password-toggle--icon" data-password-toggle data-password-toggle-icon aria-label="Mostrar senha" aria-pressed="false" title="Mostrar senha"><i class="bi bi-eye" aria-hidden="true"></i></button>
+            </div>
           </label>
-
           <div class="db-form-actions">
             <button type="submit" class="db-card-link">Entrar</button>
+            <a class="db-card-link db-card-link-secondary" href="{{ app_url() }}">Voltar ao painel</a>
           </div>
         </form>
-      </article>
-
-      {% include 'components/dashboard-footer.twig' with {
-        lastUpdated: lastUpdated
-      } %}
+      </section>
     </div>
   </main>
-</div>
 {% endblock %}

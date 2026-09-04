@@ -1,0 +1,70 @@
+{% set sidebarTitle = sidebarTitle|default(dashboardTitle|default('16º BI Mtz')) %}
+{% set sidebarSubtitle = sidebarSubtitle|default(dashboardSubtitle|default('Batalhão Itapiru')) %}
+{% set sidebarAdminItems = sidebarAdminItems|default([
+  { entity: 'groups', label: 'Grupos' },
+  { entity: 'subgroups', label: 'Subgrupos' },
+  { entity: 'cards', label: 'Cards' },
+  { entity: 'requests', label: 'Solicitações' }
+]) %}
+
+<aside id="db-sidebar" class="db-sidebar" data-sidebar aria-label="Menu de seções">
+  <div class="db-sidebar-header">
+    <img class="db-om-logo" src="{{ asset_base_path }}/assets/img/om.png" alt="Imagem institucional">
+    <h1 class="db-brand">{{ sidebarTitle }}</h1>
+    <p class="db-caption">{{ sidebarSubtitle }}</p>
+  </div>
+
+  <nav class="db-menu" aria-label="Navegação de seções">
+    <a href="{{ app_url() }}" hx-boost="false" class="db-menu-item{{ activeSection == 'home' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'home' ? 'page' : 'false' }}"><i class="bi bi-speedometer2" aria-hidden="true"></i><span>PAINEL DE CONTROLE</span></a>
+    <span class="db-menu-divider" aria-hidden="true"></span>
+    {% for group in groupedSections|default([]) %}
+      {% set groupSlugs = group.items|keys %}
+      {% set isGroupOpen = activeSection is defined and activeSection in groupSlugs %}
+      <section class="db-menu-group-block{{ isGroupOpen ? ' is-open' : '' }}" data-menu-group data-group-current="{{ isGroupOpen ? 'true' : 'false' }}">
+        <button type="button" class="db-menu-group-toggle{{ isGroupOpen ? ' is-current' : '' }}" data-menu-group-toggle data-group-key="group-{{ loop.index0 }}-{{ group.label|lower|trim|replace({' ': '-'}) }}" aria-expanded="{{ isGroupOpen ? 'true' : 'false' }}"><span class="db-menu-group">{{ group.label }}</span><i class="bi bi-chevron-down" aria-hidden="true"></i></button>
+        <div class="db-menu-group-items" data-menu-group-items {{ isGroupOpen ? '' : 'hidden' }}>
+          {% for slug, section in group.items %}
+            <a href="{{ app_base_path }}/{{ slug }}" hx-boost="false" class="db-menu-item db-menu-subitem{{ activeSection == slug ? ' is-active' : '' }}" aria-current="{{ activeSection == slug ? 'page' : 'false' }}">{{ section.label }}</a>
+            {% if not loop.last %}<span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>{% endif %}
+          {% endfor %}
+        </div>
+      </section>
+      {% if not loop.last %}<span class="db-menu-divider" aria-hidden="true"></span>{% endif %}
+    {% endfor %}
+    <span class="db-menu-divider" aria-hidden="true"></span>
+    {% set isDocsMenuOpen = activeSection in ['readme', 'readme-seed', 'readme-sqlite', 'guardiao', 'distintivo-om'] %}
+    <section class="db-menu-group-block{{ isDocsMenuOpen ? ' is-open' : '' }}" data-menu-group data-group-current="{{ isDocsMenuOpen ? 'true' : 'false' }}">
+      <button type="button" class="db-menu-group-toggle{{ isDocsMenuOpen ? ' is-current' : '' }}" data-menu-group-toggle data-group-key="docs-menu" aria-expanded="{{ isDocsMenuOpen ? 'true' : 'false' }}"><span class="db-menu-group"><i class="bi bi-journal-text" aria-hidden="true"></i>Documentação</span><i class="bi bi-chevron-down" aria-hidden="true"></i></button>
+      <div class="db-menu-group-items" data-menu-group-items {{ isDocsMenuOpen ? '' : 'hidden' }}>
+        {% set docsItems = [{ slug: 'readme', label: 'Guia do usuário' }, { slug: 'readme-seed', label: 'Guia de Seed' }, { slug: 'readme-sqlite', label: 'Guia do banco' }, { slug: 'guardiao', label: 'Guardião' }, { slug: 'distintivo-om', label: 'Distintivo da OM' }] %}
+        {% for item in docsItems %}
+          <a href="{{ app_base_path }}/{{ item.slug }}" hx-boost="false" class="db-menu-item db-menu-subitem{{ activeSection == item.slug ? ' is-active' : '' }}" aria-current="{{ activeSection == item.slug ? 'page' : 'false' }}">{{ item.label }}</a>
+          {% if not loop.last %}<span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>{% endif %}
+        {% endfor %}
+      </div>
+    </section>
+    <span class="db-menu-divider" aria-hidden="true"></span>
+    <a href="{{ app_base_path }}/faq" hx-boost="false" class="db-menu-item{{ activeSection == 'faq' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'faq' ? 'page' : 'false' }}"><i class="bi bi-question-circle" aria-hidden="true"></i><span>FAQ DO GUARDIÃO</span></a>
+    <span class="db-menu-divider" aria-hidden="true"></span>
+    <a href="{{ app_base_path }}/solicitar-card" hx-boost="false" class="db-menu-item{{ activeSection == 'solicitar-card' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'solicitar-card' ? 'page' : 'false' }}"><i class="bi bi-person-vcard" aria-hidden="true"></i><span>SOLICITAR CARD</span></a>
+    <span class="db-menu-divider" aria-hidden="true"></span>
+    <a href="{{ app_base_path }}/contato" hx-boost="false" class="db-menu-item{{ activeSection == 'contato' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'contato' ? 'page' : 'false' }}"><i class="bi bi-envelope" aria-hidden="true"></i><span>CONTATO</span></a>
+    <span class="db-menu-divider" aria-hidden="true"></span>
+    {% if isAdminLogged|default(false) %}
+      {% set isAdminMenuOpen = activeSection == 'admin' %}
+      <section class="db-menu-group-block{{ isAdminMenuOpen ? ' is-open' : '' }}" data-menu-group data-group-current="{{ isAdminMenuOpen ? 'true' : 'false' }}">
+        <button type="button" class="db-menu-group-toggle{{ isAdminMenuOpen ? ' is-current' : '' }}" data-menu-group-toggle data-group-key="admin-menu" aria-expanded="{{ isAdminMenuOpen ? 'true' : 'false' }}"><span class="db-menu-group"><i class="bi bi-shield-lock" aria-hidden="true"></i>Admin</span><i class="bi bi-chevron-down" aria-hidden="true"></i></button>
+        <div class="db-menu-group-items" data-menu-group-items {{ isAdminMenuOpen ? '' : 'hidden' }}>
+          {% for item in sidebarAdminItems %}
+            <a href="{{ app_base_path }}/admin{{ item.entity == 'account' ? '/account' : '?entity=' ~ item.entity }}" hx-boost="false" class="db-menu-item db-menu-subitem{{ activeSection == 'admin' and adminEntity|default('groups') == item.entity ? ' is-active' : '' }}" aria-current="{{ activeSection == 'admin' and adminEntity|default('groups') == item.entity ? 'page' : 'false' }}">{{ item.label }}</a>
+            {% if not loop.last %}<span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>{% endif %}
+          {% endfor %}
+        </div>
+      </section>
+      <form method="post" action="{{ app_base_path }}/logout" hx-boost="false" class="db-menu-form"><input type="hidden" name="csrf_token" value="{{ csrfToken|default('') }}"><button class="db-menu-item" type="submit"><i class="bi bi-box-arrow-right" aria-hidden="true"></i><span>SAIR</span></button></form>
+    {% else %}
+      <a href="{{ app_base_path }}/login" hx-boost="false" class="db-menu-item{{ activeSection == 'login' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'login' ? 'page' : 'false' }}"><i class="bi bi-box-arrow-in-right" aria-hidden="true"></i><span>LOGIN</span></a>
+    {% endif %}
+  </nav>
+</aside>
+<div class="db-sidebar-backdrop" data-sidebar-backdrop aria-hidden="true"></div>

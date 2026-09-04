@@ -4,141 +4,7 @@
 
 {% block content %}
 <div class="db-shell">
-  <aside id="db-sidebar" class="db-sidebar" data-sidebar aria-label="Menu de seções">
-    <div class="db-sidebar-header">
-      <img
-        class="db-om-logo"
-        src="{{ asset_base_path }}/assets/img/om.png"
-        alt="Imagem institucional"
-      >
-      <h1 class="db-brand">{{ dashboardTitle }}</h1>
-      <p class="db-caption">{{ dashboardSubtitle }}</p>
-    </div>
-
-    <nav class="db-menu" aria-label="Navegação de seções">
-      <a href="{{ app_url() }}" hx-boost="false" class="db-menu-item{{ activeSection == 'home' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'home' ? 'page' : 'false' }}">
-        <i class="bi bi-speedometer2" aria-hidden="true"></i>
-        <span>PAINEL DE CONTROLE</span>
-      </a>
-      <span class="db-menu-divider" aria-hidden="true"></span>
-      {% set sidebarGroups = groupedSections|default([]) %}
-      {% for group in sidebarGroups %}
-        {% set groupSlugs = group.items|keys %}
-        {% set isGroupOpen = activeSection is defined and activeSection in groupSlugs %}
-        <section class="db-menu-group-block" data-menu-group>
-          <button
-            type="button"
-            class="db-menu-group-toggle"
-            data-menu-group-toggle
-            data-group-key="group-{{ loop.index0 }}-{{ group.label|lower|trim|replace({' ': '-'}) }}"
-            aria-expanded="{{ isGroupOpen ? 'true' : 'false' }}"
-          >
-            <span class="db-menu-group">{{ group.label }}</span>
-            <i class="bi bi-chevron-down" aria-hidden="true"></i>
-          </button>
-          <div class="db-menu-group-items" data-menu-group-items {{ isGroupOpen ? '' : 'hidden' }}>
-            {% for slug, section in group.items %}
-              <a href="{{ app_base_path }}/{{ slug }}" hx-boost="false" class="db-menu-item" aria-current="false">
-                {{ section.label }}
-              </a>
-              {% if not loop.last %}
-                <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
-              {% endif %}
-            {% endfor %}
-          </div>
-        </section>
-        {% if not loop.last %}
-          <span class="db-menu-divider" aria-hidden="true"></span>
-        {% endif %}
-      {% endfor %}
-      <span class="db-menu-divider" aria-hidden="true"></span>
-      {% set isDocsMenuOpen = activeSection in ['readme', 'readme-seed', 'readme-sqlite', 'guardiao', 'distintivo-om'] %}
-      <section class="db-menu-group-block" data-menu-group>
-        <button
-          type="button"
-          class="db-menu-group-toggle"
-          data-menu-group-toggle
-          data-group-key="docs-menu"
-          aria-expanded="{{ isDocsMenuOpen ? 'true' : 'false' }}"
-        >
-          <span class="db-menu-group"><i class="bi bi-journal-text" aria-hidden="true"></i>Documentação</span>
-          <i class="bi bi-chevron-down" aria-hidden="true"></i>
-        </button>
-        <div class="db-menu-group-items" data-menu-group-items {{ isDocsMenuOpen ? '' : 'hidden' }}>
-          <a href="{{ app_base_path }}/readme" hx-boost="false" class="db-menu-item{{ activeSection == 'readme' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'readme' ? 'page' : 'false' }}">
-            Guia do usuário
-          </a>
-          <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
-          <a href="{{ app_base_path }}/readme-seed" hx-boost="false" class="db-menu-item{{ activeSection == 'readme-seed' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'readme-seed' ? 'page' : 'false' }}">
-            Guia de Seed
-          </a>
-          <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
-          <a href="{{ app_base_path }}/readme-sqlite" hx-boost="false" class="db-menu-item{{ activeSection == 'readme-sqlite' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'readme-sqlite' ? 'page' : 'false' }}">
-            Guia do banco
-          </a>
-          <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
-          <a href="{{ app_base_path }}/guardiao" hx-boost="false" class="db-menu-item{{ activeSection == 'guardiao' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'guardiao' ? 'page' : 'false' }}">
-            Guardião
-          </a>
-          <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
-          <a href="{{ app_base_path }}/distintivo-om" hx-boost="false" class="db-menu-item{{ activeSection == 'distintivo-om' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'distintivo-om' ? 'page' : 'false' }}">
-            Distintivo da OM
-          </a>
-        </div>
-      </section>
-      <span class="db-menu-divider" aria-hidden="true"></span>
-      <a href="{{ app_base_path }}/faq" hx-boost="false" class="db-menu-item{{ activeSection == 'faq' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'faq' ? 'page' : 'false' }}">
-        <i class="bi bi-question-circle" aria-hidden="true"></i>
-        <span>FAQ DO GUARDIÃO</span>
-      </a>
-      <span class="db-menu-divider" aria-hidden="true"></span>
-      <a href="{{ app_base_path }}/solicitar-card" hx-boost="false" class="db-menu-item{{ activeSection == 'solicitar-card' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'solicitar-card' ? 'page' : 'false' }}">
-        <i class="bi bi-person-vcard" aria-hidden="true"></i>
-        <span>SOLICITAR CARD</span>
-      </a>
-      <span class="db-menu-divider" aria-hidden="true"></span>
-      <a href="{{ app_base_path }}/contato" hx-boost="false" class="db-menu-item{{ activeSection == 'contato' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'contato' ? 'page' : 'false' }}">
-        <i class="bi bi-envelope" aria-hidden="true"></i>
-        <span>CONTATO</span>
-      </a>
-      <span class="db-menu-divider" aria-hidden="true"></span>
-      {% set isAdminMenuOpen = activeSection == 'admin' %}
-      <section class="db-menu-group-block" data-menu-group>
-        <button
-          type="button"
-          class="db-menu-group-toggle"
-          data-menu-group-toggle
-          data-group-key="admin-menu"
-          aria-expanded="{{ isAdminMenuOpen ? 'true' : 'false' }}"
-        >
-          <span class="db-menu-group"><i class="bi bi-shield-lock" aria-hidden="true"></i>Admin</span>
-          <i class="bi bi-chevron-down" aria-hidden="true"></i>
-        </button>
-        <div class="db-menu-group-items" data-menu-group-items {{ isAdminMenuOpen ? '' : 'hidden' }}>
-          <a href="{{ app_base_path }}/admin?entity=groups" hx-boost="false" class="db-menu-item{{ activeSection == 'admin' and adminEntity == 'groups' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'admin' and adminEntity == 'groups' ? 'page' : 'false' }}">
-            Grupos
-          </a>
-          <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
-          <a href="{{ app_base_path }}/admin?entity=subgroups" hx-boost="false" class="db-menu-item{{ activeSection == 'admin' and adminEntity == 'subgroups' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'admin' and adminEntity == 'subgroups' ? 'page' : 'false' }}">
-            Subgrupos
-          </a>
-          <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
-          <a href="{{ app_base_path }}/admin?entity=cards" hx-boost="false" class="db-menu-item{{ activeSection == 'admin' and adminEntity == 'cards' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'admin' and adminEntity == 'cards' ? 'page' : 'false' }}">
-            Cards
-          </a>
-          <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
-          <a href="{{ app_base_path }}/admin?entity=requests" hx-boost="false" class="db-menu-item{{ activeSection == 'admin' and adminEntity == 'requests' ? ' is-active' : '' }}" aria-current="{{ activeSection == 'admin' and adminEntity == 'requests' ? 'page' : 'false' }}">
-            Solicitações
-          </a>
-        </div>
-      </section>
-      <form method="post" action="{{ app_base_path }}/logout" hx-boost="false" class="db-menu-form">
-        <input type="hidden" name="csrf_token" value="{{ csrfToken|default('') }}">
-        <button class="db-menu-item" type="submit"><i class="bi bi-box-arrow-right" aria-hidden="true"></i><span>SAIR</span></button>
-      </form>
-    </nav>
-  </aside>
-  <div class="db-sidebar-backdrop" data-sidebar-backdrop aria-hidden="true"></div>
+  {% include 'components/dashboard-sidebar.twig' %}
 
   <main class="db-main" aria-label="Painel administrativo">
     {% set adminLabel = adminEntity == 'groups'
@@ -266,6 +132,19 @@
                           <a class="db-card-link db-icon-action" href="{{ app_base_path }}/admin?entity=groups&mode=edit&slug={{ group.slug }}" title="Editar grupo" aria-label="Editar grupo">
                             <i class="bi bi-pencil-square" aria-hidden="true"></i>
                           </a>
+                          {% set groupIsAdminOnly = group.visibility|default('public') == 'admin' %}
+                          <form method="post" action="{{ app_base_path }}/admin/groups/visibility" class="db-inline-form">
+                            <input type="hidden" name="csrf_token" value="{{ csrfToken }}">
+                            <input type="hidden" name="slug" value="{{ group.slug }}">
+                            <button
+                              class="db-card-link db-icon-action"
+                              type="submit"
+                              title="{{ groupIsAdminOnly ? 'Tornar grupo público' : 'Restringir grupo aos administradores' }}"
+                              aria-label="{{ groupIsAdminOnly ? 'Tornar grupo público' : 'Restringir grupo aos administradores' }}"
+                            >
+                              <i class="bi {{ groupIsAdminOnly ? 'bi-eye-slash' : 'bi-eye' }}" aria-hidden="true"></i>
+                            </button>
+                          </form>
                           <form method="post" action="{{ app_base_path }}/admin/groups/delete" class="db-inline-form">
                             <input type="hidden" name="csrf_token" value="{{ csrfToken }}">
                             <input type="hidden" name="slug" value="{{ group.slug }}">
@@ -505,7 +384,7 @@
             {% if adminMode == 'new' %}
               <a class="db-card-link db-card-link-secondary" href="{{ app_base_path }}/admin?entity=cards">Voltar para lista</a>
             {% else %}
-              <a class="db-card-link" href="{{ app_base_path }}/admin?entity=cards&mode=new">Novo card</a>
+              <a class="db-card-link" href="{{ app_base_path }}/admin?entity=cards&mode=new" hx-boost="false">Novo card</a>
             {% endif %}
           </div>
 
@@ -516,6 +395,7 @@
                 <label class="db-form-field">
                   <span class="db-form-label">Grupo</span>
                   <select class="db-form-input" name="group_slug" data-subgroup-group-select required>
+                    <option value="">Selecione um grupo</option>
                     {% for group in groups|default([]) %}
                       <option value="{{ group.slug }}">{{ group.label|label_case }}</option>
                     {% endfor %}
@@ -523,7 +403,8 @@
                 </label>
                 <label class="db-form-field">
                   <span class="db-form-label">Subgrupo</span>
-                  <select class="db-form-input" name="subgroup_slug" data-subgroup-select required>
+                  <select class="db-form-input" name="subgroup_slug" data-subgroup-select required disabled>
+                    <option value="">Selecione um grupo primeiro</option>
                     {% for slug, section in sections %}
                       <option value="{{ slug }}" data-group-slug="{{ section.group_slug|default('geral') }}">{{ section.label|label_case }} ({{ section.group|default('Geral')|label_case }})</option>
                     {% endfor %}
@@ -536,7 +417,7 @@
                   <span class="db-form-label">Ordem</span>
                   <input class="db-form-input" type="number" name="order" value="99" min="1" required>
                 </label>
-                <label class="db-form-field"><span class="db-form-label">Status</span>
+                <label class="db-form-field"><span class="db-form-label">Categoria do card</span>
                   <select class="db-form-input" name="status" required>
                     <option>Interno</option>
                     <option>Externo</option>
@@ -553,7 +434,7 @@
               </div>
 
               <label class="db-form-field"><span class="db-form-label">Descrição</span><input class="db-form-input" name="description"></label>
-              <label class="db-form-field"><span class="db-form-label">Externo?</span>
+              <label class="db-form-field"><span class="db-form-label">Abrir em nova aba?</span>
                 <select class="db-form-input" name="external"><option value="1">Sim</option><option value="0">Não</option></select>
               </label>
               <div class="db-form-actions db-form-actions-wrap">
@@ -589,7 +470,7 @@
                   <span class="db-form-label">Ordem</span>
                   <input class="db-form-input" type="number" name="order" value="{{ editingCard.order }}" min="1" required>
                 </label>
-                <label class="db-form-field"><span class="db-form-label">Status</span>
+                <label class="db-form-field"><span class="db-form-label">Categoria do card</span>
                   <select class="db-form-input" name="status" required>
                     <option {{ editingCard.status == 'Interno' ? 'selected' : '' }}>Interno</option>
                     <option {{ editingCard.status == 'Externo' ? 'selected' : '' }}>Externo</option>
@@ -604,10 +485,11 @@
                 <label class="db-form-field"><span class="db-form-label">Ícone (Bootstrap)</span><input class="db-form-input" name="icon" value="{{ editingCard.icon }}"></label>
               </div>
               <label class="db-form-field"><span class="db-form-label">Descrição</span><input class="db-form-input" name="description" value="{{ editingCard.description }}"></label>
-              <label class="db-form-field"><span class="db-form-label">Externo?</span>
+              <label class="db-form-field"><span class="db-form-label">Abrir em nova aba?</span>
                 <select class="db-form-input" name="external"><option value="1" {{ editingCard.external ? 'selected' : '' }}>Sim</option><option value="0" {{ not editingCard.external ? 'selected' : '' }}>Não</option></select>
               </label>
               <div class="db-admin-form-actions-inline">
+                <a class="db-card-link db-card-link-secondary" href="{{ app_base_path }}/">Cancelar</a>
                 <a class="db-card-link db-card-link-secondary" href="{{ app_base_path }}/admin?entity=cards">Voltar para lista</a>
                 <button class="db-card-link" type="submit">Salvar card</button>
                 <button class="db-card-link db-card-link-danger" type="submit" formaction="{{ app_base_path }}/admin/cards/delete">Excluir card</button>
@@ -684,7 +566,13 @@
                       <td data-label="Ordem">{{ card.order }}</td>
                       <td class="db-admin-td-actions">
                         <div class="db-admin-cards-actions-inline">
-                          <button class="db-card-link db-card-link-secondary db-icon-action" type="button" onclick="document.getElementById('card-preview-{{ card.id }}').showModal();" title="Visualizar card" aria-label="Visualizar card">
+                          <button
+                            class="db-card-link db-card-link-secondary db-icon-action"
+                            type="button"
+                            onclick="(function(dialog){ if (dialog && typeof dialog.showModal === 'function') { dialog.showModal(); } })(document.getElementById('card-preview-{{ card.id }}'));"
+                            title="Visualizar card"
+                            aria-label="Visualizar card"
+                          >
                             <i class="bi bi-eye" aria-hidden="true"></i>
                           </button>
                           <a class="db-card-link db-icon-action" href="{{ app_base_path }}/admin?entity=cards&mode=edit&id={{ card.id }}" title="Editar card" aria-label="Editar card">
@@ -708,6 +596,63 @@
                 </tbody>
               </table>
             </div>
+
+            {% for card in listedCards|default(filteredCards|default(cards)) %}
+              <dialog
+                id="card-preview-{{ card.id }}"
+                class="db-preview-dialog"
+                aria-labelledby="card-preview-title-{{ card.id }}"
+                onclick="if (event.target === this) { this.close(); }"
+              >
+                <div class="db-preview-shell">
+                  <div class="db-preview-head">
+                    <h4 id="card-preview-title-{{ card.id }}" class="db-preview-title">Pré-visualização do card</h4>
+                    <button
+                      class="db-card-link db-card-link-secondary"
+                      type="button"
+                      onclick="(function(dialog){ if (dialog && typeof dialog.close === 'function') { dialog.close(); } })(this.closest('dialog'));"
+                    >
+                      Fechar
+                    </button>
+                  </div>
+
+                  <article class="db-card db-card--standard db-preview-card" aria-label="Pré-visualização de {{ card.title }}">
+                    <header class="db-card-head">
+                      <div class="db-card-title-wrap">
+                        <span class="db-card-icon" aria-hidden="true"><i class="bi {{ card.icon|default('bi-globe2') }}"></i></span>
+                        <h3>{{ card.title }}</h3>
+                      </div>
+                      {% if card.status is defined and card.status %}
+                        <span class="db-badge {{ card.status == 'Sistema' ? 'is-critical' : (card.status == 'Externo' ? 'is-warning' : 'is-ok') }}">
+                          {{ card.status }}
+                        </span>
+                      {% endif %}
+                    </header>
+
+                    {% if card.href is defined and card.href and card.href != '#' %}
+                      <p class="db-link-url">{{ card.href }}</p>
+                    {% endif %}
+
+                    {% if card.description is defined and card.description %}
+                      <p class="db-description">{{ card.description }}</p>
+                    {% endif %}
+                  </article>
+
+                  <div class="db-preview-actions">
+                    <a class="db-card-link db-card-link-secondary" href="{{ app_base_path }}/admin?entity=cards&mode=edit&id={{ card.id }}">Editar card</a>
+                    {% if card.href is defined and card.href and card.href != '#' %}
+                      <a
+                        class="db-card-link"
+                        href="{{ card.href }}"
+                        {% if card.external|default(false) %}target="_blank" rel="noopener noreferrer"{% endif %}
+                      >
+                        Abrir destino
+                      </a>
+                    {% endif %}
+                  </div>
+                </div>
+              </dialog>
+            {% endfor %}
 
             {% if cardsPagination.totalPages|default(1) > 1 %}
               <nav class="db-admin-pagination" aria-label="Paginação de cards">
@@ -1000,60 +945,6 @@
       decreaseNotificationBadge();
     }, true);
 
-    const forms = document.querySelectorAll('form');
-    forms.forEach((form) => {
-      const groupSelect = form.querySelector('[data-subgroup-group-select]');
-      const subgroupSelect = form.querySelector('[data-subgroup-select]');
-      if (!groupSelect || !subgroupSelect) {
-        return;
-      }
-
-      const allOptions = Array.from(subgroupSelect.options).map((option) => ({
-        value: option.value,
-        text: option.text,
-        groupSlug: String(option.getAttribute('data-group-slug') || '').toLowerCase(),
-        selected: option.selected,
-      }));
-
-      const updateSubgroups = () => {
-        const selectedGroup = String(groupSelect.value || '').toLowerCase();
-        const currentValue = String(subgroupSelect.value || '').toLowerCase();
-        const filtered = allOptions.filter((item) => selectedGroup === '' || item.groupSlug === selectedGroup);
-
-        subgroupSelect.innerHTML = '';
-
-        filtered.forEach((item) => {
-          const option = document.createElement('option');
-          option.value = item.value;
-          option.text = item.text;
-          option.setAttribute('data-group-slug', item.groupSlug);
-          subgroupSelect.appendChild(option);
-        });
-
-        if (filtered.length === 0) {
-          const option = document.createElement('option');
-          option.value = '';
-          option.text = 'Nenhum subgrupo disponível para este grupo';
-          subgroupSelect.appendChild(option);
-          subgroupSelect.disabled = true;
-          return;
-        }
-
-        subgroupSelect.disabled = false;
-
-        const selectedStillExists = filtered.some((item) => item.value.toLowerCase() === currentValue);
-        if (selectedStillExists) {
-          subgroupSelect.value = currentValue;
-          return;
-        }
-
-        const initiallySelected = filtered.find((item) => item.selected);
-        subgroupSelect.value = initiallySelected ? initiallySelected.value : filtered[0].value;
-      };
-
-      groupSelect.addEventListener('change', updateSubgroups);
-      updateSubgroups();
-    });
   })();
 </script>
 {% endblock %}

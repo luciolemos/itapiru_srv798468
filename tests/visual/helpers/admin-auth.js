@@ -3,11 +3,11 @@ const adminPassword = process.env.ITAPIRU_ADMIN_PASSWORD || 'admin123';
 
 async function loginAsAdmin(page)
 {
-    await page.goto('/itapiru/login');
+    await page.goto('/login');
     await page.waitForLoadState('networkidle');
 
-    await page.getByLabel('Usuário').fill(adminUser);
-    await page.getByLabel('Senha').fill(adminPassword);
+    await page.getByLabel('Usuário', { exact: true }).fill(adminUser);
+    await page.getByLabel('Senha', { exact: true }).fill(adminPassword);
     await page.getByRole('button', { name: 'Entrar' }).click();
 }
 

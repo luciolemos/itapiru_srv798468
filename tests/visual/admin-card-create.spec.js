@@ -27,16 +27,35 @@ test.describe('Admin card create persistence', () => {
 
         await expect(groupSelect).toBeVisible();
         await expect(subgroupSelect).toBeVisible();
+        await expect(subgroupSelect).toBeDisabled();
+        await expect(subgroupSelect.locator('option')).toHaveCount(1);
+        await expect(subgroupSelect.locator('option').first()).toHaveText('Selecione um grupo primeiro');
 
-        const groupValue = await groupSelect.locator('option').nth(0).getAttribute('value');
+        const availableGroups = await groupSelect.locator('option').evaluateAll((options) => {
+            return options
+                .map((option) => option.value)
+                .filter((value) => value !== '');
+        });
+        const groupValue = availableGroups[0];
         if (!groupValue) {
             throw new Error('Nenhum grupo disponível para criar card.');
         }
 
         await groupSelect.selectOption(groupValue);
 
-        await expect.poll(async() => subgroupSelect.locator('option').count()).toBeGreaterThan(0);
-        const subgroupValue = await subgroupSelect.locator('option').nth(0).getAttribute('value');
+        await expect(subgroupSelect).toBeEnabled();
+        await expect.poll(async() => subgroupSelect.locator('option').count()).toBeGreaterThan(1);
+        const subgroupOptions = await subgroupSelect.locator('option').evaluateAll((options) => {
+            return options
+                .map((option) => ({
+                    value: option.value,
+                    groupSlug: option.getAttribute('data-group-slug'),
+                }))
+                .filter((option) => option.value !== '');
+        });
+        expect(subgroupOptions.every((option) => option.groupSlug === groupValue)).toBeTruthy();
+
+        const subgroupValue = subgroupOptions[0] ? subgroupOptions[0].value : null;
         if (!subgroupValue) {
             throw new Error('Nenhum subgrupo disponível para criar card.');
         }

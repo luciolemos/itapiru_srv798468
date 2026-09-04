@@ -115,6 +115,17 @@ return function (ContainerBuilder $containerBuilder) {
 
                 return ($assetBasePath !== '' ? $assetBasePath : '') . '/' . ltrim($normalizedPath, '/');
             }));
+            $twig->getEnvironment()->addFunction(new TwigFunction('asset_version', static function (string $asset): string {
+                static $versions = [];
+
+                $path = ltrim($asset, '/');
+                if (isset($versions[$path])) {
+                    return $versions[$path];
+                }
+
+                $file = __DIR__ . '/../public/' . $path;
+                return $versions[$path] = is_file($file) ? substr(sha1_file($file), 0, 12) : '';
+            }));
 
             return $twig;
         },

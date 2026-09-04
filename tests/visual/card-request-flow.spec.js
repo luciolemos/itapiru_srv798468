@@ -25,6 +25,10 @@ test.describe('Card request public to admin flow', () => {
         const groupSelect = page.locator('select[name="group_slug"]');
         const subgroupSelect = page.locator('select[name="subgroup_slug"]');
 
+        await expect(subgroupSelect).toBeDisabled();
+        await expect(subgroupSelect.locator('option')).toHaveCount(1);
+        await expect(subgroupSelect.locator('option').first()).toHaveText('Selecione um grupo primeiro');
+
         const availableGroups = await groupSelect.locator('option').evaluateAll((options) => {
             return options
                 .map((option) => {
@@ -39,25 +43,26 @@ test.describe('Card request public to admin flow', () => {
 
         const selectedGroup = availableGroups[0];
         await groupSelect.selectOption(selectedGroup.value);
+        await expect(subgroupSelect).toBeEnabled();
 
-        const matchingSubgroup = await subgroupSelect
+        const subgroupOptions = await subgroupSelect
             .locator('option')
-            .evaluateAll(
-                (options, groupLabel) => {
-                    const normalizedGroup = String(groupLabel || '').toLowerCase();
+            .evaluateAll((options) => {
+                return options.map((option) => {
+                    return {
+                        value: option.value,
+                        label: (option.textContent || '').trim(),
+                    };
+                });
+            });
 
-                    return options
-                        .map((option) => {
-                            return {
-                                value: option.value,
-                                label: (option.textContent || '').trim(),
-                            };
-                        })
-                        .find((option) => option.value && option.label.toLowerCase().startsWith(normalizedGroup + ' · ')) || null;
-                },
-                selectedGroup.label
-            );
+        const selectableSubgroups = subgroupOptions.filter((option) => option.value !== '');
+        expect(selectableSubgroups.length).toBeGreaterThan(0);
+        selectableSubgroups.forEach((option) => {
+            expect(option.label.toLowerCase().startsWith(selectedGroup.label.toLowerCase() + ' · ')).toBeTruthy();
+        });
 
+        const matchingSubgroup = selectableSubgroups[0] || null;
         if (!matchingSubgroup) {
             throw new Error('Nenhum subgrupo encontrado para o grupo ' + selectedGroup.label + '.');
         }

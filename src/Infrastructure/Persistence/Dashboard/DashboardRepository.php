@@ -34,10 +34,10 @@ class DashboardRepository
 
     public function getAllGroups(): array
     {
-        $stmt = $this->pdo->query('SELECT g.id, g.slug, g.label, g.sort_order, COUNT(s.slug) AS subgroups_count
+        $stmt = $this->pdo->query('SELECT g.id, g.slug, g.label, g.sort_order, g.visibility, COUNT(s.slug) AS subgroups_count
             FROM groups g
             LEFT JOIN sections s ON s.group_id = g.id
-            GROUP BY g.id, g.slug, g.label, g.sort_order
+            GROUP BY g.id, g.slug, g.label, g.sort_order, g.visibility
             ORDER BY g.sort_order ASC, g.label ASC, g.slug ASC');
 
         $groups = [];
@@ -47,6 +47,7 @@ class DashboardRepository
                 'slug' => (string) ($row['slug'] ?? ''),
                 'label' => (string) ($row['label'] ?? ''),
                 'order' => (int) ($row['sort_order'] ?? 0),
+                'visibility' => (string) ($row['visibility'] ?? 'public') === 'admin' ? 'admin' : 'public',
                 'subgroups_count' => (int) ($row['subgroups_count'] ?? 0),
             ];
         }
@@ -178,6 +179,24 @@ class DashboardRepository
         }
 
         return 1;
+    }
+
+    public function setGroupVisibility(string $slug, string $visibility): bool
+    {
+        $normalizedSlug = $this->normalizeSlug($slug, '');
+        $normalizedVisibility = $visibility === 'admin' ? 'admin' : 'public';
+
+        if ($normalizedSlug === '') {
+            return false;
+        }
+
+        $stmt = $this->pdo->prepare('UPDATE groups SET visibility = :visibility WHERE slug = :slug');
+        $stmt->execute([
+            'slug' => $normalizedSlug,
+            'visibility' => $normalizedVisibility,
+        ]);
+
+        return $stmt->rowCount() > 0;
     }
 
     public function getSections(): array
@@ -678,6 +697,7 @@ class DashboardRepository
         $this->ensureCardsWithoutMetricAndTrend();
         $this->ensureCardRequestsRankColumn();
         $this->ensureSectionsGroupColumn();
+        $this->ensureGroupVisibilityColumn();
         $this->ensureUniqueGroupLabels();
         $this->seedIfEmpty($isNewDatabase);
         $this->ensureUppercaseGroupLabels();
@@ -728,7 +748,8 @@ class DashboardRepository
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             slug TEXT NOT NULL UNIQUE,
             label TEXT NOT NULL,
-            sort_order INTEGER NOT NULL DEFAULT 0
+            sort_order INTEGER NOT NULL DEFAULT 0,
+            visibility TEXT NOT NULL DEFAULT "public"
         )');
 
         $this->pdo->exec('CREATE TABLE IF NOT EXISTS sections (
@@ -955,6 +976,25 @@ class DashboardRepository
         }
     }
 
+    private function ensureGroupVisibilityColumn(): void
+    {
+        $columns = $this->pdo->query('PRAGMA table_info(groups)')->fetchAll(PDO::FETCH_ASSOC);
+        $hasVisibility = false;
+
+        foreach ($columns as $column) {
+            if ((string) ($column['name'] ?? '') === 'visibility') {
+                $hasVisibility = true;
+                break;
+            }
+        }
+
+        if (!$hasVisibility) {
+            $this->pdo->exec('ALTER TABLE groups ADD COLUMN visibility TEXT NOT NULL DEFAULT "public"');
+        }
+
+        $this->pdo->exec('UPDATE groups SET visibility = "public" WHERE COALESCE(visibility, "") NOT IN ("public", "admin")');
+    }
+
     private function ensureSectionsGroupColumn(): void
     {
         $columns = $this->pdo->query('PRAGMA table_info(sections)')->fetchAll(PDO::FETCH_ASSOC);
@@ -1080,8 +1120,18 @@ class DashboardRepository
             return;
         }
 
-        $username = trim((string) ($_ENV['ADMIN_USER'] ?? 'admin'));
-        $password = (string) ($_ENV['ADMIN_PASS'] ?? 'admin123');
+        $configuredUsername = trim((string) ($_ENV['ADMIN_USER'] ?? ''));
+        $configuredPassword = (string) ($_ENV['ADMIN_PASS'] ?? '');
+        $isProduction = strtolower((string) ($_ENV['APP_ENV'] ?? '')) === 'production';
+
+        if ($isProduction && ($configuredUsername === '' || strlen($configuredPassword) < 12)) {
+            throw new \RuntimeException(
+                'A new production database requires ADMIN_USER and ADMIN_PASS with at least 12 characters.'
+            );
+        }
+
+        $username = $configuredUsername !== '' ? $configuredUsername : 'admin';
+        $password = $configuredPassword !== '' ? $configuredPassword : 'admin123';
 
         $stmt = $this->pdo->prepare(
             'INSERT INTO admins (username, password_hash, created_at) VALUES (:username, :password_hash, :created_at)'

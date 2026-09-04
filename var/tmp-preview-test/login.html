@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Login Admin | 16º BI Mtz</title>
+  <script>
+    (function () {
+      try {
+        if (localStorage.getItem('dashboard_sidebar_collapsed_desktop') === '1') {
+          document.documentElement.classList.add('db-sidebar-collapsed-initial');
+        }
+
+        const guardianPosition = JSON.parse(localStorage.getItem('dashboard_guardian_position') || 'null');
+        if (
+          guardianPosition
+          && Number.isFinite(guardianPosition.x)
+          && Number.isFinite(guardianPosition.y)
+        ) {
+          document.documentElement.classList.add('db-assistant-position-saved');
+          document.documentElement.style.setProperty('--db-assistant-left', `${guardianPosition.x}px`);
+          document.documentElement.style.setProperty('--db-assistant-top', `${guardianPosition.y}px`);
+        }
+      } catch (error) {
+      }
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/css/dashboard.css?v=20260901-3">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/om-favicon.png">
+  <link rel="apple-touch-icon" href="/assets/img/om.png">
+  <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
+  </head>
+<body data-app-base-path="">
+  <div id="db-loading" class="db-loading" aria-hidden="true"></div>
+  <div
+    id="db-app"
+    hx-boost="true"
+    hx-target="#db-content"
+    hx-select="#db-content"
+    hx-swap="outerHTML show:none"
+    hx-push-url="true"
+    hx-indicator="#db-loading"
+  >
+    <div class="db-shell">
+  <aside id="db-sidebar" class="db-sidebar" data-sidebar aria-label="Menu de seções">
+    <div class="db-sidebar-header">
+      <img
+        class="db-om-logo"
+        src="/assets/img/om.png"
+        alt="Imagem institucional"
+      >
+      <h1 class="db-brand">16º BI Mtz</h1>
+      <p class="db-caption">Batalhão Itapiru</p>
+    </div>
+
+    <nav class="db-menu" aria-label="Navegação de seções">
+      <a href="/" hx-boost="false" class="db-menu-item" aria-current="false">
+        <i class="bi bi-speedometer2" aria-hidden="true"></i>
+        <span>PAINEL DE CONTROLE</span>
+      </a>
+      <span class="db-menu-divider" aria-hidden="true"></span>
+                                    <section class="db-menu-group-block" data-menu-group data-group-current="false">
+          <button
+            type="button"
+            class="db-menu-group-toggle"
+            data-menu-group-toggle
+            data-group-key="group-0-seções-da-om"
+            aria-expanded="false"
+          >
+            <span class="db-menu-group">SEÇÕES DA OM</span>
+            <i class="bi bi-chevron-down" aria-hidden="true"></i>
+          </button>
+          <div class="db-menu-group-items" data-menu-group-items hidden>
+                            <a
+                  href="/1secao"
+                  hx-boost="false"
+                class="db-menu-item db-menu-subitem"
+                aria-current="false"
+              >
+                1ª Seção
+              </a>
+                              <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
+                                          <a
+                  href="/2secao"
+                  hx-boost="false"
+                class="db-menu-item db-menu-subitem"
+                aria-current="false"
+              >
+                2ª Seção
+              </a>
+                              <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
+                                          <a
+                  href="/3secao"
+                  hx-boost="false"
+                class="db-menu-item db-menu-subitem"
+                aria-current="false"
+              >
+                3ª Seção
+              </a>
+                              <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
+                                          <a
+                  href="/4secao"
+                  hx-boost="false"
+                class="db-menu-item db-menu-subitem"
+                aria-current="false"
+              >
+                4ª Seção
+              </a>
+                              <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
+                                          <a
+                  href="/fisc-adm"
+                  hx-boost="false"
+                class="db-menu-item db-menu-subitem"
+                aria-current="false"
+              >
+                Fisc Adm
+              </a>
+                              <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
+                                          <a
+                  href="/sfpc"
+                  hx-boost="false"
+                class="db-menu-item db-menu-subitem"
+                aria-current="false"
+              >
+                SFPC
+              </a>
+                              <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
+                                          <a
+                  href="/5secao"
+                  hx-boost="false"
+                class="db-menu-item db-menu-subitem"
+                aria-current="false"
+              >
+                COMSOC
+              </a>
+                              <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
+                                          <a
+                  href="/secinfo"
+                  hx-boost="false"
+                class="db-menu-item db-menu-subitem"
+                aria-current="false"
+              >
+                Seção Informática
+              </a>
+                                    </div>
+        </section>
+                  <span class="db-menu-divider" aria-hidden="true"></span>
+                                      <section class="db-menu-group-block" data-menu-group data-group-current="false">
+          <button
+            type="button"
+            class="db-menu-group-toggle"
+            data-menu-group-toggle
+            data-group-key="group-1-om-da-guarnição"
+            aria-expanded="false"
+          >
+            <span class="db-menu-group">OM DA GUARNIÇÃO</span>
+            <i class="bi bi-chevron-down" aria-hidden="true"></i>
+          </button>
+          <div class="db-menu-group-items" data-menu-group-items hidden>
+                            <a
+                  href="/internet"
+                  hx-boost="false"
+                class="db-menu-item db-menu-subitem"
+                aria-current="false"
+              >
+                INTERNET DAS OM GU
+              </a>
+                              <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
+                                          <a
+                  href="/intranet"
+                  hx-boost="false"
+                class="db-menu-item db-menu-subitem"
+                aria-current="false"
+              >
+                INTRANET DAS OM DA GU
+              </a>
+                                    </div>
+        </section>
+                  <span class="db-menu-divider" aria-hidden="true"></span>
+                                      <section class="db-menu-group-block" data-menu-group data-group-current="false">
+          <button
+            type="button"
+            class="db-menu-group-toggle"
+            data-menu-group-toggle
+            data-group-key="group-2-om-esc.sup"
+            aria-expanded="false"
+          >
+            <span class="db-menu-group">OM ESC.SUP</span>
+            <i class="bi bi-chevron-down" aria-hidden="true"></i>
+          </button>
+          <div class="db-menu-group-items" data-menu-group-items hidden>
+                            <a
+                  href="/internet-om-esc-sup"
+                  hx-boost="false"
+                class="db-menu-item db-menu-subitem"
+                aria-current="false"
+              >
+                INTERNET DAS OM ESC. SUP
+              </a>
+                              <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
+                                          <a
+                  href="/intranet-om-esc-sup"
+                  hx-boost="false"
+                class="db-menu-item db-menu-subitem"
+                aria-current="false"
+              >
+                INTRANET DAS OM ESC. SUP
+              </a>
+                                    </div>
+        </section>
+                    <span class="db-menu-divider" aria-hidden="true"></span>
+            <section class="db-menu-group-block" data-menu-group>
+        <button
+          type="button"
+          class="db-menu-group-toggle"
+          data-menu-group-toggle
+          data-group-key="docs-menu"
+          aria-expanded="false"
+        >
+          <span class="db-menu-group"><i class="bi bi-journal-text" aria-hidden="true"></i>Documentação</span>
+          <i class="bi bi-chevron-down" aria-hidden="true"></i>
+        </button>
+        <div class="db-menu-group-items" data-menu-group-items hidden>
+          <a href="/readme" hx-boost="false" class="db-menu-item" aria-current="false">
+            Guia do usuário
+          </a>
+          <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
+          <a href="/readme-seed" hx-boost="false" class="db-menu-item" aria-current="false">
+            Guia de Seed
+          </a>
+          <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
+          <a href="/readme-sqlite" hx-boost="false" class="db-menu-item" aria-current="false">
+            Guia do banco
+          </a>
+          <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
+          <a href="/guardiao" hx-boost="false" class="db-menu-item" aria-current="false">
+            Guardião
+          </a>
+          <span class="db-menu-divider db-menu-divider-sub" aria-hidden="true"></span>
+          <a href="/distintivo-om" hx-boost="false" class="db-menu-item" aria-current="false">
+            Distintivo da OM
+          </a>
+        </div>
+      </section>
+      <span class="db-menu-divider" aria-hidden="true"></span>
+      <a href="/faq" hx-boost="false" class="db-menu-item" aria-current="false">
+        <i class="bi bi-question-circle" aria-hidden="true"></i>
+        <span>FAQ DO GUARDIÃO</span>
+      </a>
+      <span class="db-menu-divider" aria-hidden="true"></span>
+      <a href="/solicitar-card" hx-boost="false" class="db-menu-item" aria-current="false">
+        <i class="bi bi-person-vcard" aria-hidden="true"></i>
+        <span>SOLICITAR CARD</span>
+      </a>
+      <span class="db-menu-divider" aria-hidden="true"></span>
+      <a href="/contato" hx-boost="false" class="db-menu-item" aria-current="false">
+        <i class="bi bi-envelope" aria-hidden="true"></i>
+        <span>CONTATO</span>
+      </a>
+              <span class="db-menu-divider" aria-hidden="true"></span>
+        <a href="/login" hx-boost="false" class="db-menu-item is-active" aria-current="page">
+          <i class="bi bi-box-arrow-in-right" aria-hidden="true"></i>
+          <span>LOGIN</span>
+        </a>
+          </nav>
+  </aside>
+  <div class="db-sidebar-backdrop" data-sidebar-backdrop aria-hidden="true"></div>
+
+  <main class="db-main" aria-label="Login administrativo">
+    <header class="db-navbar" aria-label="Barra superior do dashboard">
+  <div class="db-navbar-row">
+    <div class="db-navbar-actions">
+      <div class="db-navbar-left">
+        <button
+          type="button"
+          class="db-sidebar-toggle"
+          data-sidebar-toggle
+          aria-controls="db-sidebar"
+          aria-expanded="false"
+          aria-label="Alternar menu lateral"
+        >
+          <i class="bi bi-list" aria-hidden="true"></i>
+        </button>
+      </div>
+
+
+        <div class="db-navbar-right">
+                </div>
+    </div>
+  </div>
+</header>
+
+    <div id="db-content" class="db-main-body">
+      <section class="db-content-header" aria-label="Cabeçalho do conteúdo">
+      <nav class="db-breadcrumb" aria-label="Breadcrumb">
+      <i class="bi bi-speedometer2 db-breadcrumb-icon" aria-hidden="true"></i>
+                        <a href="{{ app_base_path }}" class="db-breadcrumb-link">Dashboard</a>
+                          <span class="db-breadcrumb-sep" aria-hidden="true">/</span>
+                                <span class="db-breadcrumb-current">Login</span>
+                          </nav>
+    <h2 class="db-navbar-title">Acesso administrativo</h2>
+      <p class="db-navbar-subtitle">Entre para gerenciar seções e cards do dashboard</p>
+  </section>
+      
+      <article class="db-card db-card--standard db-readme-card db-login-card">
+        <form class="db-contact-form" method="post" action="/login" hx-boost="false" novalidate>
+          <input type="hidden" name="csrf_token" value="f27a0e15e4b2c2fcdaf6bf770b32c99decd8edb6dc048c6d0d1289f4a29c6f8d">
+          <label class="db-form-field">
+            <span class="db-form-label">Usuário</span>
+            <input class="db-form-input" type="text" name="username" autocomplete="username" required>
+          </label>
+
+          <div class="db-form-field">
+            <label class="db-form-label" for="login-password">Senha</label>
+            <span class="db-password-wrap">
+              <input id="login-password" class="db-form-input" type="password" name="password" autocomplete="current-password" required data-password-input>
+              <button
+                type="button"
+                class="db-password-toggle db-password-toggle--icon"
+                data-password-toggle
+                data-password-toggle-icon
+                aria-label="Mostrar senha"
+                aria-pressed="false"
+                title="Mostrar senha"
+              ><i class="bi bi-eye" aria-hidden="true"></i></button>
+            </span>
+          </div>
+
+          <div class="db-form-actions">
+            <button type="submit" class="db-card-link">Entrar</button>
+          </div>
+        </form>
+      </article>
+
+      <footer class="db-footer" aria-label="Rodapé do dashboard">
+  <p class="db-footer-copy">© 2026 16º BI Mtz. Todos os direitos reservados.</p>
+      <p class="db-footer-copy">Última atualização: 02/09/2026 13:50</p>
+  </footer>
+    </div>
+  </main>
+</div>
+  </div>
+  <a
+    class="db-floating-assistant"
+    href="/faq"
+    draggable="false"
+    aria-label="Abrir FAQ do Guardião"
+    title="Abrir FAQ do Guardião"
+  >
+    <img src="/assets/img/guardiao16.png" alt="Guardião 16" draggable="false">
+  </a>
+  <div class="db-floating-assistant-bubble" role="note" data-assistant-bubble>
+    🪖 Olá! Sou o Cb Guardião do 16º BI Mtz, seu assistente virtual. Minha missão é oferecer uma experiência digital moderna, segura e intuitiva, integrando você aos principais sistemas corporativos do Exército Brasileiro com praticidade e eficiência.
+  </div>
+  <script src="/assets/js/sidebar-toggle.js?v=20260901-3" defer></script>
+</body>
+</html>

@@ -20,6 +20,18 @@ class TestCase extends PHPUnit_TestCase
 {
     use ProphecyTrait;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $databasePath = (string) ($_ENV['APP_DB_PATH'] ?? '');
+        if ($databasePath !== '' && is_file($databasePath)) {
+            unlink($databasePath);
+        }
+
+        $_SESSION = [];
+    }
+
     /**
      * @return App
      * @throws Exception
